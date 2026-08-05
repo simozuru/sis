@@ -1,11 +1,13 @@
 /**
  * =================================================================
- * Salon Information System (SIS) - js/ui.js [Version 4.3.4-debug]
- * [役割: DOM操作・3ステップUI制御・遅延タイムテーブル通信・イベントハンドリング（GASエラー可視化版）]
+ * Salon Information System (SIS) - js/ui.js
+ * [役割: DOM操作・UI制御・イベントハンドリング]
  * =================================================================
  */
 
-// フォームおよび入力DOM要素
+// -----------------------------------------------------------------
+// 1. DOM要素の取得
+// -----------------------------------------------------------------
 const form = document.getElementById('reservation-form');
 const nameInput = document.getElementById('name');
 const nameKanaInput = document.getElementById('name_kana');
@@ -15,7 +17,6 @@ const memoInput = document.getElementById('memo');
 
 const dateInput = document.getElementById('date');
 const staffSelect = document.getElementById('staff');
-// 💡プルダウン・チェックボックス両用のメニューコンテナ
 const menuContainer = document.getElementById('menu-container'); 
 const submitBtn = document.getElementById('submit-btn');
 
@@ -42,95 +43,134 @@ const timetableLoading = document.getElementById('timetable-loading');
 const selectedDateInput = document.getElementById('selected-date');
 const selectedTimeInput = document.getElementById('selected-time');
 
+// -----------------------------------------------------------------
+// 2. システム初期化 & UIセットアップ
+// -----------------------------------------------------------------
 /**
- * 💡【ver.4.3.2 変更】グローバル状態のCONFIGオブジェクトからメニュー情報を安全に組み立てる
+ * api.js で取得した設定値をもとに画面をセットアップする
  */
+async function initializeSystemUI() {
+  const settings = await fetchSystemSettingsApi();
+  if (!settings || !settings.success) {
+    console.error("システム設定の読み込みに失敗しました");
+    return;
+  }
+
+  // カレンダーの選択範囲制御（過去日・最大未来日制限）
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  if (dateInput) {
+    dateInput.min = todayStr;
+    const maxFutureDays = settings.maxFutureDays || 60;
+    const maxDateObj = new Date(today.getTime() + (maxFutureDays * 24 * 60 * 60 * 1000));
+    dateInput.max = maxDateObj.toISOString().split('T')[0];
+  }
+
+  // スタッフ選択プルダウンの構築
+  const staffGroup = document.getElementById('staff-group');
+  if (staffSelect) {
+    staffSelect.innerHTML = '';
+    if (settings.showStaffSelector === false) {
+      if (staffGroup) staffGroup.style.display = 'none';
+      if (settings.staffList && settings.staffList.length > 0) {
+        staffSelect.innerHTML = `<option value="${settings.staffList[0]}">${settings.staffList[0]}</option>`;
+        staffSelect.value = settings.staffList[0];
+      }
+    } else {
+      if (staffGroup) staffGroup.style.display = 'block';
+
+      if (settings.allowNoAssign === true) {
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '指名なし';
+        defaultOpt.textContent = '指名なし (店舗全体の空き状況)';
+        staffSelect.appendChild(defaultOpt);
+      } else {
+        const placeholderOpt = document.createElement('option');
+        placeholderOpt.value = '';
+        placeholderOpt.textContent = '担当スタッフを選択してください';
+        placeholderOpt.disabled = true;
+        placeholderOpt.selected = true;
+        staffSelect.appendChild(placeholderOpt);
+      }
+
+      if (settings.staffList && settings.staffList.length > 0) {
+        settings.staffList.forEach(staffName => {
+          const opt = document.createElement('option');
+          opt.value = staffName;
+          opt.textContent = staffName;
+          staffSelect.appendChild(opt);
+        });
+      }
+    }
+  }
+
+  // グローバル設定（CONFIG）へ反映
+  if (settings.menuSelectorType) CONFIG.MENU_SELECTOR_TYPE = settings.menuSelectorType;
+  if (settings.showMenuMinutes !== undefined) CONFIG.SHOW_MENU_MINUTES = settings.showMenuMinutes;
+  if (settings.showMenuPrice !== undefined) CONFIG.SHOW_MENU_PRICE = settings.showMenuPrice;
+  if (settings.menuMaster) CONFIG.MENU_MASTER = settings.menuMaster;
+
+  // メニューUIの描画
+  renderMenuUI();
+}
+
+// -----------------------------------------------------------------
+// 3. メニューUI制御
+// -----------------------------------------------------------------
 function renderMenuUI() {
   if (!menuContainer) return;
   
-  // 💡 キャッシュまたはグローバル設定からメニューマスターを取得
   const menuMaster = (typeof CONFIG !== 'undefined' && CONFIG.MENU_MASTER) ? CONFIG.MENU_MASTER : {};
   let menuNames = Object.keys(menuMaster);
   
-  // 💡 もしCONFIG.MENU_MASTERが配列（またはインデックス番号）になっている場合のセーフティ対策
   if (menuNames.length > 0 && !isNaN(menuNames[0])) {
-    // マスター自体が配列データだった場合は、中身を直接参照できるように調整
     if (Array.isArray(CONFIG.MENU_MASTER)) {
       menuNames = CONFIG.MENU_MASTER;
-    } else if (typeof CONFIG.menuList !== 'undefined') {
-      menuNames = CONFIG.menuList;
     }
   }
   
-  const selectType = (typeof CONFIG !== 'undefined' && CONFIG.MENU_SELECTOR_TYPE) ? CONFIG.MENU_SELECTOR_TYPE : "TYPE_B";
-  
-  // 表示任意フラグの取得
-  const showMinutes = (typeof CONFIG !== 'undefined' && CONFIG.SHOW_MENU_MINUTES !== undefined) ? CONFIG.SHOW_MENU_MINUTES : true;
-  const showPrice = (typeof CONFIG !== 'undefined' && CONFIG.SHOW_MENU_PRICE !== undefined) ? CONFIG.SHOW_MENU_PRICE : true;
+  const selectType = CONFIG.MENU_SELECTOR_TYPE || "TYPE_B";
+  const showMinutes = CONFIG.SHOW_MENU_MINUTES !== false;
+  const showPrice = CONFIG.SHOW_MENU_PRICE !== false;
   
   if (menuNames.length === 0) {
     menuContainer.innerHTML = '<div class="note">メニューを読み込んでいます...</div>';
     return;
   }
   
-  // 💡 TYPE_A: プルダウン式（単一選択）の組み立て
   if (selectType === "TYPE_A") {
     let html = '<select id="menu-select" class="form-select" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">';
     html += '<option value="" disabled selected>メニューを選択してください</option>';
     
     menuNames.forEach((menuName) => {
-      // 文字列そのものがメニュー名であることを担保
       if (typeof menuName === 'object' && menuName !== null) {
         menuName = menuName.name || Object.keys(menuName)[0];
       }
-      
       const menuData = menuMaster[menuName] || {};
       let label = menuName;
       let meta = [];
       
-      // 時間表示の判定
-      if (showMinutes && menuData.minutes) {
-        meta.push(`${menuData.minutes}分`);
-      }
-      // 金額表示の判定
-      if (showPrice && menuData.price !== undefined && menuData.price !== null) {
-        meta.push(`￥${Number(menuData.price).toLocaleString()}`);
-      }
-      
-      if (meta.length > 0) {
-        label += ` (${meta.join(' / ')})`;
-      }
+      if (showMinutes && menuData.minutes) meta.push(`${menuData.minutes}分`);
+      if (showPrice && menuData.price !== undefined && menuData.price !== null) meta.push(`￥${Number(menuData.price).toLocaleString()}`);
+      if (meta.length > 0) label += ` (${meta.join(' / ')})`;
       
       html += `<option value="${menuName}">${label}</option>`;
     });
     html += '</select>';
     menuContainer.innerHTML = html;
-  } 
-  // 💡 TYPE_B: チェックボックス式（複数選択）の組み立て
-  else {
+  } else {
     let html = '<div class="menu-checkbox-list" style="display: flex; flex-direction: column; gap: 8px;">';
-    
     menuNames.forEach((menuName) => {
       if (typeof menuName === 'object' && menuName !== null) {
         menuName = menuName.name || Object.keys(menuName)[0];
       }
-      
       const menuData = menuMaster[menuName] || {};
       let label = menuName;
       let meta = [];
       
-      // 時間表示の判定
-      if (showMinutes && menuData.minutes) {
-        meta.push(`${menuData.minutes}分`);
-      }
-      // 金額表示の判定
-      if (showPrice && menuData.price !== undefined && menuData.price !== null) {
-        meta.push(`￥${Number(menuData.price).toLocaleString()}`);
-      }
-      
-      if (meta.length > 0) {
-        label += ` (${meta.join(' / ')})`;
-      }
+      if (showMinutes && menuData.minutes) meta.push(`${menuData.minutes}分`);
+      if (showPrice && menuData.price !== undefined && menuData.price !== null) meta.push(`￥${Number(menuData.price).toLocaleString()}`);
+      if (meta.length > 0) label += ` (${meta.join(' / ')})`;
       
       html += `
         <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
@@ -143,34 +183,25 @@ function renderMenuUI() {
     menuContainer.innerHTML = html;
   }
 
-  // 💡UI描画完了後、もし予約変更モード中のデータが存在すれば選択状態を再現する
   if (changeModeData && changeModeData.oldMenu) {
     applySelectedMenuValue(changeModeData.oldMenu);
   }
 }
 
-/**
- * 💡【ver.4.3.0 変更】選択されているメニューの値を表示タイプに応じて取得する
- */
 function getSelectedMenusValue() {
-  const selectType = (typeof CONFIG !== 'undefined' && CONFIG.MENU_SELECTOR_TYPE) ? CONFIG.MENU_SELECTOR_TYPE : "TYPE_B";
-
+  const selectType = CONFIG.MENU_SELECTOR_TYPE || "TYPE_B";
   if (selectType === "TYPE_A") {
     const menuSelect = document.getElementById('menu-select');
     return menuSelect ? menuSelect.value : '';
   } else {
     const checkboxes = document.querySelectorAll('.menu-checkbox:checked');
-    const selectedValues = Array.from(checkboxes).map(cb => cb.value);
-    return selectedValues.join(','); // 例: "カット,カラー"
+    return Array.from(checkboxes).map(cb => cb.value).join(',');
   }
 }
 
-/**
- * 💡【ver.4.3.0 新設】メニューの選択状態を指定された文字列（カンマ区切り対応）から再現する
- */
 function applySelectedMenuValue(menuValue) {
   if (!menuValue) return;
-  const selectType = (typeof CONFIG !== 'undefined' && CONFIG.MENU_SELECTOR_TYPE) ? CONFIG.MENU_SELECTOR_TYPE : "TYPE_B";
+  const selectType = CONFIG.MENU_SELECTOR_TYPE || "TYPE_B";
 
   if (selectType === "TYPE_A") {
     const menuSelect = document.getElementById('menu-select');
@@ -183,12 +214,8 @@ function applySelectedMenuValue(menuValue) {
   }
 }
 
-/**
- * 💡【ver.4.3.0 新設】メニューの選択状態をクリアする
- */
 function clearSelectedMenuValue() {
-  const selectType = (typeof CONFIG !== 'undefined' && CONFIG.MENU_SELECTOR_TYPE) ? CONFIG.MENU_SELECTOR_TYPE : "TYPE_B";
-
+  const selectType = CONFIG.MENU_SELECTOR_TYPE || "TYPE_B";
   if (selectType === "TYPE_A") {
     const menuSelect = document.getElementById('menu-select');
     if (menuSelect) menuSelect.selectedIndex = 0;
@@ -197,38 +224,29 @@ function clearSelectedMenuValue() {
   }
 }
 
-/**
- * 💡表示画面の切り替え制御（フェードやクラスの代わり）
- */
+// -----------------------------------------------------------------
+// 4. セクション切替・タイムテーブル描画
+// -----------------------------------------------------------------
 function showSection(targetContainer) {
   const sections = [step1Container, step2Container, step3Container, checkTabContainer];
-  sections.forEach(sec => {
-    if (sec) sec.style.display = 'none';
-  });
-  if (targetContainer) {
-    targetContainer.style.display = 'block';
-  }
+  sections.forEach(sec => { if (sec) sec.style.display = 'none'; });
+  if (targetContainer) targetContainer.style.display = 'block';
 }
 
-/**
- * 💡【ver.4.3.4 変更】サーバーから取得した複数日データをもとにテーブルを画面に描画する（GASエラー可視化デバッグ版）
- */
 function renderTimetable(multiDayStatuses) {
-  // 💡【安全対策デバッグ】GAS側から戻ってきたエラー理由を隠さず詳細に出力する
   if (multiDayStatuses && multiDayStatuses.success === false) {
-    timetableContainer.innerHTML = `<div class="no-data text-danger" style="word-break: break-all;">【GASエラー検知】<br>${JSON.stringify(multiDayStatuses)}</div>`;
+    timetableContainer.innerHTML = `<div class="no-data text-danger" style="word-break: break-all;">【エラー検知】<br>${multiDayStatuses.message}</div>`;
     return;
   }
 
   if (!multiDayStatuses || Object.keys(multiDayStatuses).length === 0) {
-    timetableContainer.innerHTML = '<div class="no-data text-danger">空き状況の取得に失敗しました。(データが空です)</div>';
+    timetableContainer.innerHTML = '<div class="no-data text-danger">空き状況の取得に失敗しました。</div>';
     return;
   }
 
   const dateKeys = Object.keys(multiDayStatuses).sort();
   let timeSlots = [];
   
-  // 💡【安全対策】管理用のキー（SHOP_HOLIDAYなど）を除外し、「○○:○○」形式の時間文字列だけを抽出して綺麗にソート
   for (const dKey of dateKeys) {
     if (multiDayStatuses[dKey] && !multiDayStatuses[dKey].SHOP_HOLIDAY) {
       const slots = Object.keys(multiDayStatuses[dKey]).filter(key => /^\d{1,2}:\d{2}$/.test(key));
@@ -250,20 +268,12 @@ function renderTimetable(multiDayStatuses) {
   let html = '<table class="timetable-table"><thead><tr><th>時間</th>';
   
   dateKeys.forEach(dStr => {
-    // 💡【安全対策】iOSや特定ブラウザのパースバグ（NaN）を防ぐため、ハイフンをスラッシュに置換して明示的に年・月・日を解釈
     const cleanStr = dStr.replace(/-/g, '/');
     const d = new Date(cleanStr);
-    
     let label = dStr;
     if (!isNaN(d.getTime())) {
       const dayLabels = ['日', '月', '火', '水', '木', '金', '土'];
       label = `${d.getMonth() + 1}/${d.getDate()}(${dayLabels[d.getDay()]})`;
-    } else {
-      // 万が一Dateオブジェクトが壊れた場合のフォールバック（文字列から直接「月/日」を切り出す）
-      const parts = dStr.split('-');
-      if (parts.length === 3) {
-        label = `${parseInt(parts[1], 10)}/${parseInt(parts[2], 10)}`;
-      }
     }
     html += `<th>${label}</th>`;
   });
@@ -309,9 +319,6 @@ function renderTimetable(multiDayStatuses) {
   });
 }
 
-/**
- * 💡STEP 3 遷移時のみ走る「遅延型」非同期リフレッシュ
- */
 async function updateAvailableTimes() {
   const dateVal = dateInput.value;
   const staffVal = staffSelect.value;
@@ -326,12 +333,8 @@ async function updateAvailableTimes() {
   if (timetableLoading) timetableLoading.style.display = 'block';
   
   try {
-    const resIdParam = (changeModeData && changeModeData.resId) ? `&resId=${changeModeData.resId}` : '';
-    const url = `${CONFIG.GAS_WEB_APP_URL}?method=getSlotStatuses&date=${dateVal}&staff=${encodeURIComponent(staffVal)}&menu=${encodeURIComponent(menuVal)}${resIdParam}`;
-    
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTPエラー ステータス: ${response.status}`);
-    const multiDayStatuses = await response.json();
+    const resId = (changeModeData && changeModeData.resId) ? changeModeData.resId : "";
+    const multiDayStatuses = await fetchTimetableDataApi(dateVal, staffVal, menuVal, resId);
     
     renderTimetable(multiDayStatuses);
     
@@ -340,17 +343,18 @@ async function updateAvailableTimes() {
     submitBtn.disabled = true;
     submitBtn.textContent = '日時を選択してください';
     return true;
-
   } catch (error) {
     console.error('空き状況更新エラー:', error);
-    timetableContainer.innerHTML = `<div class="no-data text-danger" style="word-break: break-all;">【通信・例外エラー】<br>${error.message}</div>`;
+    timetableContainer.innerHTML = `<div class="no-data text-danger">通信エラーが発生しました。</div>`;
     return false;
   } finally {
     if (timetableLoading) timetableLoading.style.display = 'none';
   }
 }
 
-// 予約状況の取得とカード描画
+// -----------------------------------------------------------------
+// 5. 予約検索 & 変更 / キャンセル処理
+// -----------------------------------------------------------------
 async function fetchReservations() {
   const telVal = document.getElementById('check-tel').value.trim();
   const emailVal = document.getElementById('check-email').value.trim();
@@ -362,23 +366,19 @@ async function fetchReservations() {
 
   checkBtn.disabled = true;
   checkBtn.textContent = '検索中...';
-  resultsArea.innerHTML = '<div class="no-data">予約データを検索しています。少々お待ちください...</div>';
+  resultsArea.innerHTML = '<div class="no-data">予約データを検索しています...</div>';
 
-  localStorage.setItem('sis_tel', telVal);
-  localStorage.setItem('sis_email', emailVal);
+  saveCustomerDataToCache();
 
   try {
-    const response = await fetch(`${CONFIG.GAS_WEB_APP_URL}?method=getCustomerReservations&tel=${encodeURIComponent(telVal)}&email=${encodeURIComponent(emailVal)}`);
-    if (!response.ok) throw new Error('通信エラーが発生しました');
-    
-    const result = await response.json();
+    const result = await fetchCustomerReservationsApi(telVal, emailVal);
 
     if (!result.success) {
       resultsArea.innerHTML = `<div class="no-data text-danger">${result.message}</div>`;
       return;
     }
 
-    if (result.reservations.length === 0) {
+    if (!result.reservations || result.reservations.length === 0) {
       resultsArea.innerHTML = '<div class="no-data">現在、条件に一致する今日以降のご予約はありません。</div>';
       return;
     }
@@ -414,7 +414,6 @@ async function fetchReservations() {
     });
 
     resultsArea.innerHTML = htmlContent;
-
   } catch (error) {
     console.error('予約検索エラー:', error);
     resultsArea.innerHTML = '<div class="no-data text-danger">エラーが発生しました。時間を置いて再度お試しください。</div>';
@@ -424,7 +423,6 @@ async function fetchReservations() {
   }
 }
 
-// 変更モードの開始設定
 async function startChangeMode(buttonEl) {
   changeModeData = {
     resId: buttonEl.getAttribute('data-id'),
@@ -434,13 +432,10 @@ async function startChangeMode(buttonEl) {
     oldMenu: buttonEl.getAttribute('data-menu')
   };
 
-  await initializeSystemSettings();
+  await initializeSystemUI();
 
   staffSelect.value = changeModeData.oldStaff;
-  
-  // 💡【ver.4.3.0 変更】表示形式に合わせて選択値を再現させる関数へ移譲
   applySelectedMenuValue(changeModeData.oldMenu);
-
   memoInput.value = buttonEl.getAttribute('data-memo');
   dateInput.value = changeModeData.oldDate;
 
@@ -459,7 +454,6 @@ async function startChangeMode(buttonEl) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// 変更モードの中止
 function abortChangeMode() {
   changeModeData = null;
   document.getElementById('change-banner').style.display = 'none';
@@ -473,8 +467,6 @@ function abortChangeMode() {
   
   dateInput.value = '';
   if (staffSelect.options.length > 0) staffSelect.selectedIndex = 0;
-  
-  // 💡【ver.4.3.0 変更】表示形式に合わせてクリアする関数を呼び出し
   clearSelectedMenuValue();
   
   selectedDateInput.value = '';
@@ -484,30 +476,20 @@ function abortChangeMode() {
   memoInput.value = '';
   
   restoreCachedCustomerData();
-  initializeSystemSettings();
+  initializeSystemUI();
   showSection(step1Container);
 }
 
-// キャンセルリクエスト送信
 async function requestCancel(buttonEl) {
   const resId = buttonEl.getAttribute('data-id');
   if (!resId) return;
 
   if (!confirm(`ご予約（ID: ${resId}）をキャンセルしてもよろしいですか？\n\n※この操作は取り消せません。`)) return;
 
-  resultsArea.innerHTML = '<div class="no-data">予約のキャンセル処理を行っています。少々お待ちください...</div>';
-
-  const formData = new URLSearchParams();
-  formData.append('action', 'cancel');
-  formData.append('resId', resId);
+  resultsArea.innerHTML = '<div class="no-data">予約のキャンセル処理を行っています...</div>';
 
   try {
-    const response = await fetch(CONFIG.GAS_WEB_APP_URL, {
-      method: 'POST',
-      body: formData,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
-    const data = await response.json();
+    const data = await submitReservationApi('cancel', { resId: resId });
 
     if (data.success) {
       alert('ご予約のキャンセルが正常に完了しました。');
@@ -522,7 +504,9 @@ async function requestCancel(buttonEl) {
   }
 }
 
-// 予約登録・変更の送信処理
+// -----------------------------------------------------------------
+// 6. フォーム送信処理 & イベントリスナー設定
+// -----------------------------------------------------------------
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   
@@ -535,40 +519,30 @@ form.addEventListener('submit', async (e) => {
   submitBtn.disabled = true;
   submitBtn.textContent = changeModeData ? '予約を変更中...' : '予約を登録中...';
 
-  CONFIG.STORAGE_FIELDS.forEach(field => {
-    const el = document.getElementById(field);
-    if (el) localStorage.setItem(`sis_${field}`, el.value);
-  });
+  saveCustomerDataToCache();
 
-  const submittedTel = telInput.value;
-  const submittedEmail = emailInput.value;
-  const formData = new URLSearchParams();
-  
+  const action = changeModeData ? 'change' : 'create';
+  const payload = {
+    staff: staffSelect.value,
+    menu: getSelectedMenusValue(),
+    name: nameInput.value,
+    name_kana: nameKanaInput.value,
+    tel: telInput.value,
+    email: emailInput.value,
+    formData: memoInput.value
+  };
+
   if (changeModeData) {
-    formData.append('action', 'change');
-    formData.append('resId', changeModeData.resId);
-    formData.append('newDate', selectedDateInput.value);
-    formData.append('newTime', selectedTimeInput.value);
+    payload.resId = changeModeData.resId;
+    payload.newDate = selectedDateInput.value;
+    payload.newTime = selectedTimeInput.value;
   } else {
-    formData.append('date', selectedDateInput.value);
-    formData.append('time', selectedTimeInput.value);
+    payload.date = selectedDateInput.value;
+    payload.time = selectedTimeInput.value;
   }
-  
-  formData.append('staff', staffSelect.value);
-  formData.append('menu', getSelectedMenusValue()); 
-  formData.append('name', nameInput.value);
-  formData.append('name_kana', nameKanaInput.value);
-  formData.append('tel', submittedTel);
-  formData.append('email', submittedEmail);
-  formData.append('formData', memoInput.value);
 
   try {
-    const response = await fetch(CONFIG.GAS_WEB_APP_URL, {
-      method: 'POST',
-      body: formData,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
-    const data = await response.json();
+    const data = await submitReservationApi(action, payload);
     
     if (data.success) {
       const isChangeMode = !!changeModeData;
@@ -581,13 +555,11 @@ form.addEventListener('submit', async (e) => {
         alert(msg);
       }
       
-      document.getElementById('check-tel').value = submittedTel;
-      document.getElementById('check-email').value = submittedEmail;
+      document.getElementById('check-tel').value = telInput.value;
+      document.getElementById('check-email').value = emailInput.value;
 
       dateInput.value = '';
       if (staffSelect.options.length > 0) staffSelect.selectedIndex = 0; 
-      
-      // 💡【ver.4.3.0 変更】表示形式に合わせてクリアする関数を呼び出し
       clearSelectedMenuValue();
       
       selectedDateInput.value = '';
@@ -597,7 +569,7 @@ form.addEventListener('submit', async (e) => {
       memoInput.value = '';
 
       restoreCachedCustomerData();
-      await initializeSystemSettings();
+      await initializeSystemUI();
 
       if (isChangeMode) {
         showSection(checkTabContainer);
@@ -605,19 +577,17 @@ form.addEventListener('submit', async (e) => {
       } else {
         showSection(step1Container);
       }
-      
     } else {
       alert('処理に失敗しました: ' + data.message);
     }
   } catch (error) {
     console.error('送信エラー:', error);
-    alert('通信エラーが発生しました。カレンダー等をご確認ください。');
+    alert('通信エラーが発生しました。');
   } finally {
     submitBtn.disabled = false;
   }
 });
 
-// イベントリスナーの一元管理
 function initializeEvents() {
   if (toStep2Btn) {
     toStep2Btn.addEventListener('click', () => {
@@ -651,33 +621,18 @@ function initializeEvents() {
     });
   }
 
-  if (backToStep1Btn) {
-    backToStep1Btn.addEventListener('click', () => showSection(step1Container));
-  }
-  if (backToStep2Btn) {
-    backToStep2Btn.addEventListener('click', () => showSection(step2Container));
-  }
+  if (backToStep1Btn) backToStep1Btn.addEventListener('click', () => showSection(step1Container));
+  if (backToStep2Btn) backToStep2Btn.addEventListener('click', () => showSection(step2Container));
 
   if (goToCheckBtn) {
     goToCheckBtn.addEventListener('click', () => {
-      const cachedTel = localStorage.getItem('sis_tel');
-      const cachedEmail = localStorage.getItem('sis_email');
-      if (cachedTel) document.getElementById('check-tel').value = cachedTel;
-      if (cachedEmail) document.getElementById('check-email').value = cachedEmail;
+      restoreCachedCustomerData();
       showSection(checkTabContainer);
     });
   }
-  if (backFromCheckBtn) {
-    backFromCheckBtn.addEventListener('click', () => showSection(step1Container));
-  }
-
-  if (checkBtn) {
-    checkBtn.addEventListener('click', fetchReservations);
-  }
-
-  if (cancelChangeBtn) {
-    cancelChangeBtn.addEventListener('click', abortChangeMode);
-  }
+  if (backFromCheckBtn) backFromCheckBtn.addEventListener('click', () => showSection(step1Container));
+  if (checkBtn) checkBtn.addEventListener('click', fetchReservations);
+  if (cancelChangeBtn) cancelChangeBtn.addEventListener('click', abortChangeMode);
 
   if (resultsArea) {
     resultsArea.addEventListener('click', (e) => {
@@ -691,11 +646,11 @@ function initializeEvents() {
   }
 }
 
-// ページ読み込み時の初期化処理
+// -----------------------------------------------------------------
+// 7. ページ読み込み時の自動実行
+// -----------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', () => {
-  initializeSystemSettings();
+  initializeSystemUI();
   initializeEvents();
-  // 💡【ver.4.3.0 変更】包括的な初期描画関数へ差し替え
-  renderMenuUI(); 
   showSection(step1Container);
 });
