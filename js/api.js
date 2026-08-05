@@ -30,7 +30,7 @@ async function fetchSystemSettingsApi() {
  */
 async function fetchTimetableDataApi(date, staff, menu, resId = "") {
   try {
-    const url = `${CONFIG.GAS_WEB_APP_URL}?method=getTimetable&date=${encodeURIComponent(date)}&staff=${encodeURIComponent(staff)}&menu=${encodeURIComponent(menu)}&resId=${encodeURIComponent(resId)}`;
+    const url = `${CONFIG.GAS_WEB_APP_URL}?method=getSlotStatuses&date=${encodeURIComponent(date)}&staff=${encodeURIComponent(staff)}&menu=${encodeURIComponent(menu)}&resId=${encodeURIComponent(resId)}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error('タイムテーブルの取得に失敗しました');
     return await response.json();
@@ -77,7 +77,7 @@ async function submitReservationApi(action, payload) {
  */
 async function fetchCustomerReservationsApi(tel, email) {
   try {
-    const url = `${CONFIG.GAS_WEB_APP_URL}?method=getReservations&tel=${encodeURIComponent(tel)}&email=${encodeURIComponent(email)}`;
+    const url = `${CONFIG.GAS_WEB_APP_URL}?method=getCustomerReservations&tel=${encodeURIComponent(tel)}&email=${encodeURIComponent(email)}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error('ご予約状況の取得に失敗しました');
     return await response.json();
