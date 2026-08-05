@@ -6,7 +6,7 @@
  */
 
 // -----------------------------------------------------------------
-// 1. DOM要素の取得
+// 1. DOM要素（画面のパーツ）の取得
 // -----------------------------------------------------------------
 const form = document.getElementById('reservation-form');
 const nameInput = document.getElementById('name');
@@ -30,14 +30,14 @@ const backFromCheckBtn = document.getElementById('back-from-check-btn');
 const checkBtn = document.getElementById('check-btn');
 const cancelChangeBtn = document.getElementById('cancel-change-btn');
 
-// コンテナおよび結果描画エリア
+// コンテナ（画面のブロック）および結果描画エリア
 const step1Container = document.getElementById('step-1-container');
 const step2Container = document.getElementById('step-2-container');
 const step3Container = document.getElementById('step-3-container');
 const checkTabContainer = document.getElementById('check-tab-container');
 const resultsArea = document.getElementById('check-results-area');
 
-// タイムテーブル動的生成パーツ
+// タイムテーブル（時間表）表示パーツ
 const timetableContainer = document.getElementById('timetable-container');
 const timetableLoading = document.getElementById('timetable-loading');
 const selectedDateInput = document.getElementById('selected-date');
@@ -47,16 +47,16 @@ const selectedTimeInput = document.getElementById('selected-time');
 // 2. システム初期化 & UIセットアップ
 // -----------------------------------------------------------------
 /**
- * api.js で取得した設定値をもとに画面をセットアップする
+ * api.js で取得した設定値をもとに画面を作る処理
  */
 async function initializeSystemUI() {
   const settings = await fetchSystemSettingsApi();
-  if (!settings || !settings.success) {
+  if (!settings || settings.success === false) {
     console.error("システム設定の読み込みに失敗しました");
     return;
   }
 
-  // カレンダーの選択範囲制御（過去日・最大未来日制限）
+  // カレンダーの選択範囲制御（過去の日付を選べなくする）
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
   if (dateInput) {
@@ -104,13 +104,13 @@ async function initializeSystemUI() {
     }
   }
 
-  // グローバル設定（CONFIG）へ反映
+  // 設定値（CONFIG）へ反映
   if (settings.menuSelectorType) CONFIG.MENU_SELECTOR_TYPE = settings.menuSelectorType;
   if (settings.showMenuMinutes !== undefined) CONFIG.SHOW_MENU_MINUTES = settings.showMenuMinutes;
   if (settings.showMenuPrice !== undefined) CONFIG.SHOW_MENU_PRICE = settings.showMenuPrice;
   if (settings.menuMaster) CONFIG.MENU_MASTER = settings.menuMaster;
 
-  // メニューUIの描画
+  // メニュー画面を表示
   renderMenuUI();
 }
 
@@ -183,7 +183,7 @@ function renderMenuUI() {
     menuContainer.innerHTML = html;
   }
 
-  if (changeModeData && changeModeData.oldMenu) {
+  if (typeof changeModeData !== 'undefined' && changeModeData && changeModeData.oldMenu) {
     applySelectedMenuValue(changeModeData.oldMenu);
   }
 }
@@ -225,7 +225,7 @@ function clearSelectedMenuValue() {
 }
 
 // -----------------------------------------------------------------
-// 4. セクション切替・タイムテーブル描画
+// 4. セクション切替・タイムテーブル（時間表）描画
 // -----------------------------------------------------------------
 function showSection(targetContainer) {
   const sections = [step1Container, step2Container, step3Container, checkTabContainer];
@@ -314,7 +314,8 @@ function renderTimetable(multiDayStatuses) {
       selectedTimeInput.value = target.getAttribute('data-time');
       
       submitBtn.disabled = false;
-      submitBtn.textContent = changeModeData ? '上記の内容で変更を確定する' : '上記の内容で予約を確定する';
+      const isChange = typeof changeModeData !== 'undefined' && changeModeData;
+      submitBtn.textContent = isChange ? '上記の内容で変更を確定する' : '上記の内容で予約を確定する';
     });
   });
 }
@@ -333,9 +334,16 @@ async function updateAvailableTimes() {
   if (timetableLoading) timetableLoading.style.display = 'block';
   
   try {
-    const resId = (changeModeData && changeModeData.resId) ? changeModeData.resId : "";
+    const resId = (typeof changeModeData !== 'undefined' && changeModeData && changeModeData.resId) ? changeModeData.resId : "";
     const multiDayStatuses = await fetchTimetableDataApi(dateVal, staffVal, menuVal, resId);
     
+    // APIから通信エラーや処理失敗が返ってきた場合
+    if (multiDayStatuses && multiDayStatuses.success === false) {
+      console.error('タイムテーブル取得失敗:', multiDayStatuses.message);
+      timetableContainer.innerHTML = `<div class="no-data text-danger">データの取得に失敗しました:<br>${multiDayStatuses.message}</div>`;
+      return false;
+    }
+
     renderTimetable(multiDayStatuses);
     
     selectedDateInput.value = '';
@@ -345,7 +353,7 @@ async function updateAvailableTimes() {
     return true;
   } catch (error) {
     console.error('空き状況更新エラー:', error);
-    timetableContainer.innerHTML = `<div class="no-data text-danger">通信エラーが発生しました。</div>`;
+    timetableContainer.innerHTML = `<div class="no-data text-danger">通信エラーが発生しました:<br>${error.message || error}</div>`;
     return false;
   } finally {
     if (timetableLoading) timetableLoading.style.display = 'none';
@@ -424,7 +432,7 @@ async function fetchReservations() {
 }
 
 async function startChangeMode(buttonEl) {
-  changeModeData = {
+  window.changeModeData = {
     resId: buttonEl.getAttribute('data-id'),
     oldDate: buttonEl.getAttribute('data-date'),
     oldTime: buttonEl.getAttribute('data-time'),
@@ -455,7 +463,7 @@ async function startChangeMode(buttonEl) {
 }
 
 function abortChangeMode() {
-  changeModeData = null;
+  window.changeModeData = null;
   document.getElementById('change-banner').style.display = 'none';
   
   document.getElementById('prev-id').textContent = '';
@@ -510,18 +518,19 @@ async function requestCancel(buttonEl) {
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  const confirmMsg = changeModeData 
+  const isChange = typeof changeModeData !== 'undefined' && changeModeData;
+  const confirmMsg = isChange 
     ? '選択した新しい日時で予約を変更してもよろしいですか？' 
     : 'この内容で予約を確定してもよろしいですか？';
     
   if (!confirm(confirmMsg)) return;
 
   submitBtn.disabled = true;
-  submitBtn.textContent = changeModeData ? '予約を変更中...' : '予約を登録中...';
+  submitBtn.textContent = isChange ? '予約を変更中...' : '予約を登録中...';
 
   saveCustomerDataToCache();
 
-  const action = changeModeData ? 'change' : 'create';
+  const action = isChange ? 'change' : 'create';
   const payload = {
     staff: staffSelect.value,
     menu: getSelectedMenusValue(),
@@ -532,7 +541,7 @@ form.addEventListener('submit', async (e) => {
     formData: memoInput.value
   };
 
-  if (changeModeData) {
+  if (isChange) {
     payload.resId = changeModeData.resId;
     payload.newDate = selectedDateInput.value;
     payload.newTime = selectedTimeInput.value;
@@ -545,9 +554,7 @@ form.addEventListener('submit', async (e) => {
     const data = await submitReservationApi(action, payload);
     
     if (data.success) {
-      const isChangeMode = !!changeModeData;
-
-      if (isChangeMode) {
+      if (isChange) {
         alert('ご予約の変更が正常に完了しました！');
         abortChangeMode();
       } else {
@@ -571,7 +578,7 @@ form.addEventListener('submit', async (e) => {
       restoreCachedCustomerData();
       await initializeSystemUI();
 
-      if (isChangeMode) {
+      if (isChange) {
         showSection(checkTabContainer);
         await fetchReservations();
       } else {
