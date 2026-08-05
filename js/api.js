@@ -11,7 +11,7 @@
  */
 async function fetchSystemSettingsApi() {
   try {
-    const response = await fetch(`${CONFIG.GAS_WEB_APP_URL}?method=getSystemSettings`);
+    const response = await fetch(`${CONFIG.GAS_WEB_APP_URL}?action=getSystemSettings`);
     if (!response.ok) throw new Error('システム設定の取得に失敗しました');
     return await response.json();
   } catch (error) {
@@ -30,13 +30,13 @@ async function fetchSystemSettingsApi() {
  */
 async function fetchTimetableDataApi(date, staff, menu, resId = "") {
   try {
-    const url = `${CONFIG.GAS_WEB_APP_URL}?method=getTimetable&date=${encodeURIComponent(date)}&staff=${encodeURIComponent(staff)}&menu=${encodeURIComponent(menu)}&resId=${encodeURIComponent(resId)}`;
+    const url = `${CONFIG.GAS_WEB_APP_URL}?action=getTimetable&date=${encodeURIComponent(date)}&staff=${encodeURIComponent(staff)}&menu=${encodeURIComponent(menu)}&resId=${encodeURIComponent(resId)}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error('タイムテーブルの取得に失敗しました');
     return await response.json();
   } catch (error) {
     console.error("fetchTimetableDataApi エラー:", error);
-    return { success: false, message: error.toString() };
+    throw error; // UI側でcatchできるようにthrowします
   }
 }
 
@@ -56,7 +56,7 @@ async function submitReservationApi(action, payload) {
     const response = await fetch(CONFIG.GAS_WEB_APP_URL, {
       method: 'POST',
       headers: {
-        'Content-Type': 'text/plain;charset=utf-8' // GASのPOST仕様に準拠
+        'Content-Type': 'text/plain;charset=utf-8'
       },
       body: JSON.stringify(postData)
     });
@@ -77,7 +77,7 @@ async function submitReservationApi(action, payload) {
  */
 async function fetchCustomerReservationsApi(tel, email) {
   try {
-    const url = `${CONFIG.GAS_WEB_APP_URL}?method=getReservations&tel=${encodeURIComponent(tel)}&email=${encodeURIComponent(email)}`;
+    const url = `${CONFIG.GAS_WEB_APP_URL}?action=getReservations&tel=${encodeURIComponent(tel)}&email=${encodeURIComponent(email)}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error('ご予約状況の取得に失敗しました');
     return await response.json();
