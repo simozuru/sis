@@ -183,8 +183,8 @@ function renderMenuUI() {
     menuContainer.innerHTML = html;
   }
 
-  if (typeof changeModeData !== 'undefined' && changeModeData && changeModeData.oldMenu) {
-    applySelectedMenuValue(changeModeData.oldMenu);
+  if (window.changeModeData && window.changeModeData.oldMenu) {
+    applySelectedMenuValue(window.changeModeData.oldMenu);
   }
 }
 
@@ -314,7 +314,7 @@ function renderTimetable(multiDayStatuses) {
       selectedTimeInput.value = target.getAttribute('data-time');
       
       submitBtn.disabled = false;
-      const isChange = typeof changeModeData !== 'undefined' && changeModeData;
+      const isChange = Boolean(window.changeModeData);
       submitBtn.textContent = isChange ? '上記の内容で変更を確定する' : '上記の内容で予約を確定する';
     });
   });
@@ -334,10 +334,9 @@ async function updateAvailableTimes() {
   if (timetableLoading) timetableLoading.style.display = 'block';
   
   try {
-    const resId = (typeof changeModeData !== 'undefined' && changeModeData && changeModeData.resId) ? changeModeData.resId : "";
+    const resId = (window.changeModeData && window.changeModeData.resId) ? window.changeModeData.resId : "";
     const multiDayStatuses = await fetchTimetableDataApi(dateVal, staffVal, menuVal, resId);
     
-    // APIから通信エラーや処理失敗が返ってきた場合
     if (multiDayStatuses && multiDayStatuses.success === false) {
       console.error('タイムテーブル取得失敗:', multiDayStatuses.message);
       timetableContainer.innerHTML = `<div class="no-data text-danger">データの取得に失敗しました:<br>${multiDayStatuses.message}</div>`;
@@ -432,7 +431,6 @@ async function fetchReservations() {
 }
 
 async function startChangeMode(buttonEl) {
-  // 安全にデータ属性を取得（nullやundefinedの場合はデフォルト値を設定）
   const rawStaff = buttonEl.getAttribute('data-staff');
   const staffVal = (rawStaff && rawStaff !== 'null' && rawStaff !== 'undefined') ? rawStaff : '指名なし';
 
@@ -446,22 +444,25 @@ async function startChangeMode(buttonEl) {
 
   await initializeSystemUI();
 
-  // ドロップダウン内に同じ値が存在する場合のみセットする安全処理
-  if (staffSelect) {
-    let exists = Array.from(staffSelect.options).some(opt => opt.value === changeModeData.oldStaff);
+  if (staffSelect && window.changeModeData && window.changeModeData.oldStaff) {
+    const targetStaff = window.changeModeData.oldStaff;
+    let exists = Array.from(staffSelect.options).some(opt => opt && opt.value === targetStaff);
     if (exists) {
-      staffSelect.value = changeModeData.oldStaff;
+      staffSelect.value = targetStaff;
     } else if (staffSelect.options.length > 0) {
       staffSelect.selectedIndex = 0;
     }
   }
 
-  applySelectedMenuValue(changeModeData.oldMenu);
+  if (window.changeModeData && window.changeModeData.oldMenu) {
+    applySelectedMenuValue(window.changeModeData.oldMenu);
+  }
+  
   if (memoInput) memoInput.value = buttonEl.getAttribute('data-memo') || '';
-  if (dateInput) dateInput.value = changeModeData.oldDate;
+  if (dateInput && window.changeModeData) dateInput.value = window.changeModeData.oldDate;
 
-  const prevDateParts = changeModeData.oldDate.split('-');
-  const formattedOldDate = prevDateParts.length === 3 ? `${prevDateParts[0]}年${prevDateParts[1]}月${prevDateParts[2]}日` : changeModeData.oldDate;
+  const prevDateParts = (window.changeModeData?.oldDate || '').split('-');
+  const formattedOldDate = prevDateParts.length === 3 ? `${prevDateParts[0]}年${prevDateParts[1]}月${prevDateParts[2]}日` : (window.changeModeData?.oldDate || '');
   
   const prevIdEl = document.getElementById('prev-id');
   const prevDatetimeEl = document.getElementById('prev-datetime');
@@ -469,10 +470,10 @@ async function startChangeMode(buttonEl) {
   const prevStaffEl = document.getElementById('prev-staff');
   const changeBannerEl = document.getElementById('change-banner');
 
-  if (prevIdEl) prevIdEl.textContent = changeModeData.resId;
-  if (prevDatetimeEl) prevDatetimeEl.textContent = `${formattedOldDate}  ${changeModeData.oldTime}`;
-  if (prevMenuEl) prevMenuEl.textContent = changeModeData.oldMenu;
-  if (prevStaffEl) prevStaffEl.textContent = changeModeData.oldStaff;
+  if (prevIdEl) prevIdEl.textContent = window.changeModeData?.resId || '';
+  if (prevDatetimeEl) prevDatetimeEl.textContent = `${formattedOldDate}  ${window.changeModeData?.oldTime || ''}`;
+  if (prevMenuEl) prevMenuEl.textContent = window.changeModeData?.oldMenu || '';
+  if (prevStaffEl) prevStaffEl.textContent = window.changeModeData?.oldStaff || '';
 
   if (changeBannerEl) changeBannerEl.style.display = 'block';
   if (submitBtn) submitBtn.textContent = '日時を選択してください';
@@ -543,7 +544,7 @@ async function requestCancel(buttonEl) {
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  const isChange = typeof changeModeData !== 'undefined' && changeModeData;
+  const isChange = Boolean(window.changeModeData);
   const confirmMsg = isChange 
     ? '選択した新しい日時で予約を変更してもよろしいですか？' 
     : 'この内容で予約を確定してもよろしいですか？';
@@ -567,7 +568,7 @@ form.addEventListener('submit', async (e) => {
   };
 
   if (isChange) {
-    payload.resId = changeModeData.resId;
+    payload.resId = window.changeModeData.resId;
     payload.newDate = selectedDateInput.value;
     payload.newTime = selectedTimeInput.value;
   } else {
