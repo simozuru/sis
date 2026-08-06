@@ -119,6 +119,9 @@ async function initializeSystemUI() {
   if (settings.menuMaster) CONFIG.MENU_MASTER = settings.menuMaster;
   if (settings.displayDays !== undefined) CONFIG.DISPLAY_DAYS = settings.displayDays;
 
+  // ボタンの初期ラベル更新
+  updateDateNavButtonStates();
+
   // メニュー画面を表示
   renderMenuUI();
 }
@@ -317,7 +320,7 @@ function renderTimetable(multiDayStatuses) {
   if (currentRangeLabel && dateKeys.length > 0) {
     const startStr = dateKeys[0];
     const endStr = dateKeys[dateKeys.length - 1];
-    currentRangeLabel.textContent = `${startStr} 〜 ${endStr}`;
+    currentRangeLabel.textContent = (startStr === endStr) ? startStr : `${startStr} 〜 ${endStr}`;
   }
 
   document.querySelectorAll('.slot-available').forEach(cell => {
@@ -383,12 +386,22 @@ async function updateAvailableTimes(targetDateStr) {
 }
 
 /**
- * 前へ/次へ ボタンの活性・非活性を制御
+ * 前へ/次へ ボタンのテキスト更新 & 活性・非活性を制御
  */
 function updateDateNavButtonStates() {
-  const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? CONFIG.DISPLAY_DAYS : 7;
-  if (prevDaysBtn) prevDaysBtn.textContent = `◀ 前の${displayDays}日`;
-  if (nextDaysBtn) nextDaysBtn.textContent = `次の${displayDays}日 ▶`;
+  const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? Number(CONFIG.DISPLAY_DAYS) : 7;
+  
+  // 日数に応じたテキストの動的判定
+  let prevText = '◀ 前の日';
+  let nextText = '次の日 ▶';
+
+  if (displayDays > 1) {
+    prevText = `◀ 前の${displayDays}日`;
+    nextText = `次の${displayDays}日 ▶`;
+  }
+
+  if (prevDaysBtn) prevDaysBtn.textContent = prevText;
+  if (nextDaysBtn) nextDaysBtn.textContent = nextText;
 
   if (!currentStartDate || !prevDaysBtn) return;
 
@@ -727,14 +740,14 @@ function initializeEvents() {
 
   if (prevDaysBtn) {
     prevDaysBtn.addEventListener('click', () => {
-      const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? CONFIG.DISPLAY_DAYS : 7;
+      const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? Number(CONFIG.DISPLAY_DAYS) : 7;
       shiftDateAndReload(-displayDays);
     });
   }
 
   if (nextDaysBtn) {
     nextDaysBtn.addEventListener('click', () => {
-      const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? CONFIG.DISPLAY_DAYS : 7;
+      const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? Number(CONFIG.DISPLAY_DAYS) : 7;
       shiftDateAndReload(displayDays);
     });
   }
