@@ -30,6 +30,11 @@ const backFromCheckBtn = document.getElementById('back-from-check-btn');
 const checkBtn = document.getElementById('check-btn');
 const cancelChangeBtn = document.getElementById('cancel-change-btn');
 
+// STEP 3 日付範囲移動ボタン
+const prevDaysBtn = document.getElementById('prev-days-btn');
+const nextDaysBtn = document.getElementById('next-days-btn');
+const currentRangeLabel = document.getElementById('current-range-label');
+
 // コンテナ（画面のブロック）および結果描画エリア
 const step1Container = document.getElementById('step-1-container');
 const step2Container = document.getElementById('step-2-container');
@@ -42,6 +47,9 @@ const timetableContainer = document.getElementById('timetable-container');
 const timetableLoading = document.getElementById('timetable-loading');
 const selectedDateInput = document.getElementById('selected-date');
 const selectedTimeInput = document.getElementById('selected-time');
+
+// 日付移動状態保持用
+let currentStartDate = '';
 
 // -----------------------------------------------------------------
 // 2. システム初期化 & UIセットアップ
@@ -109,6 +117,7 @@ async function initializeSystemUI() {
   if (settings.showMenuMinutes !== undefined) CONFIG.SHOW_MENU_MINUTES = settings.showMenuMinutes;
   if (settings.showMenuPrice !== undefined) CONFIG.SHOW_MENU_PRICE = settings.showMenuPrice;
   if (settings.menuMaster) CONFIG.MENU_MASTER = settings.menuMaster;
+  if (settings.displayDays !== undefined) CONFIG.DISPLAY_DAYS = settings.displayDays;
 
   // メニュー画面を表示
   renderMenuUI();
@@ -304,6 +313,13 @@ function renderTimetable(multiDayStatuses) {
   html += '</tbody></table>';
   timetableContainer.innerHTML = html;
 
+  // ラベル（表示範囲）更新
+  if (currentRangeLabel && dateKeys.length > 0) {
+    const startStr = dateKeys[0];
+    const endStr = dateKeys[dateKeys.length - 1];
+    currentRangeLabel.textContent = `${startStr} 〜 ${endStr}`;
+  }
+
   document.querySelectorAll('.slot-available').forEach(cell => {
     cell.addEventListener('click', (e) => {
       document.querySelectorAll('.slot-available').forEach(c => c.classList.remove('selected'));
@@ -320,8 +336,12 @@ function renderTimetable(multiDayStatuses) {
   });
 }
 
-async function updateAvailableTimes() {
-  const dateVal = dateInput.value;
+/**
+ * タイムテーブルデータ取得・表示更新
+ * @param {string} [targetDateStr] 移動先の日付(YYYY-MM-DD)。指定なしの場合は dateInput の値
+ */
+async function updateAvailableTimes(targetDateStr) {
+  const dateVal = targetDateStr || dateInput.value;
   const staffVal = staffSelect.value;
   const menuVal = getSelectedMenusValue(); 
 
@@ -329,6 +349,9 @@ async function updateAvailableTimes() {
     alert('日付、スタッフ、メニューをすべて選択してください。');
     return false;
   }
+
+  currentStartDate = dateVal;
+  updateDateNavButtonStates();
 
   timetableContainer.innerHTML = '';
   if (timetableLoading) timetableLoading.style.display = 'block';
@@ -357,6 +380,51 @@ async function updateAvailableTimes() {
   } finally {
     if (timetableLoading) timetableLoading.style.display = 'none';
   }
+}
+
+/**
+ * 前へ/次へ ボタンの活性・非活性を制御
+ */
+function updateDateNavButtonStates() {
+  const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? CONFIG.DISPLAY_DAYS : 7;
+  if (prevDaysBtn) prevDaysBtn.textContent = `◀ 前の${displayDays}日`;
+  if (nextDaysBtn) nextDaysBtn.textContent = `次の${displayDays}日 ▶`;
+
+  if (!currentStartDate || !prevDaysBtn) return;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const [y, m, d] = currentStartDate.split('-').map(Number);
+  const curDate = new Date(y, m - 1, d);
+
+  // 本日以前には遡れないように制限
+  prevDaysBtn.disabled = (curDate <= today);
+}
+
+/**
+ * 日付を指定日数だけずらして更新
+ * @param {number} daysShift （+7 または -7 など）
+ */
+function shiftDateAndReload(daysShift) {
+  if (!currentStartDate) return;
+
+  const [y, m, d] = currentStartDate.split('-').map(Number);
+  const targetDateObj = new Date(y, m - 1, d + daysShift);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (targetDateObj < today) {
+    targetDateObj.setTime(today.getTime());
+  }
+
+  const newYear = targetDateObj.getFullYear();
+  const newMonth = String(targetDateObj.getMonth() + 1).padStart(2, '0');
+  const newDay = String(targetDateObj.getDate()).padStart(2, '0');
+  const newDateStr = `${newYear}-${newMonth}-${newDay}`;
+
+  updateAvailableTimes(newDateStr);
 }
 
 // -----------------------------------------------------------------
@@ -656,6 +724,20 @@ function initializeEvents() {
 
   if (backToStep1Btn) backToStep1Btn.addEventListener('click', () => showSection(step1Container));
   if (backToStep2Btn) backToStep2Btn.addEventListener('click', () => showSection(step2Container));
+
+  if (prevDaysBtn) {
+    prevDaysBtn.addEventListener('click', () => {
+      const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? CONFIG.DISPLAY_DAYS : 7;
+      shiftDateAndReload(-displayDays);
+    });
+  }
+
+  if (nextDaysBtn) {
+    nextDaysBtn.addEventListener('click', () => {
+      const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? CONFIG.DISPLAY_DAYS : 7;
+      shiftDateAndReload(displayDays);
+    });
+  }
 
   if (goToCheckBtn) {
     goToCheckBtn.addEventListener('click', () => {
