@@ -675,34 +675,59 @@ form.addEventListener('submit', async (e) => {
 });
 
 function initializeEvents() {
+  // ステップ1 → ステップ2 へ進むボタン
   if (toStep2Btn) {
-    toStep2Btn.addEventListener('click', () => {
-      if (!nameInput.checkValidity() || !nameKanaInput.checkValidity() || !telInput.checkValidity() || !emailInput.checkValidity()) {
-        alert('お客様情報を正しく入力してください。');
+    toStep2Btn.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      if (!nameInput.value.trim() || !nameKanaInput.value.trim() || !telInput.value.trim() || !emailInput.value.trim()) {
+        alert('お名前、フリガナ、電話番号、メールアドレスをすべてご入力ください。');
         return;
       }
+
+      if (form && !form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
       showSection(step2Container);
     });
   }
 
+  // ステップ2 → ステップ3 へ進むボタン
   if (toStep3Btn) {
-    toStep3Btn.addEventListener('click', async () => {
-      if (!dateInput.value || !staffSelect.value || !getSelectedMenusValue()) {
-        alert('ご来店希望日、スタッフ、メニューを選択してください。');
+    toStep3Btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const selectedMenu = getSelectedMenusValue();
+      if (!dateInput.value) {
+        alert('ご来店希望日を選択してください。');
         return;
       }
-      
+      if (!staffSelect.value) {
+        alert('担当スタッフを選択してください。');
+        return;
+      }
+      if (!selectedMenu) {
+        alert('メニューを選択してください。');
+        return;
+      }
+
       toStep3Btn.disabled = true;
       const originalText = toStep3Btn.textContent;
       toStep3Btn.textContent = '空き状況を読み込み中...';
-      
-      const success = await updateAvailableTimes();
-      
-      toStep3Btn.disabled = false;
-      toStep3Btn.textContent = originalText;
-      
-      if (success) {
-        showSection(step3Container);
+
+      try {
+        const success = await updateAvailableTimes();
+        if (success) {
+          showSection(step3Container);
+        }
+      } catch (err) {
+        console.error('タイムテーブル読み込みエラー:', err);
+        alert('空き状況の取得中にエラーが発生しました。');
+      } finally {
+        toStep3Btn.disabled = false;
+        toStep3Btn.textContent = originalText;
       }
     });
   }
