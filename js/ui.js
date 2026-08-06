@@ -389,7 +389,7 @@ async function updateAvailableTimes(targetDateStr) {
  * 前へ/次へ ボタンのテキスト更新 & 活性・非活性を制御
  */
 function updateDateNavButtonStates() {
-  const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? Number(CONFIG.DISPLAY_DAYS) : 7;
+  const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? Number(CONFIG.DISPLAY_DAYS) : 3;
   
   // CONFIG.DISPLAY_DAYS に基づいて動的にテキストを作成
   let prevText = '◀ 前の日';
@@ -400,9 +400,11 @@ function updateDateNavButtonStates() {
     nextText = `次の${displayDays}日 ▶`;
   }
 
+  // 日付の保持状態にかかわらず、まずテキストを確実に更新する
   if (prevDaysBtn) prevDaysBtn.textContent = prevText;
   if (nextDaysBtn) nextDaysBtn.textContent = nextText;
 
+  // 日付が未設定の場合はボタン無効化の判定のみスキップ
   if (!currentStartDate || !prevDaysBtn) return;
 
   const today = new Date();
@@ -417,7 +419,7 @@ function updateDateNavButtonStates() {
 
 /**
  * 日付を指定日数だけずらして更新
- * @param {number} daysShift （+7 または -7 など）
+ * @param {number} daysShift （+3 または -3 など）
  */
 function shiftDateAndReload(daysShift) {
   if (!currentStartDate) return;
@@ -740,14 +742,14 @@ function initializeEvents() {
 
   if (prevDaysBtn) {
     prevDaysBtn.addEventListener('click', () => {
-      const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? Number(CONFIG.DISPLAY_DAYS) : 7;
+      const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? Number(CONFIG.DISPLAY_DAYS) : 3;
       shiftDateAndReload(-displayDays);
     });
   }
 
   if (nextDaysBtn) {
     nextDaysBtn.addEventListener('click', () => {
-      const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? Number(CONFIG.DISPLAY_DAYS) : 7;
+      const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? Number(CONFIG.DISPLAY_DAYS) : 3;
       shiftDateAndReload(displayDays);
     });
   }
