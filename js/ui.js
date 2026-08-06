@@ -64,6 +64,16 @@ async function initializeSystemUI() {
     return;
   }
 
+  // 設定値（CONFIG）へ反映
+  if (settings.menuSelectorType) CONFIG.MENU_SELECTOR_TYPE = settings.menuSelectorType;
+  if (settings.showMenuMinutes !== undefined) CONFIG.SHOW_MENU_MINUTES = settings.showMenuMinutes;
+  if (settings.showMenuPrice !== undefined) CONFIG.SHOW_MENU_PRICE = settings.showMenuPrice;
+  if (settings.menuMaster) CONFIG.MENU_MASTER = settings.menuMaster;
+  if (settings.displayDays !== undefined) CONFIG.DISPLAY_DAYS = settings.displayDays;
+
+  // ボタンの初期ラベル更新（CONFIG設定反映後に行う）
+  updateDateNavButtonStates();
+
   // カレンダーの選択範囲制御（過去の日付を選べなくする）
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
@@ -111,16 +121,6 @@ async function initializeSystemUI() {
       }
     }
   }
-
-  // 設定値（CONFIG）へ反映
-  if (settings.menuSelectorType) CONFIG.MENU_SELECTOR_TYPE = settings.menuSelectorType;
-  if (settings.showMenuMinutes !== undefined) CONFIG.SHOW_MENU_MINUTES = settings.showMenuMinutes;
-  if (settings.showMenuPrice !== undefined) CONFIG.SHOW_MENU_PRICE = settings.showMenuPrice;
-  if (settings.menuMaster) CONFIG.MENU_MASTER = settings.menuMaster;
-  if (settings.displayDays !== undefined) CONFIG.DISPLAY_DAYS = settings.displayDays;
-
-  // ボタンの初期ラベル更新
-  updateDateNavButtonStates();
 
   // メニュー画面を表示
   renderMenuUI();
@@ -391,7 +391,7 @@ async function updateAvailableTimes(targetDateStr) {
 function updateDateNavButtonStates() {
   const displayDays = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? Number(CONFIG.DISPLAY_DAYS) : 7;
   
-  // 日数に応じたテキストの動的判定
+  // CONFIG.DISPLAY_DAYS に基づいて動的にテキストを作成
   let prevText = '◀ 前の日';
   let nextText = '次の日 ▶';
 
