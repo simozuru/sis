@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIS Web Reservation - ver 4.4.2</title>
-  <link rel="stylesheet" href="./style.css?v=1.0.4">
+  <link rel="stylesheet" href="./style.css?v=1.0.2">
 </head>
 <body>
 
@@ -103,14 +103,6 @@
     <div id="step-3-container" class="step-section" style="display: none;">
       <div class="form-group">
         <label>ご来店希望日時を選択してください *</label>
-        
-        <!-- 期間移動用ナビゲーションUI -->
-        <div id="date-nav-container" class="date-nav-bar" style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0 15px 0; gap: 8px;">
-          <button type="button" id="prev-days-btn" class="btn-back" style="padding: 6px 12px; font-size: 0.9em; flex: 1; max-width: 120px;"></button>
-          <span id="current-range-label" style="font-weight: bold; font-size: 0.9em; text-align: center; flex: 2;"></span>
-          <button type="button" id="next-days-btn" class="btn-submit" style="padding: 6px 12px; font-size: 0.9em; margin-top: 0; flex: 1; max-width: 120px;"></button>
-        </div>
-
         <div id="timetable-loading" class="note" style="display: none;">空き状況をリアルタイムで読み込んでいます...</div>
         <div id="timetable-container">
           <div class="no-data">条件に沿った空き枠を表示しています。</div>
@@ -156,11 +148,11 @@
 
 </div>
 
-<!-- バージョン番号を 1.0.4 に更新して強制読み込み -->
-<script src="./js/config.js?v=1.0.4"></script>
-<script src="./js/storage.js?v=1.0.4"></script>
-<script src="./js/api.js?v=1.0.4"></script>
-<script src="./js/ui.js?v=1.0.4"></script>
+<!-- スクリプトの読み込み末尾にバージョンを追加して強制読み込みを実施 -->
+<script src="./js/config.js?v=1.0.2"></script>
+<script src="./js/storage.js?v=1.0.2"></script>
+<script src="./js/api.js?v=1.0.2"></script>
+<script src="./js/ui.js?v=1.0.2"></script>
 
 </body>
 </html>
