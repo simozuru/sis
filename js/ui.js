@@ -432,31 +432,50 @@ async function fetchReservations() {
 }
 
 async function startChangeMode(buttonEl) {
+  // 安全にデータ属性を取得（nullやundefinedの場合はデフォルト値を設定）
+  const rawStaff = buttonEl.getAttribute('data-staff');
+  const staffVal = (rawStaff && rawStaff !== 'null' && rawStaff !== 'undefined') ? rawStaff : '指名なし';
+
   window.changeModeData = {
-    resId: buttonEl.getAttribute('data-id'),
-    oldDate: buttonEl.getAttribute('data-date'),
-    oldTime: buttonEl.getAttribute('data-time'),
-    oldStaff: buttonEl.getAttribute('data-staff'),
-    oldMenu: buttonEl.getAttribute('data-menu')
+    resId: buttonEl.getAttribute('data-id') || '',
+    oldDate: buttonEl.getAttribute('data-date') || '',
+    oldTime: buttonEl.getAttribute('data-time') || '',
+    oldStaff: staffVal,
+    oldMenu: buttonEl.getAttribute('data-menu') || ''
   };
 
   await initializeSystemUI();
 
-  staffSelect.value = changeModeData.oldStaff;
+  // ドロップダウン内に同じ値が存在する場合のみセットする安全処理
+  if (staffSelect) {
+    let exists = Array.from(staffSelect.options).some(opt => opt.value === changeModeData.oldStaff);
+    if (exists) {
+      staffSelect.value = changeModeData.oldStaff;
+    } else if (staffSelect.options.length > 0) {
+      staffSelect.selectedIndex = 0;
+    }
+  }
+
   applySelectedMenuValue(changeModeData.oldMenu);
-  memoInput.value = buttonEl.getAttribute('data-memo');
-  dateInput.value = changeModeData.oldDate;
+  if (memoInput) memoInput.value = buttonEl.getAttribute('data-memo') || '';
+  if (dateInput) dateInput.value = changeModeData.oldDate;
 
   const prevDateParts = changeModeData.oldDate.split('-');
   const formattedOldDate = prevDateParts.length === 3 ? `${prevDateParts[0]}年${prevDateParts[1]}月${prevDateParts[2]}日` : changeModeData.oldDate;
   
-  document.getElementById('prev-id').textContent = changeModeData.resId;
-  document.getElementById('prev-datetime').textContent = `${formattedOldDate}  ${changeModeData.oldTime}`;
-  document.getElementById('prev-menu').textContent = changeModeData.oldMenu;
-  document.getElementById('prev-staff').textContent = changeModeData.oldStaff;
+  const prevIdEl = document.getElementById('prev-id');
+  const prevDatetimeEl = document.getElementById('prev-datetime');
+  const prevMenuEl = document.getElementById('prev-menu');
+  const prevStaffEl = document.getElementById('prev-staff');
+  const changeBannerEl = document.getElementById('change-banner');
 
-  document.getElementById('change-banner').style.display = 'block';
-  submitBtn.textContent = '日時を選択してください';
+  if (prevIdEl) prevIdEl.textContent = changeModeData.resId;
+  if (prevDatetimeEl) prevDatetimeEl.textContent = `${formattedOldDate}  ${changeModeData.oldTime}`;
+  if (prevMenuEl) prevMenuEl.textContent = changeModeData.oldMenu;
+  if (prevStaffEl) prevStaffEl.textContent = changeModeData.oldStaff;
+
+  if (changeBannerEl) changeBannerEl.style.display = 'block';
+  if (submitBtn) submitBtn.textContent = '日時を選択してください';
 
   showSection(step2Container);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -464,24 +483,30 @@ async function startChangeMode(buttonEl) {
 
 function abortChangeMode() {
   window.changeModeData = null;
-  document.getElementById('change-banner').style.display = 'none';
+  const changeBannerEl = document.getElementById('change-banner');
+  if (changeBannerEl) changeBannerEl.style.display = 'none';
   
-  document.getElementById('prev-id').textContent = '';
-  document.getElementById('prev-datetime').textContent = '';
-  document.getElementById('prev-menu').textContent = '';
-  document.getElementById('prev-staff').textContent = '';
+  const prevIdEl = document.getElementById('prev-id');
+  const prevDatetimeEl = document.getElementById('prev-datetime');
+  const prevMenuEl = document.getElementById('prev-menu');
+  const prevStaffEl = document.getElementById('prev-staff');
 
-  submitBtn.textContent = '日時を選択してください';
+  if (prevIdEl) prevIdEl.textContent = '';
+  if (prevDatetimeEl) prevDatetimeEl.textContent = '';
+  if (prevMenuEl) prevMenuEl.textContent = '';
+  if (prevStaffEl) prevStaffEl.textContent = '';
+
+  if (submitBtn) submitBtn.textContent = '日時を選択してください';
   
-  dateInput.value = '';
-  if (staffSelect.options.length > 0) staffSelect.selectedIndex = 0;
+  if (dateInput) dateInput.value = '';
+  if (staffSelect && staffSelect.options.length > 0) staffSelect.selectedIndex = 0;
   clearSelectedMenuValue();
   
-  selectedDateInput.value = '';
-  selectedTimeInput.value = '';
-  timetableContainer.innerHTML = '<div class="no-data">条件に沿った空き枠を表示しています。</div>';
-  submitBtn.disabled = true;
-  memoInput.value = '';
+  if (selectedDateInput) selectedDateInput.value = '';
+  if (selectedTimeInput) selectedTimeInput.value = '';
+  if (timetableContainer) timetableContainer.innerHTML = '<div class="no-data">条件に沿った空き枠を表示しています。</div>';
+  if (submitBtn) submitBtn.disabled = true;
+  if (memoInput) memoInput.value = '';
   
   restoreCachedCustomerData();
   initializeSystemUI();
