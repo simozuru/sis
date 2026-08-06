@@ -20,10 +20,6 @@ const staffSelect = document.getElementById('staff');
 const menuContainer = document.getElementById('menu-container'); 
 const submitBtn = document.getElementById('submit-btn');
 
-// 期間移動用ナビゲーションパーツ
-const prevDaysBtn = document.getElementById('prev-days-btn');
-const nextDaysBtn = document.getElementById('next-days-btn');
-
 // ナビゲーションおよび機能ボタン
 const toStep2Btn = document.getElementById('to-step-2-btn');
 const toStep3Btn = document.getElementById('to-step-3-btn');
@@ -46,9 +42,6 @@ const timetableContainer = document.getElementById('timetable-container');
 const timetableLoading = document.getElementById('timetable-loading');
 const selectedDateInput = document.getElementById('selected-date');
 const selectedTimeInput = document.getElementById('selected-time');
-
-// 現在表示中の開始日を保持する変数
-let currentStartDate = '';
 
 // -----------------------------------------------------------------
 // 2. システム初期化 & UIセットアップ
@@ -116,7 +109,6 @@ async function initializeSystemUI() {
   if (settings.showMenuMinutes !== undefined) CONFIG.SHOW_MENU_MINUTES = settings.showMenuMinutes;
   if (settings.showMenuPrice !== undefined) CONFIG.SHOW_MENU_PRICE = settings.showMenuPrice;
   if (settings.menuMaster) CONFIG.MENU_MASTER = settings.menuMaster;
-  if (settings.displayDays !== undefined) CONFIG.DISPLAY_DAYS = settings.displayDays;
 
   // メニュー画面を表示
   renderMenuUI();
@@ -328,8 +320,8 @@ function renderTimetable(multiDayStatuses) {
   });
 }
 
-async function updateAvailableTimes(targetDate) {
-  const dateVal = targetDate || dateInput.value;
+async function updateAvailableTimes() {
+  const dateVal = dateInput.value;
   const staffVal = staffSelect.value;
   const menuVal = getSelectedMenusValue(); 
 
@@ -337,8 +329,6 @@ async function updateAvailableTimes(targetDate) {
     alert('日付、スタッフ、メニューをすべて選択してください。');
     return false;
   }
-
-  currentStartDate = dateVal;
 
   timetableContainer.innerHTML = '';
   if (timetableLoading) timetableLoading.style.display = 'block';
@@ -354,7 +344,6 @@ async function updateAvailableTimes(targetDate) {
     }
 
     renderTimetable(multiDayStatuses);
-    updateDateNavState();
     
     selectedDateInput.value = '';
     selectedTimeInput.value = '';
@@ -368,48 +357,6 @@ async function updateAvailableTimes(targetDate) {
   } finally {
     if (timetableLoading) timetableLoading.style.display = 'none';
   }
-}
-
-/**
- * 期間移動ボタンを押した際に日付をシフトして再読み込みする処理
- */
-async function shiftDateAndReload(offsetDays) {
-  if (!currentStartDate) return;
-
-  const [y, m, d] = currentStartDate.split('-').map(Number);
-  const curDate = new Date(y, m - 1, d);
-  curDate.setDate(curDate.getDate() + offsetDays);
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  // 過去の日付にならないよう制御
-  if (curDate < today) {
-    curDate.setTime(today.getTime());
-  }
-
-  const newYear = curDate.getFullYear();
-  const newMonth = String(curDate.getMonth() + 1).padStart(2, '0');
-  const newDay = String(curDate.getDate()).padStart(2, '0');
-  const newDateStr = `${newYear}-${newMonth}-${newDay}`;
-
-  if (dateInput) dateInput.value = newDateStr;
-  await updateAvailableTimes(newDateStr);
-}
-
-/**
- * 「前へ」ボタンの活性/非活性状態を判定・更新する処理
- */
-function updateDateNavState() {
-  if (!currentStartDate || !prevDaysBtn) return;
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const [y, m, d] = currentStartDate.split('-').map(Number);
-  const curDate = new Date(y, m - 1, d);
-
-  prevDaysBtn.disabled = (curDate <= today);
 }
 
 // -----------------------------------------------------------------
@@ -675,80 +622,40 @@ form.addEventListener('submit', async (e) => {
 });
 
 function initializeEvents() {
-  // ステップ1 → ステップ2 へ進むボタン
   if (toStep2Btn) {
-    toStep2Btn.addEventListener('click', (e) => {
-      e.preventDefault();
-
-      if (!nameInput.value.trim() || !nameKanaInput.value.trim() || !telInput.value.trim() || !emailInput.value.trim()) {
-        alert('お名前、フリガナ、電話番号、メールアドレスをすべてご入力ください。');
+    toStep2Btn.addEventListener('click', () => {
+      if (!nameInput.checkValidity() || !nameKanaInput.checkValidity() || !telInput.checkValidity() || !emailInput.checkValidity()) {
+        alert('お客様情報を正しく入力してください。');
         return;
       }
-
-      if (form && !form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
-
       showSection(step2Container);
     });
   }
 
-  // ステップ2 → ステップ3 へ進むボタン
   if (toStep3Btn) {
-    toStep3Btn.addEventListener('click', async (e) => {
-      e.preventDefault();
-
-      const selectedMenu = getSelectedMenusValue();
-      if (!dateInput.value) {
-        alert('ご来店希望日を選択してください。');
+    toStep3Btn.addEventListener('click', async () => {
+      if (!dateInput.value || !staffSelect.value || !getSelectedMenusValue()) {
+        alert('ご来店希望日、スタッフ、メニューを選択してください。');
         return;
       }
-      if (!staffSelect.value) {
-        alert('担当スタッフを選択してください。');
-        return;
-      }
-      if (!selectedMenu) {
-        alert('メニューを選択してください。');
-        return;
-      }
-
+      
       toStep3Btn.disabled = true;
       const originalText = toStep3Btn.textContent;
       toStep3Btn.textContent = '空き状況を読み込み中...';
-
-      try {
-        const success = await updateAvailableTimes();
-        if (success) {
-          showSection(step3Container);
-        }
-      } catch (err) {
-        console.error('タイムテーブル読み込みエラー:', err);
-        alert('空き状況の取得中にエラーが発生しました。');
-      } finally {
-        toStep3Btn.disabled = false;
-        toStep3Btn.textContent = originalText;
+      
+      const success = await updateAvailableTimes();
+      
+      toStep3Btn.disabled = false;
+      toStep3Btn.textContent = originalText;
+      
+      if (success) {
+        showSection(step3Container);
       }
     });
   }
 
   if (backToStep1Btn) backToStep1Btn.addEventListener('click', () => showSection(step1Container));
   if (backToStep2Btn) backToStep2Btn.addEventListener('click', () => showSection(step2Container));
-
-  // 期間移動ボタンのクリックイベント（表示日数に応じて動的に移動）
-  if (prevDaysBtn) {
-    prevDaysBtn.addEventListener('click', () => {
-      const days = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? Number(CONFIG.DISPLAY_DAYS) : 7;
-      shiftDateAndReload(-days);
-    });
-  }
-
-  if (nextDaysBtn) {
-    nextDaysBtn.addEventListener('click', () => {
-      const days = (typeof CONFIG !== 'undefined' && CONFIG.DISPLAY_DAYS) ? Number(CONFIG.DISPLAY_DAYS) : 7;
-      shiftDateAndReload(days);
-    });
-  }
 
   if (goToCheckBtn) {
     goToCheckBtn.addEventListener('click', () => {
