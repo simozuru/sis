@@ -7,22 +7,24 @@
 
 // システム設定
 const CONFIG = {
-  GAS_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbwjCmWjdkKTTnvHVsZrPPCq7uyOdiQ8DFH41t6qbJ08zebrbwjrdX57yRANvrSMsQzm/exec",
-  STORAGE_FIELDS: ['name', 'name_kana', 'tel', 'email'],
-  
-  // スロット基本設定（1スロット = 5分）
-  BASE_SLOT_MINUTES: 5,
-  
-  // GASから同期されるメニュー表示タイプの受け皿（デフォルトはTYPE_B:チェックボックス）
+  GAS_WEB_APP_URL: "[script.google.com](https://script.google.com/macros/s/AKfycbwjCmWjdkKTTnvHVsZrPPCq7uyOdiQ8DFH41t6qbJ08zebrbwjrdX57yRANvrSMsQzm/exec)",
+  STORAGE_FIELDS: ["name", "name_kana", "tel", "email"],
+  STORAGE_PREFIX: "sis_",
+
+  // GASから同期される設定値の受け皿
   MENU_SELECTOR_TYPE: "TYPE_B",
-  
-  // GASから同期される表示フラグの受け皿（表示任意コントロール用）
-  SHOW_MENU_MINUTES: true, // 時間（分）を表示するかどうかのステート保持
-  SHOW_MENU_PRICE: true,   // 金額を表示するかどうかのステート保持
-  
-  // GAS（Config.gs）から取得したメニューオブジェクトを格納する受け皿
-  MENU_MASTER: {}
+  SHOW_MENU_MINUTES: true,
+  SHOW_MENU_PRICE: true,
+  SHOW_STAFF_SELECTOR: true,
+  ALLOW_NO_ASSIGN: true,
+  NO_ASSIGN_LABEL: "指名なし",
+  MAX_FUTURE_DAYS: 60,
+  MENU_MASTER: {},
+  STAFF_LIST: []
 };
 
-// 予約変更モード用のグローバル状態
-let changeModeData = null;
+// 画面全体で共有する状態
+const AppState = {
+  systemSettings: null,
+  changeModeData: null
+};

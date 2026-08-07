@@ -12,7 +12,7 @@
 async function fetchSystemSettingsApi() {
   try {
     const response = await fetch(`${CONFIG.GAS_WEB_APP_URL}?method=getSystemSettings`);
-    if (!response.ok) throw new Error('システム設定の取得に失敗しました');
+    if (!response.ok) throw new Error("システム設定の取得に失敗しました");
     return await response.json();
   } catch (error) {
     console.error("fetchSystemSettingsApi エラー:", error);
@@ -32,7 +32,7 @@ async function fetchTimetableDataApi(date, staff, menu, resId = "") {
   try {
     const url = `${CONFIG.GAS_WEB_APP_URL}?method=getSlotStatuses&date=${encodeURIComponent(date)}&staff=${encodeURIComponent(staff)}&menu=${encodeURIComponent(menu)}&resId=${encodeURIComponent(resId)}`;
     const response = await fetch(url);
-    if (!response.ok) throw new Error('タイムテーブルの取得に失敗しました');
+    if (!response.ok) throw new Error("タイムテーブルの取得に失敗しました");
     return await response.json();
   } catch (error) {
     console.error("fetchTimetableDataApi エラー:", error);
@@ -54,14 +54,14 @@ async function submitReservationApi(action, payload) {
     };
 
     const response = await fetch(CONFIG.GAS_WEB_APP_URL, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
+        "Content-Type": "text/plain;charset=utf-8"
       },
       body: JSON.stringify(postData)
     });
 
-    if (!response.ok) throw new Error('予約処理のリクエストに失敗しました');
+    if (!response.ok) throw new Error("予約処理のリクエストに失敗しました");
     return await response.json();
   } catch (error) {
     console.error("submitReservationApi エラー:", error);
@@ -79,7 +79,7 @@ async function fetchCustomerReservationsApi(tel, email) {
   try {
     const url = `${CONFIG.GAS_WEB_APP_URL}?method=getCustomerReservations&tel=${encodeURIComponent(tel)}&email=${encodeURIComponent(email)}`;
     const response = await fetch(url);
-    if (!response.ok) throw new Error('ご予約状況の取得に失敗しました');
+    if (!response.ok) throw new Error("ご予約状況の取得に失敗しました");
     return await response.json();
   } catch (error) {
     console.error("fetchCustomerReservationsApi エラー:", error);

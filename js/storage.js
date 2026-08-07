@@ -6,51 +6,50 @@
  */
 
 /**
- * 1. 【キャッシュ復元】保存されたお客様情報を画面の入力欄へ自動セットする
+ * 1. 保存済みのお客様情報を取得する
+ * @returns {Object} 保存済みのお客様情報
  */
-function restoreCachedCustomerData() {
+function getCachedCustomerData() {
+  const result = {};
+
   try {
-    if (typeof CONFIG === 'undefined' || !CONFIG.STORAGE_FIELDS) return;
+    if (typeof CONFIG === "undefined" || !Array.isArray(CONFIG.STORAGE_FIELDS)) {
+      return result;
+    }
 
     CONFIG.STORAGE_FIELDS.forEach(field => {
-      const saved = localStorage.getItem(`sis_${field}`);
+      const saved = localStorage.getItem(`${CONFIG.STORAGE_PREFIX}${field}`);
       if (saved) {
-        const el = document.getElementById(field);
-        if (el) el.value = saved;
-        
-        // 確認・キャンセル用タブ側の入力欄にも自動セット
-        if (field === 'tel') {
-          const checkTel = document.getElementById('check-tel');
-          if (checkTel) checkTel.value = saved;
-        }
-        if (field === 'email') {
-          const checkEmail = document.getElementById('check-email');
-          if (checkEmail) checkEmail.value = saved;
-        }
+        result[field] = saved;
       }
     });
   } catch (e) {
-    console.warn("ローカルストレージからのデータ復元に失敗しました:", e);
+    console.warn("ローカルストレージからのデータ取得に失敗しました:", e);
   }
+
+  return result;
 }
 
 /**
- * 2. 【キャッシュ保存】入力されたお客様情報をローカルストレージに保存する
+ * 2. 指定されたお客様情報をローカルストレージに保存する
+ * @param {Object} data - 保存対象データ
  */
-function saveCustomerDataToCache() {
+function saveCustomerDataToCache(data) {
   try {
-    if (typeof CONFIG === 'undefined' || !CONFIG.STORAGE_FIELDS) return;
+    if (typeof CONFIG === "undefined" || !Array.isArray(CONFIG.STORAGE_FIELDS)) {
+      return;
+    }
 
     CONFIG.STORAGE_FIELDS.forEach(field => {
-      const el = document.getElementById(field);
-      if (el && el.value) {
-        localStorage.setItem(`sis_${field}`, el.value.trim());
+      const value = data[field];
+
+      if (value && String(value).trim()) {
+        localStorage.setItem(`${CONFIG.STORAGE_PREFIX}${field}`, String(value).trim());
+      } else {
+        localStorage.removeItem(`${CONFIG.STORAGE_PREFIX}${field}`);
       }
     });
   } catch (e) {
     console.warn("ローカルストレージへのデータ保存に失敗しました:", e);
   }
 }
-
-// ページ読み込み時に自動で復元処理を実行
-restoreCachedCustomerData();
