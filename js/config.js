@@ -7,9 +7,8 @@
 
 // システム設定
 const CONFIG = {
-  GAS_WEB_APP_URL: "[script.google.com](https://script.google.com/macros/s/AKfycbwjCmWjdkKTTnvHVsZrPPCq7uyOdiQ8DFH41t6qbJ08zebrbwjrdX57yRANvrSMsQzm/exec)",
-  STORAGE_FIELDS: ["name", "name_kana", "tel", "email"],
-  STORAGE_PREFIX: "sis_",
+  GAS_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbwjCmWjdkKTTnvHVsZrPPCq7uyOdiQ8DFH41t6qbJ08zebrbwjrdX57yRANvrSMsQzm/exec",
+  STORAGE_FIELDS: ['name', 'name_kana', 'tel', 'email'],
 
   // GASから同期される設定値の受け皿
   MENU_SELECTOR_TYPE: "TYPE_B",
