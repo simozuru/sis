@@ -18,6 +18,7 @@ const memoInput = document.getElementById('memo');
 const dateInput = document.getElementById('date');
 const staffSelect = document.getElementById('staff');
 const menuContainer = document.getElementById('menu-container');
+const menuMultiSelectNote = document.getElementById('menu-multi-select-note');
 const submitBtn = document.getElementById('submit-btn');
 
 // ナビゲーションおよび機能ボタン
@@ -192,6 +193,11 @@ async function initializeSystemUI() {
  */
 function renderMenuUI() {
   if (!menuContainer) return;
+
+  // プルダウン式（単一選択）の時は「複数選択可」の表記を隠す
+  if (menuMultiSelectNote) {
+    menuMultiSelectNote.style.display = isMenuPulldownType() ? 'none' : 'inline';
+  }
 
   const menuMaster = CONFIG.MENU_MASTER || {};
   const menuNames = Object.keys(menuMaster);
