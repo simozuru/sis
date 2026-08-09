@@ -628,6 +628,19 @@ background-color: var(--danger-bg);
 border-color: var(--danger-color);
 }
 
+.btn-change:disabled,
+.btn-cancel:disabled {
+background-color: #f0ede8;
+
+color: #a9a196;
+
+border-color: #d8d2c8;
+
+cursor: not-allowed;
+
+box-shadow: none;
+}
+
 .no-data {
 text-align: center;
 

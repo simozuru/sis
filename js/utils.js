@@ -82,6 +82,25 @@ function addDaysToDateString(dateStr, days) {
 }
 
 /**
+ * 5-3. 予約日時が「キャンセル・変更の受付締切」を過ぎているかどうかを判定する
+ * 例: 予約が「2026-08-11 09:00」でバッファが24時間なら、締切は「2026-08-10 09:00」。
+ * 　　今がその締切を過ぎていれば true を返す
+ * @param {string} dateStr - 予約日 (yyyy-MM-dd)
+ * @param {string} timeStr - 予約時刻 ("09:00" のような形式)
+ * @param {number} bufferHours - 予約の何時間前まで受け付けるか
+ * @returns {boolean} 締切を過ぎていたら true
+ */
+function isReservationDeadlinePassed(dateStr, timeStr, bufferHours) {
+  const [year, month, day] = String(dateStr).split('-').map(Number);
+  const [hour, minute] = String(timeStr).split(':').map(Number);
+
+  const reservationDateTime = new Date(year, month - 1, day, hour, minute);
+  const deadline = new Date(reservationDateTime.getTime() - Number(bufferHours) * 60 * 60 * 1000);
+
+  return new Date() > deadline;
+}
+
+/**
  * 6. メニュー表示ラベルを作る
  * @param {string} menuName - メニュー名
  * @param {Object} menuData - メニューデータ

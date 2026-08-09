@@ -37,6 +37,18 @@ function buildReservationCardHtml(res) {
     ? `<div class="res-row"><span class="res-label">備考・メモ</span> ${safeMemo}</div>`
     : '';
 
+  // キャンセル・日時変更、それぞれの受付締切を過ぎているか判定する
+  const isChangeExpired = isReservationDeadlinePassed(res.date, res.time, CONFIG.CHANGE_BUFFER_HOURS);
+  const isCancelExpired = isReservationDeadlinePassed(res.date, res.time, CONFIG.CANCEL_BUFFER_HOURS);
+
+  const changeButtonHtml = isChangeExpired
+    ? `<button type="button" class="btn-change" disabled>日時変更期間を過ぎています</button>`
+    : `<button type="button" class="btn-change" data-id="${safeId}" data-date="${safeDate}" data-time="${safeTime}" data-staff="${safeStaff}" data-menu="${safeMenu}" data-memo="${safeMemo}">日時を変更する</button>`;
+
+  const cancelButtonHtml = isCancelExpired
+    ? `<button type="button" class="btn-cancel" disabled>キャンセル期限を過ぎています</button>`
+    : `<button type="button" class="btn-cancel" data-id="${safeId}">この予約をキャンセルする</button>`;
+
   return `
     <div class="reservation-card">
       <div class="res-row"><span class="res-label">予約日</span> ${escapeHtml(formattedDate)}</div>
@@ -47,8 +59,8 @@ function buildReservationCardHtml(res) {
       <div class="res-card-divider"><span class="res-label">予約ID</span> <span class="res-id-badge">${safeId}</span></div>
       <div class="res-created-time">⏱ 受付時間：${safeCreatedAt}</div>
       <div class="btn-action-group">
-        <button type="button" class="btn-change" data-id="${safeId}" data-date="${safeDate}" data-time="${safeTime}" data-staff="${safeStaff}" data-menu="${safeMenu}" data-memo="${safeMemo}">日時を変更する</button>
-        <button type="button" class="btn-cancel" data-id="${safeId}">この予約をキャンセルする</button>
+        ${changeButtonHtml}
+        ${cancelButtonHtml}
       </div>
     </div>
   `;

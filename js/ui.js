@@ -88,6 +88,8 @@ async function ensureSystemSettingsLoaded() {
 function applySystemSettings(settings) {
   CONFIG.MAX_FUTURE_DAYS = settings.maxFutureDays;
   CONFIG.DISPLAY_DAYS = settings.displayDays;
+  CONFIG.CANCEL_BUFFER_HOURS = settings.cancelBufferHours;
+  CONFIG.CHANGE_BUFFER_HOURS = settings.changeBufferHours;
   CONFIG.SHOW_STAFF_SELECTOR = settings.showStaffSelector;
   CONFIG.ALLOW_NO_ASSIGN = settings.allowNoAssign;
   CONFIG.NO_ASSIGN_LABEL = settings.noAssignLabel;
