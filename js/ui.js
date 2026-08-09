@@ -42,6 +42,8 @@ const timetableContainer = document.getElementById('timetable-container');
 const timetableLoading = document.getElementById('timetable-loading');
 const selectedDateInput = document.getElementById('selected-date');
 const selectedTimeInput = document.getElementById('selected-time');
+const prevTimetableBtn = document.getElementById('prev-timetable-btn');
+const nextTimetableBtn = document.getElementById('next-timetable-btn');
 
 // 予約確認タブの入力欄
 const checkTelInput = document.getElementById('check-tel');
@@ -84,6 +86,7 @@ async function ensureSystemSettingsLoaded() {
  */
 function applySystemSettings(settings) {
   CONFIG.MAX_FUTURE_DAYS = settings.maxFutureDays;
+  CONFIG.DISPLAY_DAYS = settings.displayDays;
   CONFIG.SHOW_STAFF_SELECTOR = settings.showStaffSelector;
   CONFIG.ALLOW_NO_ASSIGN = settings.allowNoAssign;
   CONFIG.NO_ASSIGN_LABEL = settings.noAssignLabel;
@@ -293,6 +296,11 @@ function clearSelectedMenuValue() {
 // -----------------------------------------------------------------
 // 5. セクション切替・タイムテーブル（時間表）描画
 // -----------------------------------------------------------------
+
+// 現在タイムテーブルに表示中の開始日と、その表示日数（ページ送りボタンで使用）
+let currentTimetableStartDate = '';
+let currentTimetableDayCount = 0;
+
 /**
  * 指定したセクションだけを表示する
  * @param {HTMLElement} targetContainer - 表示したいセクション
@@ -424,10 +432,11 @@ function bindTimetableCellEvents() {
 
 /**
  * 選択条件をもとに空き状況を取得して描画する
+ * @param {string} [dateOverride] - 指定時はこの日付を起点に取得する（ページ送り用。省略時は画面の日付欄を使う）
  * @returns {Promise<boolean>} 取得と描画に成功したら true
  */
-async function updateAvailableTimes() {
-  const dateVal = dateInput ? dateInput.value : '';
+async function updateAvailableTimes(dateOverride) {
+  const dateVal = dateOverride || (dateInput ? dateInput.value : '');
   const staffVal = staffSelect ? staffSelect.value : '';
   const menuVal = getSelectedMenusValue();
 
@@ -449,7 +458,14 @@ async function updateAvailableTimes() {
       return false;
     }
 
+    // ページ送り（次/前の日程）で使うため、今回表示した開始日と日数を覚えておく
+    currentTimetableStartDate = dateVal;
+    currentTimetableDayCount = (multiDayStatuses && typeof multiDayStatuses === 'object')
+      ? Object.keys(multiDayStatuses).length || CONFIG.DISPLAY_DAYS
+      : CONFIG.DISPLAY_DAYS;
+
     renderTimetable(multiDayStatuses);
+    updateTimetableNavButtons();
 
     if (selectedDateInput) selectedDateInput.value = '';
     if (selectedTimeInput) selectedTimeInput.value = '';
@@ -465,6 +481,34 @@ async function updateAvailableTimes() {
   } finally {
     if (timetableLoading) timetableLoading.style.display = 'none';
   }
+}
+
+/**
+ * 「前の日程を見る」ボタンを、今日より前に戻れないよう無効化する
+ */
+function updateTimetableNavButtons() {
+  if (!prevTimetableBtn) return;
+  const todayStr = formatLocalDateInputValue(new Date());
+  prevTimetableBtn.disabled = currentTimetableStartDate <= todayStr;
+}
+
+/**
+ * 次の日程（表示中の続き）へページ送りする
+ */
+async function goToNextTimetablePage() {
+  const dayCount = currentTimetableDayCount || CONFIG.DISPLAY_DAYS;
+  const nextDate = addDaysToDateString(currentTimetableStartDate, dayCount);
+  await updateAvailableTimes(nextDate);
+}
+
+/**
+ * 前の日程へページ送りする（今日より前には戻らない）
+ */
+async function goToPrevTimetablePage() {
+  const dayCount = currentTimetableDayCount || CONFIG.DISPLAY_DAYS;
+  const prevDate = addDaysToDateString(currentTimetableStartDate, -dayCount);
+  const todayStr = formatLocalDateInputValue(new Date());
+  await updateAvailableTimes(prevDate < todayStr ? todayStr : prevDate);
 }
 
 // -----------------------------------------------------------------
@@ -616,6 +660,21 @@ function initializeEvents() {
 
   if (cancelChangeBtn) {
     cancelChangeBtn.addEventListener('click', abortChangeMode);
+  }
+
+  if (nextTimetableBtn) {
+    nextTimetableBtn.addEventListener('click', async () => {
+      nextTimetableBtn.disabled = true;
+      await goToNextTimetablePage();
+      nextTimetableBtn.disabled = false;
+    });
+  }
+
+  if (prevTimetableBtn) {
+    prevTimetableBtn.addEventListener('click', async () => {
+      prevTimetableBtn.disabled = true;
+      await goToPrevTimetablePage();
+    });
   }
 
   if (resultsArea) {

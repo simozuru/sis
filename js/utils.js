@@ -69,6 +69,19 @@ function getLocalDateAfterDays(days) {
 }
 
 /**
+ * 5-2. 指定した日付（yyyy-MM-dd）に、指定日数を加算/減算した日付を返す
+ * 「次の日程」「前の日程」ボタンで、表示中の日付を丸ごとずらすために使う
+ * @param {string} dateStr - 基準日 (yyyy-MM-dd)
+ * @param {number} days - 加算日数（マイナス指定で過去方向へずらせる）
+ * @returns {string} yyyy-MM-dd 形式
+ */
+function addDaysToDateString(dateStr, days) {
+  const [year, month, day] = String(dateStr).split('-').map(Number);
+  const target = new Date(year, month - 1, day + days);
+  return formatLocalDateInputValue(target);
+}
+
+/**
  * 6. メニュー表示ラベルを作る
  * @param {string} menuName - メニュー名
  * @param {Object} menuData - メニューデータ

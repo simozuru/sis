@@ -19,6 +19,7 @@ const CONFIG = {
   ALLOW_NO_ASSIGN: true,
   NO_ASSIGN_LABEL: "指名なし",
   MAX_FUTURE_DAYS: 60,
+  DISPLAY_DAYS: 7,
   MENU_MASTER: {},
   STAFF_LIST: []
 };

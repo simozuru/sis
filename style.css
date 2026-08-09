@@ -1019,3 +1019,41 @@ width: 72px;
   gap: 8px;
   cursor: pointer;
 }
+
+/* ==========================================================
+タイムテーブルのページ送りボタン（次/前の日程を見る）
+========================================================== */
+
+.timetable-nav-group {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.btn-timetable-nav {
+  flex: 1;
+  padding: 10px;
+  background-color: #ffffff;
+  color: #6d665f;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+  text-align: center;
+}
+
+.btn-timetable-nav:hover:not(:disabled) {
+  background-color: #f5f1ec;
+  color: var(--primary-color);
+  border-color: #cdbfaf;
+}
+
+.btn-timetable-nav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
