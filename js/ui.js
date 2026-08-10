@@ -401,7 +401,7 @@ function renderTimetable(multiDayStatuses) {
       const status = dayData ? dayData[timeStr] : '×';
 
       if (status === '○') {
-        html += `<td class="slot-cell slot-available" data-date="${escapeHtml(dStr)}" data-time="${escapeHtml(timeStr)}">○</td>`;
+        html += `<td class="slot-cell slot-available" data-date="${escapeHtml(dStr)}" data-time="${escapeHtml(timeStr)}">◎</td>`;
       } else {
         html += '<td class="slot-cell slot-unavailable">×</td>';
       }
