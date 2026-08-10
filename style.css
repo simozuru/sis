@@ -231,6 +231,8 @@ border-radius: var(--radius-sm);
 
 font-size: 16px;
 
+font-weight: 600;
+
 color: var(--text-color);
 
 background-color: var(--input-bg);
@@ -245,6 +247,8 @@ appearance: auto;
 
 select option {
 font-size: 16px;
+
+font-weight: 600;
 
 font-family: inherit;
 
@@ -278,6 +282,8 @@ resize: vertical;
 min-height: 90px;
 
 line-height: 1.6;
+
+font-weight: 400;
 }
 
 .note {
@@ -1051,6 +1057,9 @@ width: 72px;
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
 }
 
 /* ==========================================================
