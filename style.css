@@ -717,6 +717,18 @@ font-weight: 600;
 letter-spacing: 0.3px;
 }
 
+.timetable-table th.day-sat {
+background-color: #dce8f2;
+
+color: #3d6b91;
+}
+
+.timetable-table th.day-sun {
+background-color: #f3dede;
+
+color: #a13f3f;
+}
+
 .time-col {
 background-color: #f2eee7;
 
