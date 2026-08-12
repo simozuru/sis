@@ -378,7 +378,9 @@ function renderTimetable(multiDayStatuses) {
   let html = '<table class="timetable-table"><thead><tr><th>時間</th>';
 
   dateKeys.forEach(dStr => {
-    html += `<th>${escapeHtml(formatDateHeaderLabel(dStr))}</th>`;
+    const dayIndex = getDayOfWeekIndex(dStr);
+    const dayClass = dayIndex === 6 ? ' class="day-sat"' : (dayIndex === 0 ? ' class="day-sun"' : '');
+    html += `<th${dayClass}>${escapeHtml(formatDateHeaderLabel(dStr))}</th>`;
   });
 
   html += '</tr></thead><tbody>';
@@ -401,7 +403,7 @@ function renderTimetable(multiDayStatuses) {
       const status = dayData ? dayData[timeStr] : '×';
 
       if (status === '○') {
-        html += `<td class="slot-cell slot-available" data-date="${escapeHtml(dStr)}" data-time="${escapeHtml(timeStr)}">○</td>`;
+        html += `<td class="slot-cell slot-available" data-date="${escapeHtml(dStr)}" data-time="${escapeHtml(timeStr)}">◎</td>`;
       } else {
         html += '<td class="slot-cell slot-unavailable">×</td>';
       }

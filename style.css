@@ -6,24 +6,24 @@ Design : Elegant Salon / Minimal Luxury
 ========================================================== */
 
 :root {
---primary-color: #3f3a36;
---accent-color: #9a8068;
---accent-dark: #806750;
+--primary-color: #33302c;
+--accent-color: #a6542a;
+--accent-dark: #8a4522;
 
 --bg-color: #f6f3ef;
 --card-bg: #fffdfb;
 --input-bg: #ffffff;
 
---text-color: #403c38;
---sub-text-color: #888078;
+--text-color: #2e2b28;
+--sub-text-color: #6d675f;
 
---border-color: #e5dfd8;
+--border-color: #ddd5ca;
 --border-light: #eee9e3;
 
---success-color: #62806b;
+--success-color: #4a6e53;
 --success-bg: #f2f7f3;
 
---danger-color: #a65b55;
+--danger-color: #a13f3f;
 --danger-bg: #fbf4f3;
 
 --shadow-soft: 0 10px 35px rgba(72, 61, 50, 0.07);
@@ -92,21 +92,21 @@ Header
 ========================================================== */
 
 h1 {
-font-size: 25px;
+font-size: 26px;
 text-align: center;
 
-margin-bottom: 7px;
+margin-bottom: 8px;
 
 color: var(--primary-color);
 
 letter-spacing: 2px;
-font-weight: 500;
+font-weight: 600;
 }
 
 .subtitle {
 text-align: center;
 
-font-size: 12px;
+font-size: 13px;
 
 color: var(--sub-text-color);
 
@@ -162,7 +162,7 @@ color: var(--accent-color);
 .tab-btn.active {
 color: var(--accent-color);
 
-background-color: rgba(154, 128, 104, 0.045);
+background-color: rgba(166, 84, 42, 0.05);
 
 border-bottom: none;
 
@@ -206,9 +206,9 @@ display: block;
 
 margin-bottom: 8px;
 
-font-weight: 500;
+font-weight: 600;
 
-font-size: 13px;
+font-size: 15px;
 
 color: var(--primary-color);
 
@@ -223,13 +223,15 @@ select,
 textarea {
 width: 100%;
 
-padding: 13px 14px;
+padding: 15px 16px;
 
 border: 1px solid var(--border-color);
 
 border-radius: var(--radius-sm);
 
-font-size: 15px;
+font-size: 16px;
+
+font-weight: 600;
 
 color: var(--text-color);
 
@@ -241,6 +243,18 @@ box-shadow 0.2s ease,
 background-color 0.2s ease;
 
 appearance: auto;
+}
+
+select option {
+font-size: 16px;
+
+font-weight: 600;
+
+font-family: inherit;
+
+color: var(--text-color);
+
+padding: 8px;
 }
 
 input:hover,
@@ -257,7 +271,7 @@ outline: none;
 border-color: var(--accent-color);
 
 box-shadow:
-0 0 0 3px rgba(154, 128, 104, 0.10);
+0 0 0 3px rgba(166, 84, 42, 0.12);
 
 background-color: #fffefd;
 }
@@ -268,10 +282,12 @@ resize: vertical;
 min-height: 90px;
 
 line-height: 1.6;
+
+font-weight: 400;
 }
 
 .note {
-font-size: 12px;
+font-size: 13px;
 
 color: var(--sub-text-color);
 
@@ -287,7 +303,7 @@ Main Submit Button
 .btn-submit {
 width: 100%;
 
-padding: 15px 18px;
+padding: 17px 18px;
 
 background-color: var(--accent-color);
 
@@ -297,9 +313,9 @@ border: 1px solid var(--accent-color);
 
 border-radius: var(--radius-sm);
 
-font-size: 15px;
+font-size: 16px;
 
-font-weight: 500;
+font-weight: 600;
 
 letter-spacing: 0.8px;
 
@@ -319,7 +335,7 @@ background-color: var(--accent-dark);
 
 border-color: var(--accent-dark);
 
-box-shadow: 0 5px 15px rgba(100, 78, 58, 0.16);
+box-shadow: 0 5px 15px rgba(138, 69, 34, 0.18);
 }
 
 .btn-submit:active {
@@ -593,7 +609,7 @@ box-shadow 0.2s ease;
 .btn-change:hover {
 background-color: var(--accent-dark);
 
-box-shadow: 0 4px 12px rgba(100, 78, 58, 0.13);
+box-shadow: 0 4px 12px rgba(138, 69, 34, 0.15);
 }
 
 .btn-cancel {
@@ -708,7 +724,7 @@ border-bottom: none;
 }
 
 .timetable-table th {
-background-color: #f2eee9;
+background-color: #ece5da;
 
 color: var(--primary-color);
 
@@ -717,8 +733,20 @@ font-weight: 600;
 letter-spacing: 0.3px;
 }
 
+.timetable-table th.day-sat {
+background-color: #dce8f2;
+
+color: #3d6b91;
+}
+
+.timetable-table th.day-sun {
+background-color: #f3dede;
+
+color: #a13f3f;
+}
+
 .time-col {
-background-color: #faf8f5;
+background-color: #f2eee7;
 
 font-weight: 500;
 
@@ -734,31 +762,37 @@ color 0.2s ease;
 }
 
 .slot-available {
-color: var(--success-color);
+color: var(--danger-color);
 
-font-weight: 600;
+font-weight: 700;
 
-background-color: var(--success-bg);
+font-size: 17px;
+
+background-color: #ffffff;
 
 cursor: pointer;
+
+box-shadow: inset 0 0 0 1px var(--border-light);
 }
 
 .slot-available:hover {
-background-color: #e1eee5;
+background-color: #fbf0ef;
 }
 
 .slot-unavailable {
-color: #b7b0aa;
+color: #a49b90;
 
-background-color: #faf9f7;
+background-color: #e7e1d8;
 
 cursor: not-allowed;
 }
 
 .slot-available.selected {
-background-color: var(--accent-color) !important;
+background-color: var(--danger-color) !important;
 
 color: #ffffff !important;
+
+box-shadow: none;
 }
 
 .shop-holiday-cell {
@@ -899,20 +933,16 @@ padding: 12px 8px 30px;
 .container {
 padding: 27px 18px 30px;
 
-```
 border-radius: 13px;
 
 box-shadow: 0 6px 24px rgba(72, 61, 50, 0.06);
-```
 
 }
 
 h1 {
 font-size: 22px;
 
-```
 letter-spacing: 1.5px;
-```
 
 }
 
@@ -927,9 +957,7 @@ margin-bottom: 25px;
 .tab-btn {
 font-size: 13px;
 
-```
 padding: 12px 5px;
-```
 
 }
 
@@ -945,9 +973,7 @@ select,
 textarea {
 font-size: 16px;
 
-```
 padding: 13px;
-```
 
 }
 
@@ -1031,6 +1057,9 @@ width: 72px;
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
 }
 
 /* ==========================================================
