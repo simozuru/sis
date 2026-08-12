@@ -46,18 +46,6 @@ function formatDateHeaderLabel(dateStr) {
 }
 
 /**
- * 2-2. 日付文字列から曜日番号を取得する（0:日, 1:月, ... 6:土）
- * タイムテーブルの曜日ごとの色分けなどで使う
- * @param {string} dateStr - 日付文字列 (yyyy-MM-dd または yyyy/MM/dd)
- * @returns {number} 曜日番号（無効な日付の場合は -1）
- */
-function getDayOfWeekIndex(dateStr) {
-  const cleanStr = String(dateStr || "").replace(/-/g, "/");
-  const d = new Date(cleanStr);
-  return isNaN(d.getTime()) ? -1 : d.getDay();
-}
-
-/**
  * 4. ローカル日付で yyyy-MM-dd を作成
  * @param {Date} dateObj - Dateオブジェクト
  * @returns {string} yyyy-MM-dd 形式
