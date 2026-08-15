@@ -91,6 +91,7 @@ function applySystemSettings(settings) {
   CONFIG.CANCEL_BUFFER_HOURS = settings.cancelBufferHours;
   CONFIG.CHANGE_BUFFER_HOURS = settings.changeBufferHours;
   CONFIG.PROVISIONAL_RESERVATION_ENABLED = !!settings.provisionalReservationEnabled;
+  CONFIG.PROVISIONAL_RESERVATION_TARGET = settings.provisionalReservationTarget || "ALL";
   CONFIG.SHOW_STAFF_SELECTOR = settings.showStaffSelector;
   CONFIG.ALLOW_NO_ASSIGN = settings.allowNoAssign;
   CONFIG.NO_ASSIGN_LABEL = settings.noAssignLabel;
@@ -535,9 +536,12 @@ async function handleReservationSubmit(e) {
   const isChange = isChangeMode();
   const confirmMsg = isChange
     ? '選択した新しい日時で予約を変更してもよろしいですか？'
-    : (CONFIG.PROVISIONAL_RESERVATION_ENABLED
-        ? 'この内容で仮予約を申請してもよろしいですか？'
-        : 'この内容で予約を確定してもよろしいですか？');
+    : (!CONFIG.PROVISIONAL_RESERVATION_ENABLED
+        ? 'この内容で予約を確定してもよろしいですか？'
+        : (CONFIG.PROVISIONAL_RESERVATION_TARGET === 'NEW_ONLY'
+            // 新規のお客様だけ仮予約になる設定の場合、送信前は仮予約かどうか確定できないため中立的な文言にする
+            ? 'この内容で予約を送信してもよろしいですか？'
+            : 'この内容で仮予約を申請してもよろしいですか？'));
 
   if (!confirm(confirmMsg)) return;
 
