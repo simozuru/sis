@@ -90,6 +90,7 @@ function applySystemSettings(settings) {
   CONFIG.DISPLAY_DAYS = settings.displayDays;
   CONFIG.CANCEL_BUFFER_HOURS = settings.cancelBufferHours;
   CONFIG.CHANGE_BUFFER_HOURS = settings.changeBufferHours;
+  CONFIG.PROVISIONAL_RESERVATION_ENABLED = !!settings.provisionalReservationEnabled;
   CONFIG.SHOW_STAFF_SELECTOR = settings.showStaffSelector;
   CONFIG.ALLOW_NO_ASSIGN = settings.allowNoAssign;
   CONFIG.NO_ASSIGN_LABEL = settings.noAssignLabel;
@@ -534,7 +535,9 @@ async function handleReservationSubmit(e) {
   const isChange = isChangeMode();
   const confirmMsg = isChange
     ? '選択した新しい日時で予約を変更してもよろしいですか？'
-    : 'この内容で予約を確定してもよろしいですか？';
+    : (CONFIG.PROVISIONAL_RESERVATION_ENABLED
+        ? 'この内容で仮予約を申請してもよろしいですか？'
+        : 'この内容で予約を確定してもよろしいですか？');
 
   if (!confirm(confirmMsg)) return;
 
@@ -576,7 +579,9 @@ async function handleReservationSubmit(e) {
       AppState.changeModeData = null;
       renderChangeBanner(null);
     } else {
-      const msg = data.resId ? `ご予約が完了しました！\n【ご予約ID: ${data.resId}】` : 'ご予約が完了しました！';
+      const isProvisional = !!data.isProvisional;
+      const baseMsg = isProvisional ? 'ご予約を申請しました！' : 'ご予約が完了しました！';
+      const msg = data.resId ? `${baseMsg}\n【ご予約ID: ${data.resId}】` : baseMsg;
       alert(msg);
     }
 
