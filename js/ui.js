@@ -27,6 +27,7 @@ const toStep3Btn = document.getElementById('to-step-3-btn');
 const backToStep1Btn = document.getElementById('back-to-step-1-btn');
 const backToStep2Btn = document.getElementById('back-to-step-2-btn');
 const goToCheckBtn = document.getElementById('go-to-check-btn');
+const homeBtn = document.getElementById('home-btn');
 const backFromCheckBtn = document.getElementById('back-from-check-btn');
 const checkBtn = document.getElementById('check-btn');
 const cancelChangeBtn = document.getElementById('cancel-change-btn');
@@ -92,6 +93,10 @@ function applySystemSettings(settings) {
   CONFIG.CHANGE_BUFFER_HOURS = settings.changeBufferHours;
   CONFIG.PROVISIONAL_RESERVATION_ENABLED = !!settings.provisionalReservationEnabled;
   CONFIG.PROVISIONAL_RESERVATION_TARGET = settings.provisionalReservationTarget || "ALL";
+  CONFIG.HOME_PAGE_URL = settings.homePageUrl || null;
+  if (homeBtn) {
+    homeBtn.style.display = CONFIG.HOME_PAGE_URL ? 'inline' : 'none';
+  }
   CONFIG.SHOW_STAFF_SELECTOR = settings.showStaffSelector;
   CONFIG.ALLOW_NO_ASSIGN = settings.allowNoAssign;
   CONFIG.NO_ASSIGN_LABEL = settings.noAssignLabel;
@@ -666,6 +671,14 @@ function initializeEvents() {
     goToCheckBtn.addEventListener('click', () => {
       applyCachedCustomerDataToForm();
       showSection(checkTabContainer);
+    });
+  }
+
+  if (homeBtn) {
+    homeBtn.addEventListener('click', () => {
+      if (CONFIG.HOME_PAGE_URL) {
+        window.location.href = CONFIG.HOME_PAGE_URL;
+      }
     });
   }
 

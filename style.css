@@ -877,9 +877,15 @@ Reservation Check
 ========================================================== */
 
 .check-link-area {
-text-align: right;
+display: flex;
+
+align-items: center;
 
 margin-bottom: 20px;
+}
+
+#go-to-check-btn {
+margin-left: auto;
 }
 
 .btn-link {

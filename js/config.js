@@ -7,7 +7,7 @@
 
 // システム設定
 const CONFIG = {
-  GAS_WEB_APP_URL: "https://script.google.com/macros/s/AKfycby1Dd2nH35qdIGAQGKo8yCr6fq82MH3BoejcYX9y3tdlv4xi7_oOrermxi80UvrXGta/exec",
+  GAS_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbxTXwzWa_az6-TUx2CFvejmJrMIdXzfR-qZoCVn0409n-lubPAE_rGgdg-79oslG5LU/exec",
   STORAGE_FIELDS: ["name", "name_kana", "tel", "email"],
   STORAGE_PREFIX: "sis_",
 
@@ -24,6 +24,7 @@ const CONFIG = {
   CHANGE_BUFFER_HOURS: 24,
   PROVISIONAL_RESERVATION_ENABLED: false,
   PROVISIONAL_RESERVATION_TARGET: "ALL",
+  HOME_PAGE_URL: null,
   MENU_MASTER: {},
   STAFF_LIST: []
 };
