@@ -30,6 +30,7 @@ const goToCheckBtn = document.getElementById('go-to-check-btn');
 const homeBtn = document.getElementById('home-btn');
 const shopLogo = document.getElementById('shop-logo');
 const pageBody = document.getElementById('page-body');
+const stepIndicator = document.getElementById('step-indicator');
 const mainTitle = document.getElementById('main-title');
 const mainSubtitle = document.getElementById('main-subtitle');
 const backFromCheckBtn = document.getElementById('back-from-check-btn');
@@ -356,6 +357,43 @@ function showSection(targetContainer) {
   });
 
   if (targetContainer) targetContainer.style.display = 'block';
+
+  updateStepIndicator(targetContainer);
+}
+
+/**
+ * 表示中のステップに応じて、上部の進捗表示（①②③）を更新する
+ * 予約確認・キャンセル画面（checkTabContainer）の時は、この進捗表示自体を非表示にする
+ * @param {HTMLElement} targetContainer - 今から表示するセクション
+ */
+function updateStepIndicator(targetContainer) {
+  if (!stepIndicator) return;
+
+  let currentStep = 0;
+  if (targetContainer === step1Container) currentStep = 1;
+  else if (targetContainer === step2Container) currentStep = 2;
+  else if (targetContainer === step3Container) currentStep = 3;
+
+  if (currentStep === 0) {
+    stepIndicator.style.display = 'none';
+    return;
+  }
+  stepIndicator.style.display = 'flex';
+
+  stepIndicator.querySelectorAll('.step-item').forEach(item => {
+    const stepNum = parseInt(item.getAttribute('data-step'), 10);
+    item.classList.remove('active', 'completed');
+    if (stepNum === currentStep) {
+      item.classList.add('active');
+    } else if (stepNum < currentStep) {
+      item.classList.add('completed');
+    }
+  });
+
+  stepIndicator.querySelectorAll('.step-line').forEach((line, idx) => {
+    const lineStepNum = idx + 1; // この線は data-step (idx+1) と (idx+2) の間にある
+    line.classList.toggle('completed', lineStepNum < currentStep);
+  });
 }
 
 /**

@@ -156,6 +156,103 @@ margin-bottom: 30px;
 letter-spacing: 0.8px;
 }
 
+/* ==========================================================
+Step Indicator
+========================================================== */
+
+.step-indicator {
+display: flex;
+align-items: flex-start;
+justify-content: center;
+
+margin-bottom: 32px;
+}
+
+.step-item {
+display: flex;
+flex-direction: column;
+align-items: center;
+
+flex: 0 0 auto;
+
+width: 96px;
+}
+
+.step-circle {
+width: 34px;
+height: 34px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+border-radius: 50%;
+
+background-color: #fff;
+
+border: 2px solid var(--border-color);
+
+color: var(--sub-text-color);
+
+font-size: 15px;
+font-weight: 700;
+
+transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+.step-label {
+margin-top: 8px;
+
+font-size: 12px;
+font-weight: 600;
+
+color: var(--sub-text-color);
+
+text-align: center;
+
+line-height: 1.3;
+
+transition: color 0.25s ease;
+}
+
+.step-line {
+flex: 1 1 auto;
+
+height: 2px;
+
+background-color: var(--border-color);
+
+margin-top: 17px;
+
+max-width: 60px;
+
+transition: background-color 0.25s ease;
+}
+
+/* 現在のステップ：塗りつぶし＋濃い色で強調 */
+.step-item.active .step-circle {
+background-color: var(--accent-color);
+
+border-color: var(--accent-color);
+
+color: #fff;
+}
+
+.step-item.active .step-label {
+color: var(--primary-color);
+}
+
+/* 完了済みのステップ：アクセントカラーの枠線で区別 */
+.step-item.completed .step-circle {
+border-color: var(--accent-color);
+
+color: var(--accent-color);
+}
+
+.step-line.completed {
+background-color: var(--accent-color);
+}
+
 .system-footer {
 text-align: center;
 
