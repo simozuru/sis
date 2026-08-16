@@ -91,6 +91,17 @@ box-shadow: var(--shadow-soft);
 Header
 ========================================================== */
 
+.shop-logo {
+display: block;
+
+max-width: 160px;
+max-height: 100px;
+
+margin: 0 auto 14px;
+
+object-fit: contain;
+}
+
 h1 {
 font-size: 26px;
 text-align: center;

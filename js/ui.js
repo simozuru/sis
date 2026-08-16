@@ -28,6 +28,9 @@ const backToStep1Btn = document.getElementById('back-to-step-1-btn');
 const backToStep2Btn = document.getElementById('back-to-step-2-btn');
 const goToCheckBtn = document.getElementById('go-to-check-btn');
 const homeBtn = document.getElementById('home-btn');
+const shopLogo = document.getElementById('shop-logo');
+const mainTitle = document.getElementById('main-title');
+const mainSubtitle = document.getElementById('main-subtitle');
 const backFromCheckBtn = document.getElementById('back-from-check-btn');
 const checkBtn = document.getElementById('check-btn');
 const cancelChangeBtn = document.getElementById('cancel-change-btn');
@@ -96,6 +99,17 @@ function applySystemSettings(settings) {
   CONFIG.HOME_PAGE_URL = settings.homePageUrl || null;
   if (homeBtn) {
     homeBtn.style.display = CONFIG.HOME_PAGE_URL ? 'inline' : 'none';
+  }
+
+  CONFIG.HEADER_BRANDING = settings.headerBranding || null;
+  const branding = CONFIG.HEADER_BRANDING;
+  if (branding && branding.logoUrl && shopLogo) {
+    shopLogo.src = branding.logoUrl;
+    shopLogo.style.display = 'block';
+  }
+  if (branding && branding.shopName && mainTitle) {
+    mainTitle.textContent = branding.shopName;
+    if (mainSubtitle) mainSubtitle.style.display = 'none';
   }
   CONFIG.SHOW_STAFF_SELECTOR = settings.showStaffSelector;
   CONFIG.ALLOW_NO_ASSIGN = settings.allowNoAssign;
