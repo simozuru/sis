@@ -1120,7 +1120,8 @@ align-items: center;
 margin-bottom: 20px;
 }
 
-#go-to-check-btn {
+#go-to-check-btn,
+#go-to-check-btn-step2 {
 margin-left: auto;
 }
 

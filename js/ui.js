@@ -182,7 +182,7 @@ function setupStaffSelector() {
   }
 
   // スタッフ選択欄を表示する設定の場合
-  if (staffGroup) staffGroup.style.display = 'block';
+  if (staffGroup) staffGroup.style.display = 'flex';
 
   if (CONFIG.ALLOW_NO_ASSIGN === true) {
     const defaultOpt = document.createElement('option');
