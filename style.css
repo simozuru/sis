@@ -149,9 +149,9 @@ font-weight: 700;
 }
 
 .copyright-line {
-font-size: 9px;
+font-size: 14px;
 
-color: #b8b2a8;
+color: #1a1a1a;
 
 margin-top: 6px;
 
@@ -159,13 +159,13 @@ letter-spacing: 0.2px;
 }
 
 .copyright-line a {
-color: #b8b2a8;
+color: #1a1a1a;
 
 text-decoration: underline;
 }
 
 .copyright-line a:hover {
-color: var(--sub-text-color);
+color: var(--accent-color);
 }
 
 /* ==========================================================
