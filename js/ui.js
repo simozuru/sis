@@ -27,6 +27,7 @@ const toStep3Btn = document.getElementById('to-step-3-btn');
 const backToStep1Btn = document.getElementById('back-to-step-1-btn');
 const backToStep2Btn = document.getElementById('back-to-step-2-btn');
 const goToCheckBtn = document.getElementById('go-to-check-btn');
+const goToCheckBtnStep2 = document.getElementById('go-to-check-btn-step2');
 const homeBtn = document.getElementById('home-btn');
 const shopLogo = document.getElementById('shop-logo');
 const pageBody = document.getElementById('page-body');
@@ -186,7 +187,7 @@ function setupStaffSelector() {
   if (CONFIG.ALLOW_NO_ASSIGN === true) {
     const defaultOpt = document.createElement('option');
     defaultOpt.value = CONFIG.NO_ASSIGN_LABEL;
-    defaultOpt.textContent = `${CONFIG.NO_ASSIGN_LABEL} (店舗全体の空き状況)`;
+    defaultOpt.textContent = CONFIG.NO_ASSIGN_LABEL;
     staffSelect.appendChild(defaultOpt);
   } else {
     const placeholderOpt = document.createElement('option');
@@ -734,11 +735,17 @@ function initializeEvents() {
     backToStep2Btn.addEventListener('click', () => showSection(step2Container));
   }
 
+  const goToCheckHandler = () => {
+    applyCachedCustomerDataToForm();
+    showSection(checkTabContainer);
+  };
+
   if (goToCheckBtn) {
-    goToCheckBtn.addEventListener('click', () => {
-      applyCachedCustomerDataToForm();
-      showSection(checkTabContainer);
-    });
+    goToCheckBtn.addEventListener('click', goToCheckHandler);
+  }
+
+  if (goToCheckBtnStep2) {
+    goToCheckBtnStep2.addEventListener('click', goToCheckHandler);
   }
 
   if (homeBtn) {
