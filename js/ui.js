@@ -110,6 +110,9 @@ function applySystemSettings(settings) {
   if (branding && branding.shopName && mainTitle) {
     mainTitle.textContent = branding.shopName;
     if (mainSubtitle) mainSubtitle.style.display = 'none';
+    if (branding.titleFontSize) mainTitle.style.fontSize = branding.titleFontSize;
+    if (branding.titleColor) mainTitle.style.color = branding.titleColor;
+    if (branding.titleFontFamily) mainTitle.style.fontFamily = branding.titleFontFamily;
   }
   CONFIG.SHOW_STAFF_SELECTOR = settings.showStaffSelector;
   CONFIG.ALLOW_NO_ASSIGN = settings.allowNoAssign;

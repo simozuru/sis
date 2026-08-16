@@ -129,9 +129,9 @@ letter-spacing: 0.8px;
 .system-footer {
 text-align: center;
 
-font-size: 11px;
+font-size: 15px;
 
-color: var(--sub-text-color);
+color: #1a1a1a;
 
 margin-top: 28px;
 
@@ -140,6 +140,12 @@ padding-top: 16px;
 border-top: 1px solid var(--border-light);
 
 letter-spacing: 0.5px;
+}
+
+.footer-highlight {
+color: var(--danger-color);
+
+font-weight: 700;
 }
 
 /* ==========================================================
