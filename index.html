@@ -56,31 +56,54 @@
         <button type="button" id="go-to-check-btn" class="btn-link">➔ すでに予約をお持ちの方（確認・キャンセル）はこちら</button>
       </div>
 
-      <div class="form-group">
-        <label for="name">お名前 (漢字) *</label>
-        <input type="text" id="name" required placeholder="山田 太郎">
+      <div class="form-group form-group-icon">
+        <div class="field-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5"/></svg>
+        </div>
+        <div class="field-content">
+          <label for="name">お名前 (漢字) *</label>
+          <input type="text" id="name" required placeholder="山田 太郎">
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="name_kana">お名前 (フリガナ) *</label>
-        <input type="text" id="name_kana" required placeholder="ヤマダ タロウ">
+      <div class="form-group form-group-icon">
+        <div class="field-icon field-icon-text" aria-hidden="true">あ</div>
+        <div class="field-content">
+          <label for="name_kana">お名前 (フリガナ) *</label>
+          <input type="text" id="name_kana" required placeholder="ヤマダ タロウ">
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="tel">電話番号 *</label>
-        <input type="tel" id="tel" required placeholder="09012345678" pattern="^[0-9\-]+$">
-        <div class="note">ハイフンはあってもなくても構いません</div>
+      <div class="form-group form-group-icon">
+        <div class="field-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3h3l2 5-2.5 1.6a11.5 11.5 0 0 0 5.4 5.4L16 12.5l5 2v3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3z"/></svg>
+        </div>
+        <div class="field-content">
+          <label for="tel">電話番号 *</label>
+          <input type="tel" id="tel" required placeholder="09012345678" pattern="^[0-9\-]+$">
+          <div class="note">ハイフンはあってもなくても構いません</div>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="email">メールアドレス *</label>
-        <input type="email" id="email" required placeholder="example@gmail.com">
-        <div class="note">予約の確認・自動キャンセル時に使用します</div>
+      <div class="form-group form-group-icon">
+        <div class="field-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/></svg>
+        </div>
+        <div class="field-content">
+          <label for="email">メールアドレス *</label>
+          <input type="email" id="email" required placeholder="example@gmail.com">
+          <div class="note">予約の確認・自動キャンセル時に使用します</div>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="memo">ご要望・備考</label>
-        <textarea id="memo" placeholder="ご相談や、ご用件などがあればご記入ください"></textarea>
+      <div class="form-group form-group-icon">
+        <div class="field-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4.2 1.2L4 16 16.5 3.5z"/></svg>
+        </div>
+        <div class="field-content">
+          <label for="memo">ご要望・備考</label>
+          <textarea id="memo" placeholder="ご相談や、ご用件などがあればご記入ください"></textarea>
+        </div>
       </div>
 
       <button type="button" id="to-step-2-btn" class="btn-submit">次に進む (予約条件の選択へ)</button>
@@ -177,12 +200,12 @@
 </div>
 
 <!-- スクリプトの読み込み末尾にバージョンを追加して強制読み込みを実施 -->
-<script src="./js/config.js?v=1.3.1"></script>
-<script src="./js/storage.js?v=1.3.1"></script>
-<script src="./js/api.js?v=1.3.1"></script>
-<script src="./js/utils.js?v=1.3.1"></script>
-<script src="./js/ui.js?v=1.3.1"></script>
-<script src="./js/booking.js?v=1.3.1"></script>
+<script src="./js/config.js?v=1.3.2"></script>
+<script src="./js/storage.js?v=1.3.2"></script>
+<script src="./js/api.js?v=1.3.2"></script>
+<script src="./js/utils.js?v=1.3.2"></script>
+<script src="./js/ui.js?v=1.3.2"></script>
+<script src="./js/booking.js?v=1.3.2"></script>
 
 </body>
 </html>

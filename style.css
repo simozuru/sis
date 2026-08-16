@@ -381,6 +381,46 @@ Form
 margin-bottom: 21px;
 }
 
+.form-group-icon {
+display: flex;
+align-items: flex-start;
+
+gap: 14px;
+}
+
+.field-icon {
+flex: 0 0 auto;
+
+width: 44px;
+height: 44px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+border-radius: var(--radius-sm);
+
+background-color: #f2eee7;
+
+color: var(--accent-color);
+}
+
+.field-icon svg {
+width: 22px;
+height: 22px;
+}
+
+.field-icon-text {
+font-size: 18px;
+font-weight: 700;
+}
+
+.form-group-icon .field-content {
+flex: 1 1 auto;
+
+min-width: 0;
+}
+
 label {
 display: block;
 
