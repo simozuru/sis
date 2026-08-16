@@ -148,6 +148,26 @@ color: var(--danger-color);
 font-weight: 700;
 }
 
+.copyright-line {
+font-size: 9px;
+
+color: #b8b2a8;
+
+margin-top: 6px;
+
+letter-spacing: 0.2px;
+}
+
+.copyright-line a {
+color: #b8b2a8;
+
+text-decoration: underline;
+}
+
+.copyright-line a:hover {
+color: var(--sub-text-color);
+}
+
 /* ==========================================================
 Tabs
 ========================================================== */
