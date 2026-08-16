@@ -68,6 +68,36 @@ justify-content: center;
 min-height: 100vh;
 }
 
+/* 背景写真が設定されている場合（JSで body に付与） */
+body.has-bg-image {
+background-size: cover;
+background-position: center;
+background-attachment: fixed;
+background-repeat: no-repeat;
+
+position: relative;
+}
+
+/* 写真の上に薄い色を重ねて、写真が主張しすぎないように和らげる */
+body.has-bg-image::before {
+content: '';
+position: fixed;
+inset: 0;
+
+background: rgba(246, 243, 239, 0.45);
+
+z-index: 0;
+pointer-events: none;
+}
+
+/* フォームのカードは不透明のまま、写真の上にくっきり浮かせる（文字の読みやすさを優先） */
+body.has-bg-image .container {
+position: relative;
+z-index: 1;
+
+box-shadow: 0 24px 60px rgba(40, 32, 24, 0.22);
+}
+
 /* ==========================================================
 Main Container
 ========================================================== */
