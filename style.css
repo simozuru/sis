@@ -6,19 +6,19 @@ Design : Elegant Salon / Minimal Luxury
 ========================================================== */
 
 :root {
---primary-color: #24374a;
---accent-color: #32495f;
---accent-dark: #253749;
+--primary-color: #3d2f24;
+--accent-color: #a97c53;
+--accent-dark: #8a6340;
 
---bg-color: #eaedee;
---card-bg: #fbfcfc;
+--bg-color: #f6f3ec;
+--card-bg: #fdfbf7;
 --input-bg: #ffffff;
 
---text-color: #212a32;
---sub-text-color: #6f7877;
+--text-color: #362a20;
+--sub-text-color: #a97112;
 
---border-color: #8b9594;
---border-light: #d3d8d6;
+--border-color: #d9a23e;
+--border-light: #f0d9a8;
 
 --success-color: #4a6e53;
 --success-bg: #f2f7f3;
@@ -26,8 +26,8 @@ Design : Elegant Salon / Minimal Luxury
 --danger-color: #a13f3f;
 --danger-bg: #fbf4f3;
 
---shadow-soft: 0 10px 35px rgba(40, 50, 55, 0.08);
---shadow-hover: 0 12px 32px rgba(40, 50, 55, 0.14);
+--shadow-soft: 0 10px 35px rgba(70, 55, 30, 0.08);
+--shadow-hover: 0 12px 32px rgba(70, 55, 30, 0.14);
 
 --radius-sm: 6px;
 --radius-md: 10px;
@@ -55,8 +55,8 @@ body {
 background:
 linear-gradient(
 180deg,
-#eef1f1 0%,
-#eaedee 100%
+#f8f6ee 0%,
+#f6f3ec 100%
 );
 
 color: var(--text-color);
@@ -82,13 +82,13 @@ position: relative;
 /* 写真の上にレトロ・アイボリーの色を重ねて、写真が主張しすぎないように和らげる */
 /* 写真の上に薄い色を重ねて、写真が主張しすぎないように和らげる */
 /* 写真の上にココナッツ・ベージュの色を重ねて、写真が主張しすぎないように和らげる */
-/* 写真の上にクラウディ・スカイの色を重ねて、写真が主張しすぎないように和らげる */
+/* 写真の上にココナッツ・ベージュの色を重ねて、写真が主張しすぎないように和らげる */
 body.has-bg-image::before {
 content: '';
 position: fixed;
 inset: 0;
 
-background: rgba(189, 198, 202, 0.5);
+background: rgba(234, 229, 218, 0.5);
 
 z-index: 0;
 pointer-events: none;
@@ -117,7 +117,7 @@ background: var(--card-bg);
 
 padding: 34px 32px 40px;
 
-border: 1px solid rgba(136, 146, 145, 0.4);
+border: 1px solid rgba(217, 162, 62, 0.4);
 
 border-radius: var(--radius-lg);
 
@@ -146,7 +146,7 @@ background: var(--card-bg);
 
 padding: 20px 28px;
 
-border: 1px solid rgba(136, 146, 145, 0.4);
+border: 1px solid rgba(217, 162, 62, 0.4);
 
 border-radius: var(--radius-lg);
 
@@ -372,7 +372,7 @@ padding: 18px 24px;
 
 background: var(--card-bg);
 
-border: 1px solid rgba(136, 146, 145, 0.4);
+border: 1px solid rgba(217, 162, 62, 0.4);
 
 border-radius: var(--radius-lg);
 
@@ -397,7 +397,7 @@ text-align: center;
 
 background: var(--card-bg);
 
-border: 1px solid rgba(136, 146, 145, 0.4);
+border: 1px solid rgba(217, 162, 62, 0.4);
 
 border-radius: var(--radius-lg);
 
@@ -565,7 +565,7 @@ color: var(--accent-color);
 .tab-btn.active {
 color: var(--accent-color);
 
-background-color: rgba(50, 73, 95, 0.06);
+background-color: rgba(169, 124, 83, 0.06);
 
 border-bottom: none;
 
@@ -623,7 +623,7 @@ justify-content: center;
 
 border-radius: var(--radius-sm);
 
-background-color: #dde3e2;
+background-color: #f3e2c0;
 
 color: var(--sub-text-color);
 }
@@ -730,7 +730,7 @@ outline: none;
 border-color: var(--accent-color);
 
 box-shadow:
-0 0 0 3px rgba(50, 73, 95, 0.14);
+0 0 0 3px rgba(169, 124, 83, 0.14);
 
 background-color: #fffefd;
 }
@@ -794,7 +794,7 @@ background-color: var(--accent-dark);
 
 border-color: var(--accent-dark);
 
-box-shadow: 0 5px 15px rgba(37, 55, 73, 0.20);
+box-shadow: 0 5px 15px rgba(138, 99, 64, 0.20);
 }
 
 .btn-submit:active {
@@ -1068,7 +1068,7 @@ box-shadow 0.2s ease;
 .btn-change:hover {
 background-color: var(--accent-dark);
 
-box-shadow: 0 4px 12px rgba(37, 55, 73, 0.17);
+box-shadow: 0 4px 12px rgba(138, 99, 64, 0.17);
 }
 
 .btn-cancel {
@@ -1183,7 +1183,7 @@ border-bottom: none;
 }
 
 .timetable-table th {
-background-color: #cdd6d5;
+background-color: #eeddb0;
 
 color: var(--primary-color);
 
@@ -1205,7 +1205,7 @@ color: #a13f3f;
 }
 
 .time-col {
-background-color: #dde3e2;
+background-color: #f3e2c0;
 
 font-weight: 500;
 
