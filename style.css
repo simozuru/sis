@@ -63,7 +63,8 @@ color: var(--text-color);
 padding: 28px 16px 50px;
 
 display: flex;
-justify-content: center;
+flex-direction: column;
+align-items: center;
 
 min-height: 100vh;
 }
@@ -118,25 +119,77 @@ box-shadow: var(--shadow-soft);
 }
 
 /* ==========================================================
+Page Header Bar（ロゴ・店舗名 / 連絡先情報）
+========================================================== */
+
+.page-header-bar {
+max-width: 620px;
+width: 100%;
+
+display: flex;
+align-items: flex-start;
+justify-content: space-between;
+
+gap: 20px;
+
+margin-bottom: 20px;
+
+flex-wrap: wrap;
+}
+
+.page-header-left {
+display: flex;
+flex-direction: column;
+
+flex: 1 1 auto;
+
+min-width: 0;
+}
+
+.page-header-right {
+flex: 0 0 auto;
+
+text-align: right;
+
+padding-top: 4px;
+}
+
+.header-contact-phone {
+font-size: 18px;
+font-weight: 700;
+
+color: var(--primary-color);
+
+margin-bottom: 4px;
+}
+
+.header-contact-hours,
+.header-contact-closed {
+font-size: 13px;
+
+color: var(--sub-text-color);
+}
+
+/* ==========================================================
 Header
 ========================================================== */
 
 .shop-logo {
 display: block;
 
-max-width: 160px;
-max-height: 100px;
+max-width: 150px;
+max-height: 80px;
 
-margin: 0 auto 14px;
+margin: 0 0 8px;
 
 object-fit: contain;
 }
 
 h1 {
-font-size: 26px;
-text-align: center;
+font-size: 24px;
+text-align: left;
 
-margin-bottom: 8px;
+margin-bottom: 4px;
 
 color: var(--primary-color);
 
@@ -145,13 +198,13 @@ font-weight: 600;
 }
 
 .subtitle {
-text-align: center;
+text-align: left;
 
 font-size: 13px;
 
 color: var(--sub-text-color);
 
-margin-bottom: 30px;
+margin-bottom: 0;
 
 letter-spacing: 0.8px;
 }
@@ -1180,6 +1233,18 @@ border-radius: 13px;
 
 box-shadow: 0 6px 24px rgba(72, 61, 50, 0.06);
 
+}
+
+.page-header-bar {
+flex-direction: column;
+
+align-items: flex-start;
+
+gap: 8px;
+}
+
+.page-header-right {
+text-align: left;
 }
 
 h1 {

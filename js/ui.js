@@ -32,6 +32,10 @@ const homeBtn = document.getElementById('home-btn');
 const shopLogo = document.getElementById('shop-logo');
 const pageBody = document.getElementById('page-body');
 const stepIndicator = document.getElementById('step-indicator');
+const headerRight = document.getElementById('page-header-right');
+const headerPhone = document.getElementById('header-contact-phone');
+const headerHours = document.getElementById('header-contact-hours');
+const headerClosed = document.getElementById('header-contact-closed');
 const mainTitle = document.getElementById('main-title');
 const mainSubtitle = document.getElementById('main-subtitle');
 const backFromCheckBtn = document.getElementById('back-from-check-btn');
@@ -112,6 +116,24 @@ function applySystemSettings(settings) {
     } else {
       pageBody.style.backgroundImage = '';
       pageBody.classList.remove('has-bg-image');
+    }
+  }
+
+  CONFIG.HEADER_CONTACT_INFO = settings.headerContactInfo || null;
+  const contactInfo = CONFIG.HEADER_CONTACT_INFO;
+  if (contactInfo && (contactInfo.phone || contactInfo.hours || contactInfo.closedDay)) {
+    if (headerRight) headerRight.style.display = 'block';
+    if (contactInfo.phone && headerPhone) {
+      headerPhone.textContent = contactInfo.phone;
+      headerPhone.style.display = 'block';
+    }
+    if (contactInfo.hours && headerHours) {
+      headerHours.textContent = contactInfo.hours;
+      headerHours.style.display = 'block';
+    }
+    if (contactInfo.closedDay && headerClosed) {
+      headerClosed.textContent = contactInfo.closedDay;
+      headerClosed.style.display = 'block';
     }
   }
 

@@ -27,6 +27,7 @@ const CONFIG = {
   HOME_PAGE_URL: null,
   HEADER_BRANDING: null,
   BACKGROUND_IMAGE_URL: null,
+  HEADER_CONTACT_INFO: null,
   MENU_MASTER: {},
   STAFF_LIST: []
 };
