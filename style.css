@@ -6,19 +6,19 @@ Design : Elegant Salon / Minimal Luxury
 ========================================================== */
 
 :root {
---primary-color: #33302c;
---accent-color: #a6542a;
---accent-dark: #8a4522;
+--primary-color: #34362f;
+--accent-color: #b08f3a;
+--accent-dark: #8f7228;
 
---bg-color: #f6f3ef;
---card-bg: #fffdfb;
+--bg-color: #f7f6ec;
+--card-bg: #fffefa;
 --input-bg: #ffffff;
 
---text-color: #2e2b28;
---sub-text-color: #6d675f;
+--text-color: #2f312c;
+--sub-text-color: #6f756e;
 
---border-color: #ddd5ca;
---border-light: #eee9e3;
+--border-color: #ddd6b8;
+--border-light: #ece9d6;
 
 --success-color: #4a6e53;
 --success-bg: #f2f7f3;
@@ -26,8 +26,8 @@ Design : Elegant Salon / Minimal Luxury
 --danger-color: #a13f3f;
 --danger-bg: #fbf4f3;
 
---shadow-soft: 0 10px 35px rgba(72, 61, 50, 0.07);
---shadow-hover: 0 12px 32px rgba(72, 61, 50, 0.12);
+--shadow-soft: 0 10px 35px rgba(60, 56, 40, 0.08);
+--shadow-hover: 0 12px 32px rgba(60, 56, 40, 0.14);
 
 --radius-sm: 6px;
 --radius-md: 10px;
@@ -55,8 +55,8 @@ body {
 background:
 linear-gradient(
 180deg,
-#f8f5f1 0%,
-#f6f3ef 100%
+#f9f8ef 0%,
+#f7f6ec 100%
 );
 
 color: var(--text-color);
@@ -562,7 +562,7 @@ color: var(--accent-color);
 .tab-btn.active {
 color: var(--accent-color);
 
-background-color: rgba(166, 84, 42, 0.05);
+background-color: rgba(176, 143, 58, 0.06);
 
 border-bottom: none;
 
@@ -620,7 +620,7 @@ justify-content: center;
 
 border-radius: var(--radius-sm);
 
-background-color: #f2eee7;
+background-color: #efe9d0;
 
 color: var(--accent-color);
 }
@@ -727,7 +727,7 @@ outline: none;
 border-color: var(--accent-color);
 
 box-shadow:
-0 0 0 3px rgba(166, 84, 42, 0.12);
+0 0 0 3px rgba(176, 143, 58, 0.14);
 
 background-color: #fffefd;
 }
@@ -791,7 +791,7 @@ background-color: var(--accent-dark);
 
 border-color: var(--accent-dark);
 
-box-shadow: 0 5px 15px rgba(138, 69, 34, 0.18);
+box-shadow: 0 5px 15px rgba(143, 114, 40, 0.20);
 }
 
 .btn-submit:active {
@@ -1065,7 +1065,7 @@ box-shadow 0.2s ease;
 .btn-change:hover {
 background-color: var(--accent-dark);
 
-box-shadow: 0 4px 12px rgba(138, 69, 34, 0.15);
+box-shadow: 0 4px 12px rgba(143, 114, 40, 0.17);
 }
 
 .btn-cancel {
@@ -1180,7 +1180,7 @@ border-bottom: none;
 }
 
 .timetable-table th {
-background-color: #ece5da;
+background-color: #e2ddc0;
 
 color: var(--primary-color);
 
@@ -1202,11 +1202,11 @@ color: #a13f3f;
 }
 
 .time-col {
-background-color: #f2eee7;
+background-color: #efe9d0;
 
 font-weight: 500;
 
-color: #6f6861;
+color: var(--sub-text-color);
 
 width: 70px;
 }
