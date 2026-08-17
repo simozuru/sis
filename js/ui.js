@@ -6,6 +6,17 @@
  */
 
 // -----------------------------------------------------------------
+// 0. 情報セクション用アイコンライブラリ
+// 今後アイコンを増やしたい時は、この辞書にキーとSVGを追加するだけでよい
+// -----------------------------------------------------------------
+const INFO_CARD_ICONS = {
+  store: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5V20a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9.5"/><path d="M3 4h18l1.2 5.2a2 2 0 0 1-2 2.4h-.4a2 2 0 0 1-2-1.7 2 2 0 0 1-2 1.7 2 2 0 0 1-2-1.7 2 2 0 0 1-2 1.7 2 2 0 0 1-2-1.7 2 2 0 0 1-2 1.7h-.4a2 2 0 0 1-2-2.4L3 4z"/></svg>',
+  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>',
+  map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-6-2.5V4.5L9 7l6-2.5 6 2.5v13l-6-2.5-6 2.5z"/><path d="M9 7v13"/><path d="M15 4.5v13"/></svg>',
+  staff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6.2 6.5-6.2s6.5 2.6 6.5 6.2"/><circle cx="17" cy="7" r="2.4"/><path d="M15.5 13.3c2.6.5 4.5 2.7 4.5 5.4"/></svg>'
+};
+
+// -----------------------------------------------------------------
 // 1. DOM要素（画面のパーツ）の取得
 // -----------------------------------------------------------------
 const form = document.getElementById('reservation-form');
@@ -36,6 +47,9 @@ const headerRight = document.getElementById('page-header-right');
 const headerPhone = document.getElementById('header-contact-phone');
 const headerPhoneText = document.getElementById('header-contact-phone-text');
 const headerInfoLine = document.getElementById('header-contact-info-line');
+const infoSection = document.getElementById('info-section');
+const infoSectionHeading = document.getElementById('info-section-heading');
+const infoCards = document.getElementById('info-cards');
 const mainTitle = document.getElementById('main-title');
 const mainSubtitle = document.getElementById('main-subtitle');
 const backFromCheckBtn = document.getElementById('back-from-check-btn');
@@ -147,6 +161,9 @@ function applySystemSettings(settings) {
     }
   }
 
+  CONFIG.INFO_SECTION = settings.infoSection || null;
+  renderInfoSection(CONFIG.INFO_SECTION);
+
   CONFIG.HEADER_BRANDING = settings.headerBranding || null;
   const branding = CONFIG.HEADER_BRANDING;
   if (branding && branding.logoUrl && shopLogo) {
@@ -168,6 +185,52 @@ function applySystemSettings(settings) {
   CONFIG.SHOW_MENU_MINUTES = settings.showMenuMinutes;
   CONFIG.SHOW_MENU_PRICE = settings.showMenuPrice;
   CONFIG.MENU_MASTER = settings.menuMaster || {};
+}
+
+/**
+ * トップ下部の情報セクション（ホームページ風の案内リンク集）を描画する
+ * @param {Object|null} infoConfig - CONFIG.INFO_SECTION（GASのINFO_SECTION設定）
+ */
+function renderInfoSection(infoConfig) {
+  if (!infoSection || !infoCards) return;
+
+  const items = (infoConfig && Array.isArray(infoConfig.items)) ? infoConfig.items.slice(0, 4) : [];
+
+  if (!infoConfig || !infoConfig.enabled || items.length === 0) {
+    infoSection.style.display = 'none';
+    return;
+  }
+
+  // 見出しの反映（未指定の項目はデフォルトのまま）
+  const heading = infoConfig.heading || {};
+  if (infoSectionHeading) {
+    infoSectionHeading.textContent = heading.text || 'Information';
+    if (heading.fontSize) infoSectionHeading.style.fontSize = heading.fontSize;
+    if (heading.color) infoSectionHeading.style.color = heading.color;
+    if (heading.fontFamily) infoSectionHeading.style.fontFamily = heading.fontFamily;
+  }
+
+  // カードの生成（同じタブで遷移する通常のリンクとして作る）
+  let html = '';
+  items.forEach(item => {
+    const iconSvg = INFO_CARD_ICONS[item.icon] || INFO_CARD_ICONS.store;
+    const titleStyle = [
+      item.titleFontSize ? `font-size:${escapeHtml(item.titleFontSize)}` : '',
+      item.titleColor ? `color:${escapeHtml(item.titleColor)}` : '',
+      item.titleFontFamily ? `font-family:${escapeHtml(item.titleFontFamily)}` : ''
+    ].filter(Boolean).join(';');
+
+    html += `
+      <a class="info-card" href="${escapeHtml(item.url || '#')}">
+        <div class="info-card-icon">${iconSvg}</div>
+        <div class="info-card-title"${titleStyle ? ` style="${titleStyle}"` : ''}>${escapeHtml(item.title || '')}</div>
+        <div class="info-card-description">${escapeHtml(item.description || '')}</div>
+      </a>
+    `;
+  });
+
+  infoCards.innerHTML = html;
+  infoSection.style.display = 'block';
 }
 
 // -----------------------------------------------------------------

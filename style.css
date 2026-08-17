@@ -351,6 +351,9 @@ background-color: var(--accent-color);
 }
 
 .system-footer {
+max-width: 620px;
+width: 100%;
+
 text-align: center;
 
 font-size: 15px;
@@ -364,6 +367,107 @@ padding-top: 16px;
 border-top: 1px solid var(--border-light);
 
 letter-spacing: 0.5px;
+}
+
+/* ==========================================================
+Info Section（トップ下部：ホームページ風の案内リンク集）
+========================================================== */
+
+.info-section {
+max-width: 620px;
+width: 100%;
+
+margin-top: 36px;
+
+text-align: center;
+}
+
+.info-section-heading {
+position: relative;
+
+font-size: 18px;
+font-weight: 700;
+
+letter-spacing: 2px;
+
+color: var(--primary-color);
+
+margin-bottom: 28px;
+
+padding-bottom: 16px;
+
+border-bottom: 1px solid var(--border-light);
+}
+
+.info-cards {
+display: flex;
+flex-wrap: wrap;
+
+justify-content: center;
+
+gap: 20px;
+}
+
+.info-card {
+display: flex;
+flex-direction: column;
+align-items: center;
+
+flex: 1 1 120px;
+max-width: 150px;
+
+text-decoration: none;
+
+padding: 4px;
+
+border-radius: var(--radius-sm);
+
+transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.info-card:hover {
+transform: translateY(-3px);
+
+opacity: 0.85;
+}
+
+.info-card-icon {
+width: 46px;
+height: 46px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+border-radius: 50%;
+
+border: 1.5px solid var(--accent-color);
+
+color: var(--accent-color);
+
+margin-bottom: 10px;
+}
+
+.info-card-icon svg {
+width: 22px;
+height: 22px;
+}
+
+.info-card-title {
+font-size: 14px;
+font-weight: 700;
+
+color: var(--primary-color);
+
+margin-bottom: 6px;
+}
+
+.info-card-description {
+font-size: 12px;
+
+color: var(--sub-text-color);
+
+line-height: 1.5;
 }
 
 .footer-highlight {
@@ -1285,6 +1389,15 @@ flex-direction: column;
 align-items: flex-start;
 
 gap: 8px;
+}
+
+.info-cards {
+gap: 24px 16px;
+}
+
+.info-card {
+flex: 1 1 40%;
+max-width: none;
 }
 
 .page-header-right {

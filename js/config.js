@@ -30,6 +30,7 @@ const CONFIG = {
   USE_DEFAULT_BACKGROUND: true,
   DEFAULT_BACKGROUND_PATH: './pict/shop.png',
   HEADER_CONTACT_INFO: null,
+  INFO_SECTION: null,
   MENU_MASTER: {},
   STAFF_LIST: [],
 
