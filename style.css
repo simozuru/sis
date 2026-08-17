@@ -17,8 +17,8 @@ Design : Elegant Salon / Minimal Luxury
 --text-color: #2f312c;
 --sub-text-color: #6f756e;
 
---border-color: #ddd6b8;
---border-light: #ece9d6;
+--border-color: #c9cec2;
+--border-light: #e2e5da;
 
 --success-color: #4a6e53;
 --success-bg: #f2f7f3;
@@ -79,13 +79,13 @@ background-repeat: no-repeat;
 position: relative;
 }
 
-/* 写真の上に薄い色を重ねて、写真が主張しすぎないように和らげる */
+/* 写真の上にレトロ・アイボリーの色を重ねて、写真が主張しすぎないように和らげる */
 body.has-bg-image::before {
 content: '';
 position: fixed;
 inset: 0;
 
-background: rgba(246, 243, 239, 0.45);
+background: rgba(238, 239, 211, 0.55);
 
 z-index: 0;
 pointer-events: none;
@@ -716,7 +716,7 @@ padding: 8px;
 input:hover,
 select:hover,
 textarea:hover {
-border-color: #cfc5bb;
+border-color: #b7bcae;
 }
 
 input:focus,
@@ -799,9 +799,9 @@ transform: translateY(1px);
 }
 
 .btn-submit:disabled {
-background-color: #d8d3ce;
+background-color: #d3d6cb;
 
-border-color: #d8d3ce;
+border-color: #d3d6cb;
 
 cursor: not-allowed;
 
@@ -815,9 +815,9 @@ Change Alert
 .change-alert-banner {
 display: none;
 
-background-color: #f7f2ec;
+background-color: #eef0e6;
 
-border: 1px solid #dfd2c4;
+border: 1px solid #c9cec2;
 
 padding: 17px;
 
@@ -1007,7 +1007,7 @@ line-height: 1.5;
 
 margin-top: 11px;
 
-border-top: 1px dashed #e4ded7;
+border-top: 1px dashed #d5d9cc;
 
 padding-top: 9px;
 }
@@ -1106,7 +1106,7 @@ background-color: #f0ede8;
 
 color: #a9a196;
 
-border-color: #d8d2c8;
+border-color: #d3d6cb;
 
 cursor: not-allowed;
 
@@ -1321,7 +1321,7 @@ background-color: #f5f1ec;
 
 color: var(--primary-color);
 
-border-color: #cdbfaf;
+border-color: #b7bcae;
 }
 
 .step-section .btn-submit {
@@ -1527,7 +1527,7 @@ width: 72px;
   width: 100%;
   padding: 8px;
   border-radius: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
 }
 
 .menu-checkbox-list {
@@ -1576,7 +1576,7 @@ width: 72px;
 .btn-timetable-nav:hover:not(:disabled) {
   background-color: #f5f1ec;
   color: var(--primary-color);
-  border-color: #cdbfaf;
+  border-color: #b7bcae;
 }
 
 .btn-timetable-nav:disabled {
