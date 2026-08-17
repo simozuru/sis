@@ -17,8 +17,8 @@ Design : Elegant Salon / Minimal Luxury
 --text-color: #2f312c;
 --sub-text-color: #6f756e;
 
---border-color: #c9cec2;
---border-light: #e2e5da;
+--border-color: #a9b09f;
+--border-light: #d5d9cb;
 
 --success-color: #4a6e53;
 --success-bg: #f2f7f3;
@@ -114,7 +114,7 @@ background: var(--card-bg);
 
 padding: 34px 32px 40px;
 
-border: 1px solid rgba(229, 223, 216, 0.8);
+border: 1px solid rgba(111, 117, 110, 0.35);
 
 border-radius: var(--radius-lg);
 
@@ -143,7 +143,7 @@ background: var(--card-bg);
 
 padding: 20px 28px;
 
-border: 1px solid rgba(229, 223, 216, 0.8);
+border: 1px solid rgba(111, 117, 110, 0.35);
 
 border-radius: var(--radius-lg);
 
@@ -369,7 +369,7 @@ padding: 18px 24px;
 
 background: var(--card-bg);
 
-border: 1px solid rgba(229, 223, 216, 0.8);
+border: 1px solid rgba(111, 117, 110, 0.35);
 
 border-radius: var(--radius-lg);
 
@@ -394,7 +394,7 @@ text-align: center;
 
 background: var(--card-bg);
 
-border: 1px solid rgba(229, 223, 216, 0.8);
+border: 1px solid rgba(111, 117, 110, 0.35);
 
 border-radius: var(--radius-lg);
 
@@ -460,9 +460,9 @@ justify-content: center;
 
 border-radius: 50%;
 
-border: 1.5px solid var(--accent-color);
+border: 1.5px solid var(--sub-text-color);
 
-color: var(--accent-color);
+color: var(--sub-text-color);
 
 margin-bottom: 10px;
 }
@@ -620,9 +620,9 @@ justify-content: center;
 
 border-radius: var(--radius-sm);
 
-background-color: #efe9d0;
+background-color: #dde1d4;
 
-color: var(--accent-color);
+color: var(--sub-text-color);
 }
 
 .field-icon svg {
