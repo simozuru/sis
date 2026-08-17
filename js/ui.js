@@ -109,9 +109,19 @@ function applySystemSettings(settings) {
   }
 
   CONFIG.BACKGROUND_IMAGE_URL = settings.backgroundImageUrl || null;
+  CONFIG.USE_DEFAULT_BACKGROUND = settings.useDefaultBackground !== false;
+
+  // 優先順位: ①個別に指定されたURL → ②同梱のデフォルト画像(pict/shop.png) → ③白背景
+  let effectiveBgUrl = null;
+  if (CONFIG.BACKGROUND_IMAGE_URL) {
+    effectiveBgUrl = CONFIG.BACKGROUND_IMAGE_URL;
+  } else if (CONFIG.USE_DEFAULT_BACKGROUND) {
+    effectiveBgUrl = CONFIG.DEFAULT_BACKGROUND_PATH;
+  }
+
   if (pageBody) {
-    if (CONFIG.BACKGROUND_IMAGE_URL) {
-      pageBody.style.backgroundImage = `url("${CONFIG.BACKGROUND_IMAGE_URL}")`;
+    if (effectiveBgUrl) {
+      pageBody.style.backgroundImage = `url("${effectiveBgUrl}")`;
       pageBody.classList.add('has-bg-image');
     } else {
       pageBody.style.backgroundImage = '';
