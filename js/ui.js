@@ -62,6 +62,9 @@ const step2Container = document.getElementById('step-2-container');
 const step3Container = document.getElementById('step-3-container');
 const checkTabContainer = document.getElementById('check-tab-container');
 const resultsArea = document.getElementById('check-results-area');
+const pageFragmentContainer = document.getElementById('page-fragment-container');
+const pageFragmentContent = document.getElementById('page-fragment-content');
+const backToReservationBtn = document.getElementById('back-to-reservation-btn');
 
 // タイムテーブル（時間表）表示パーツ
 const timetableContainer = document.getElementById('timetable-container');
@@ -210,7 +213,9 @@ function renderInfoSection(infoConfig) {
     if (heading.fontFamily) infoSectionHeading.style.fontFamily = heading.fontFamily;
   }
 
-  // カードの生成（同じタブで遷移する通常のリンクとして作る）
+  // カードの生成
+  // item.page が指定されていれば「予約フォーム部分だけ差し替える」内部ページカードにする
+  // item.url のみの場合は、今まで通り同じタブで遷移する通常のリンクにする
   let html = '';
   items.forEach(item => {
     const iconSvg = INFO_CARD_ICONS[item.icon] || INFO_CARD_ICONS.store;
@@ -220,8 +225,12 @@ function renderInfoSection(infoConfig) {
       item.titleFontFamily ? `font-family:${escapeHtml(item.titleFontFamily)}` : ''
     ].filter(Boolean).join(';');
 
+    const isInternalPage = !!item.page;
+    const hrefAttr = isInternalPage ? '#' : escapeHtml(item.url || '#');
+    const pageAttr = isInternalPage ? ` data-page="${escapeHtml(String(item.page))}"` : '';
+
     html += `
-      <a class="info-card" href="${escapeHtml(item.url || '#')}">
+      <a class="info-card" href="${hrefAttr}"${pageAttr}>
         <div class="info-card-icon">${iconSvg}</div>
         <div class="info-card-title"${titleStyle ? ` style="${titleStyle}"` : ''}>${escapeHtml(item.title || '')}</div>
         <div class="info-card-description">${escapeHtml(item.description || '')}</div>
@@ -230,7 +239,37 @@ function renderInfoSection(infoConfig) {
   });
 
   infoCards.innerHTML = html;
+
+  // 内部ページを参照しているカードだけ、通常の画面遷移を止めて断片読み込みに差し替える
+  infoCards.querySelectorAll('.info-card[data-page]').forEach(cardEl => {
+    cardEl.addEventListener('click', (e) => {
+      e.preventDefault();
+      loadPageFragment(cardEl.getAttribute('data-page'));
+    });
+  });
   infoSection.style.display = 'block';
+}
+
+/**
+ * 情報セクションのカードから、pages/page(N).html を読み込んで表示する
+ * ヘッダー・フッターはそのままに、予約フォーム部分だけをこの内容に差し替える
+ * @param {string|number} pageNumber - ページ番号（1〜4）
+ */
+async function loadPageFragment(pageNumber) {
+  if (!pageFragmentContainer || !pageFragmentContent) return;
+
+  pageFragmentContent.innerHTML = '<div class="no-data">読み込み中...</div>';
+  showSection(pageFragmentContainer);
+
+  try {
+    const response = await fetch(`./pages/page${pageNumber}.html`);
+    if (!response.ok) throw new Error(`page${pageNumber}.html が見つかりません`);
+    const html = await response.text();
+    pageFragmentContent.innerHTML = html;
+  } catch (error) {
+    console.error('ページ断片の読み込みエラー:', error);
+    pageFragmentContent.innerHTML = '<div class="no-data text-danger">ページの読み込みに失敗しました。時間をおいて再度お試しください。</div>';
+  }
 }
 
 // -----------------------------------------------------------------
@@ -447,7 +486,7 @@ let currentTimetableDayCount = 0;
  * @param {HTMLElement} targetContainer - 表示したいセクション
  */
 function showSection(targetContainer) {
-  const sections = [step1Container, step2Container, step3Container, checkTabContainer];
+  const sections = [step1Container, step2Container, step3Container, checkTabContainer, pageFragmentContainer];
   sections.forEach(sec => {
     if (sec) sec.style.display = 'none';
   });
@@ -849,6 +888,10 @@ function initializeEvents() {
         window.location.href = CONFIG.HOME_PAGE_URL;
       }
     });
+  }
+
+  if (backToReservationBtn) {
+    backToReservationBtn.addEventListener('click', () => showSection(step1Container));
   }
 
   if (backFromCheckBtn) {
