@@ -92,7 +92,10 @@ pointer-events: none;
 }
 
 /* フォームのカードは不透明のまま、写真の上にくっきり浮かせる（文字の読みやすさを優先） */
-body.has-bg-image .container {
+body.has-bg-image .container,
+body.has-bg-image .page-header-bar,
+body.has-bg-image .info-section,
+body.has-bg-image .system-footer {
 position: relative;
 z-index: 1;
 
