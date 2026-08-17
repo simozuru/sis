@@ -31,7 +31,12 @@ const CONFIG = {
   DEFAULT_BACKGROUND_PATH: './pict/shop.png',
   HEADER_CONTACT_INFO: null,
   MENU_MASTER: {},
-  STAFF_LIST: []
+  STAFF_LIST: [],
+
+  // フッターのコピーライト表記内のリンク（文言・リンク先）
+  // GAS側の設定は経由せず、ここを直接書き換えて変更する
+  COPYRIGHT_LINK_TEXT: "Works",
+  COPYRIGHT_LINK_URL: "https://simozuru.github.io/sis/#"
 };
 
 // 画面全体で共有する状態

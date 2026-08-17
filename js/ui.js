@@ -34,8 +34,8 @@ const pageBody = document.getElementById('page-body');
 const stepIndicator = document.getElementById('step-indicator');
 const headerRight = document.getElementById('page-header-right');
 const headerPhone = document.getElementById('header-contact-phone');
-const headerHours = document.getElementById('header-contact-hours');
-const headerClosed = document.getElementById('header-contact-closed');
+const headerPhoneText = document.getElementById('header-contact-phone-text');
+const headerInfoLine = document.getElementById('header-contact-info-line');
 const mainTitle = document.getElementById('main-title');
 const mainSubtitle = document.getElementById('main-subtitle');
 const backFromCheckBtn = document.getElementById('back-from-check-btn');
@@ -133,17 +133,17 @@ function applySystemSettings(settings) {
   const contactInfo = CONFIG.HEADER_CONTACT_INFO;
   if (contactInfo && (contactInfo.phone || contactInfo.hours || contactInfo.closedDay)) {
     if (headerRight) headerRight.style.display = 'block';
-    if (contactInfo.phone && headerPhone) {
-      headerPhone.textContent = contactInfo.phone;
-      headerPhone.style.display = 'block';
+
+    if (contactInfo.phone && headerPhone && headerPhoneText) {
+      headerPhoneText.textContent = contactInfo.phone;
+      headerPhone.style.display = 'flex';
     }
-    if (contactInfo.hours && headerHours) {
-      headerHours.textContent = contactInfo.hours;
-      headerHours.style.display = 'block';
-    }
-    if (contactInfo.closedDay && headerClosed) {
-      headerClosed.textContent = contactInfo.closedDay;
-      headerClosed.style.display = 'block';
+
+    // 受付時間・定休日は1行にまとめて表示（両方あれば全角スペース2つで区切る）
+    const infoParts = [contactInfo.hours, contactInfo.closedDay].filter(Boolean);
+    if (infoParts.length > 0 && headerInfoLine) {
+      headerInfoLine.textContent = infoParts.join('　　');
+      headerInfoLine.style.display = 'block';
     }
   }
 
@@ -835,4 +835,11 @@ window.addEventListener('DOMContentLoaded', () => {
   applyCachedCustomerDataToForm();
   showSection(step1Container);
   initializeSystemUI();
+
+  // フッターのコピーライトリンク（config.jsの値をそのまま反映。GASの設定取得を待たない）
+  const copyrightLink = document.getElementById('copyright-link');
+  if (copyrightLink) {
+    copyrightLink.textContent = CONFIG.COPYRIGHT_LINK_TEXT;
+    copyrightLink.href = CONFIG.COPYRIGHT_LINK_URL;
+  }
 });
