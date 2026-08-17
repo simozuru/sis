@@ -6,19 +6,19 @@ Design : Elegant Salon / Minimal Luxury
 ========================================================== */
 
 :root {
---primary-color: #3d2f24;
---accent-color: #a97c53;
---accent-dark: #8a6340;
+--primary-color: #1f3540;
+--accent-color: #3f8298;
+--accent-dark: #2f6577;
 
---bg-color: #f6f3ec;
---card-bg: #fdfbf7;
+--bg-color: #fdf8e5;
+--card-bg: #fffdf6;
 --input-bg: #ffffff;
 
---text-color: #362a20;
---sub-text-color: #a97112;
+--text-color: #1c2e37;
+--sub-text-color: #6e8f45;
 
---border-color: #d9a23e;
---border-light: #f0d9a8;
+--border-color: #96bb56;
+--border-light: #d9e8bd;
 
 --success-color: #4a6e53;
 --success-bg: #f2f7f3;
@@ -26,8 +26,8 @@ Design : Elegant Salon / Minimal Luxury
 --danger-color: #a13f3f;
 --danger-bg: #fbf4f3;
 
---shadow-soft: 0 10px 35px rgba(70, 55, 30, 0.08);
---shadow-hover: 0 12px 32px rgba(70, 55, 30, 0.14);
+--shadow-soft: 0 10px 35px rgba(60, 90, 40, 0.08);
+--shadow-hover: 0 12px 32px rgba(60, 90, 40, 0.14);
 
 --radius-sm: 6px;
 --radius-md: 10px;
@@ -55,8 +55,8 @@ body {
 background:
 linear-gradient(
 180deg,
-#f8f6ee 0%,
-#f6f3ec 100%
+#fef9e6 0%,
+#fdf8e5 100%
 );
 
 color: var(--text-color);
@@ -116,7 +116,7 @@ background: var(--card-bg);
 
 padding: 34px 32px 40px;
 
-border: 1px solid rgba(217, 162, 62, 0.4);
+border: 1px solid rgba(176, 211, 113, 0.45);
 
 border-radius: var(--radius-lg);
 
@@ -145,7 +145,7 @@ background: var(--card-bg);
 
 padding: 20px 28px;
 
-border: 1px solid rgba(217, 162, 62, 0.4);
+border: 1px solid rgba(176, 211, 113, 0.45);
 
 border-radius: var(--radius-lg);
 
@@ -371,7 +371,7 @@ padding: 18px 24px;
 
 background: var(--card-bg);
 
-border: 1px solid rgba(217, 162, 62, 0.4);
+border: 1px solid rgba(176, 211, 113, 0.45);
 
 border-radius: var(--radius-lg);
 
@@ -396,7 +396,7 @@ text-align: center;
 
 background: var(--card-bg);
 
-border: 1px solid rgba(217, 162, 62, 0.4);
+border: 1px solid rgba(176, 211, 113, 0.45);
 
 border-radius: var(--radius-lg);
 
@@ -564,7 +564,7 @@ color: var(--accent-color);
 .tab-btn.active {
 color: var(--accent-color);
 
-background-color: rgba(169, 124, 83, 0.06);
+background-color: rgba(63, 130, 152, 0.06);
 
 border-bottom: none;
 
@@ -622,7 +622,7 @@ justify-content: center;
 
 border-radius: var(--radius-sm);
 
-background-color: #f3e2c0;
+background-color: #e8f0d0;
 
 color: var(--sub-text-color);
 }
@@ -729,7 +729,7 @@ outline: none;
 border-color: var(--accent-color);
 
 box-shadow:
-0 0 0 3px rgba(169, 124, 83, 0.14);
+0 0 0 3px rgba(63, 130, 152, 0.14);
 
 background-color: #fffefd;
 }
@@ -793,7 +793,7 @@ background-color: var(--accent-dark);
 
 border-color: var(--accent-dark);
 
-box-shadow: 0 5px 15px rgba(138, 99, 64, 0.20);
+box-shadow: 0 5px 15px rgba(47, 101, 119, 0.20);
 }
 
 .btn-submit:active {
@@ -1067,7 +1067,7 @@ box-shadow 0.2s ease;
 .btn-change:hover {
 background-color: var(--accent-dark);
 
-box-shadow: 0 4px 12px rgba(138, 99, 64, 0.17);
+box-shadow: 0 4px 12px rgba(47, 101, 119, 0.17);
 }
 
 .btn-cancel {
@@ -1182,7 +1182,7 @@ border-bottom: none;
 }
 
 .timetable-table th {
-background-color: #eeddb0;
+background-color: #d8ecec;
 
 color: var(--primary-color);
 
@@ -1204,7 +1204,7 @@ color: #a13f3f;
 }
 
 .time-col {
-background-color: #f3e2c0;
+background-color: #e8f0d0;
 
 font-weight: 500;
 
