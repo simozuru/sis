@@ -28,7 +28,7 @@ const CONFIG = {
   HEADER_BRANDING: null,
   BACKGROUND_IMAGE_URL: null,
   USE_DEFAULT_BACKGROUND: true,
-  DEFAULT_BACKGROUND_PATH: './pict/shop.png',
+  DEFAULT_BACKGROUND_PATH: './pict/shop.jpg',
   HEADER_CONTACT_INFO: null,
   INFO_SECTION: null,
   MENU_MASTER: {},

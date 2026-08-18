@@ -128,7 +128,7 @@ function applySystemSettings(settings) {
   CONFIG.BACKGROUND_IMAGE_URL = settings.backgroundImageUrl || null;
   CONFIG.USE_DEFAULT_BACKGROUND = settings.useDefaultBackground !== false;
 
-  // 優先順位: ①個別に指定されたURL → ②同梱のデフォルト画像(pict/shop.png) → ③白背景
+  // 優先順位: ①個別に指定されたURL → ②同梱のデフォルト画像(pict/shop.jpg) → ③白背景
   let effectiveBgUrl = null;
   if (CONFIG.BACKGROUND_IMAGE_URL) {
     effectiveBgUrl = CONFIG.BACKGROUND_IMAGE_URL;
