@@ -26,11 +26,12 @@ async function fetchSystemSettingsApi() {
  * @param {string} staff - スタッフ名
  * @param {string} menu - メニュー名
  * @param {string} [resId] - 変更時の除外予約ID
+ * @param {string} [tel] - 電話番号（お客様専用の施術時間を反映するため）
  * @returns {Promise<Object>} 空き状況データ
  */
-async function fetchTimetableDataApi(date, staff, menu, resId = "") {
+async function fetchTimetableDataApi(date, staff, menu, resId = "", tel = "") {
   try {
-    const url = `${CONFIG.GAS_WEB_APP_URL}?method=getSlotStatuses&date=${encodeURIComponent(date)}&staff=${encodeURIComponent(staff)}&menu=${encodeURIComponent(menu)}&resId=${encodeURIComponent(resId)}`;
+    const url = `${CONFIG.GAS_WEB_APP_URL}?method=getSlotStatuses&date=${encodeURIComponent(date)}&staff=${encodeURIComponent(staff)}&menu=${encodeURIComponent(menu)}&resId=${encodeURIComponent(resId)}&tel=${encodeURIComponent(tel)}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error("タイムテーブルの取得に失敗しました");
     return await response.json();

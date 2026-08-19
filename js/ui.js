@@ -31,6 +31,10 @@ const staffSelect = document.getElementById('staff');
 const menuContainer = document.getElementById('menu-container');
 const menuMultiSelectNote = document.getElementById('menu-multi-select-note');
 const submitBtn = document.getElementById('submit-btn');
+const customConfirmOverlay = document.getElementById('custom-confirm-overlay');
+const customConfirmMessage = document.getElementById('custom-confirm-message');
+const customConfirmOkBtn = document.getElementById('custom-confirm-ok-btn');
+const customConfirmCancelBtn = document.getElementById('custom-confirm-cancel-btn');
 
 // ナビゲーションおよび機能ボタン
 const toStep2Btn = document.getElementById('to-step-2-btn');
@@ -120,6 +124,7 @@ function applySystemSettings(settings) {
   CONFIG.CHANGE_BUFFER_HOURS = settings.changeBufferHours;
   CONFIG.PROVISIONAL_RESERVATION_ENABLED = !!settings.provisionalReservationEnabled;
   CONFIG.PROVISIONAL_RESERVATION_TARGET = settings.provisionalReservationTarget || "ALL";
+  CONFIG.PROVISIONAL_RESERVATION_TARGET_MENUS = settings.provisionalReservationTargetMenus || [];
   CONFIG.HOME_PAGE_URL = settings.homePageUrl || null;
   if (homeBtn) {
     homeBtn.style.display = CONFIG.HOME_PAGE_URL ? 'inline' : 'none';
@@ -669,7 +674,8 @@ async function updateAvailableTimes(dateOverride) {
 
   try {
     const resId = isChangeMode() ? (AppState.changeModeData.resId || '') : '';
-    const multiDayStatuses = await fetchTimetableDataApi(dateVal, staffVal, menuVal, resId);
+    const telVal = document.getElementById('tel') ? document.getElementById('tel').value : '';
+    const multiDayStatuses = await fetchTimetableDataApi(dateVal, staffVal, menuVal, resId, telVal);
 
     if (multiDayStatuses && multiDayStatuses.success === false) {
       console.error('タイムテーブル取得失敗:', multiDayStatuses.message);
@@ -737,20 +743,58 @@ async function goToPrevTimetablePage() {
  * 予約の新規登録・変更を送信する
  * @param {Event} e - submitイベント
  */
+/**
+ * ブラウザ標準のconfirm()の代わりに、装飾できる確認ポップアップを表示する
+ * @param {string} htmlMessage - 表示するメッセージ（HTMLタグの装飾も使える）
+ * @returns {Promise<boolean>} 「はい」が押されたら true、「キャンセル」なら false
+ */
+function showCustomConfirm(htmlMessage) {
+  return new Promise(resolve => {
+    if (!customConfirmOverlay || !customConfirmMessage || !customConfirmOkBtn || !customConfirmCancelBtn) {
+      resolve(confirm(htmlMessage.replace(/<[^>]+>/g, ''))); // ポップアップ要素がない場合の保険
+      return;
+    }
+
+    customConfirmMessage.innerHTML = htmlMessage;
+    customConfirmOverlay.style.display = 'flex';
+
+    const cleanup = (result) => {
+      customConfirmOverlay.style.display = 'none';
+      customConfirmOkBtn.removeEventListener('click', onOk);
+      customConfirmCancelBtn.removeEventListener('click', onCancel);
+      resolve(result);
+    };
+    const onOk = () => cleanup(true);
+    const onCancel = () => cleanup(false);
+
+    customConfirmOkBtn.addEventListener('click', onOk);
+    customConfirmCancelBtn.addEventListener('click', onCancel);
+  });
+}
+
 async function handleReservationSubmit(e) {
   e.preventDefault();
 
   const isChange = isChangeMode();
+  const selectedMenuValForConfirm = getSelectedMenusValue();
+  const selectedMenuListForConfirm = String(selectedMenuValForConfirm || '').split(',').map(m => m.trim());
+  const isMenuOnlyMatch = CONFIG.PROVISIONAL_RESERVATION_TARGET === 'MENU_ONLY' &&
+    selectedMenuListForConfirm.some(m => (CONFIG.PROVISIONAL_RESERVATION_TARGET_MENUS || []).includes(m));
+
   const confirmMsg = isChange
     ? '選択した新しい日時で予約を変更してもよろしいですか？'
     : (!CONFIG.PROVISIONAL_RESERVATION_ENABLED
         ? 'この内容で予約を確定してもよろしいですか？'
-        : (CONFIG.PROVISIONAL_RESERVATION_TARGET === 'NEW_ONLY'
-            // 新規のお客様だけ仮予約になる設定の場合、送信前は仮予約かどうか確定できないため中立的な文言にする
-            ? 'この内容で予約を送信してもよろしいですか？'
-            : 'この内容で仮予約を申請してもよろしいですか？'));
+        : (CONFIG.PROVISIONAL_RESERVATION_TARGET === 'MENU_ONLY'
+            // メニュー限定の場合、選択されたメニューで正確に判定できる
+            ? (isMenuOnlyMatch ? 'この内容で<span class="custom-confirm-highlight">仮予約</span>を申請してもよろしいですか？' : 'この内容で予約を確定してもよろしいですか？')
+            : (CONFIG.PROVISIONAL_RESERVATION_TARGET === 'NEW_ONLY'
+                // 新規のお客様だけ仮予約になる設定の場合、送信前は仮予約かどうか確定できないため中立的な文言にする
+                ? 'この内容で予約を送信してもよろしいですか？'
+                : 'この内容で<span class="custom-confirm-highlight">仮予約</span>を申請してもよろしいですか？')));
 
-  if (!confirm(confirmMsg)) return;
+  const confirmed = await showCustomConfirm(confirmMsg);
+  if (!confirmed) return;
 
   submitBtn.disabled = true;
   submitBtn.textContent = isChange ? '予約を変更中...' : '予約を登録中...';

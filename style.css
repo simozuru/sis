@@ -1586,3 +1586,95 @@ width: 72px;
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ==========================================================
+Custom Confirm Modal（装飾できる確認ポップアップ）
+========================================================== */
+
+.custom-confirm-overlay {
+position: fixed;
+inset: 0;
+
+background: rgba(30, 25, 15, 0.45);
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+z-index: 100;
+
+padding: 20px;
+}
+
+.custom-confirm-box {
+max-width: 420px;
+width: 100%;
+
+background: var(--card-bg);
+
+padding: 28px 24px;
+
+border-radius: var(--radius-lg);
+
+box-shadow: var(--shadow-hover);
+}
+
+.custom-confirm-message {
+font-size: 16px;
+line-height: 1.7;
+
+color: var(--text-color);
+
+margin-bottom: 24px;
+
+text-align: center;
+}
+
+.custom-confirm-highlight {
+color: var(--danger-color);
+
+font-weight: 700;
+}
+
+.custom-confirm-buttons {
+display: flex;
+
+gap: 12px;
+}
+
+.btn-confirm-cancel,
+.btn-confirm-ok {
+flex: 1 1 0;
+
+padding: 12px;
+
+border-radius: var(--radius-sm);
+
+font-size: 15px;
+font-weight: 600;
+
+cursor: pointer;
+
+transition: opacity 0.2s ease;
+}
+
+.btn-confirm-cancel {
+background: #fff;
+
+border: 1px solid var(--border-color);
+
+color: var(--sub-text-color);
+}
+
+.btn-confirm-ok {
+background-color: var(--accent-color);
+
+border: 1px solid var(--accent-color);
+
+color: #ffffff;
+}
+
+.btn-confirm-cancel:hover,
+.btn-confirm-ok:hover {
+opacity: 0.85;
+}
