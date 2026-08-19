@@ -648,7 +648,14 @@ function bindTimetableCellEvents() {
 
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.textContent = isChangeMode() ? '上記の内容で変更を確定する' : '上記の内容で予約を確定する';
+        if (isChangeMode()) {
+          submitBtn.textContent = '上記の内容で変更を確定する';
+        } else {
+          const mode = getProvisionalWordingMode();
+          submitBtn.textContent = mode === 'PROVISIONAL'
+            ? '上記の内容で仮予約を申請する'
+            : (mode === 'NEUTRAL' ? '上記の内容で予約を送信する' : '上記の内容で予約を確定する');
+        }
       }
     });
   });
@@ -744,6 +751,30 @@ async function goToPrevTimetablePage() {
  * @param {Event} e - submitイベント
  */
 /**
+ * 仮予約制度の設定と、今選ばれているメニューから、
+ * お客様向けの文言をどのパターンにすべきか判定する
+ * @returns {string} "PROVISIONAL"（仮予約の文言）/ "NEUTRAL"（中立的な文言）/ "NORMAL"（通常予約の文言）
+ */
+function getProvisionalWordingMode() {
+  if (!CONFIG.PROVISIONAL_RESERVATION_ENABLED) return 'NORMAL';
+
+  if (CONFIG.PROVISIONAL_RESERVATION_TARGET === 'MENU_ONLY') {
+    // メニュー限定の場合、選択されたメニューで正確に判定できる
+    const selectedMenuVal = getSelectedMenusValue();
+    const selectedMenuList = String(selectedMenuVal || '').split(',').map(m => m.trim());
+    const isMatch = selectedMenuList.some(m => (CONFIG.PROVISIONAL_RESERVATION_TARGET_MENUS || []).includes(m));
+    return isMatch ? 'PROVISIONAL' : 'NORMAL';
+  }
+
+  if (CONFIG.PROVISIONAL_RESERVATION_TARGET === 'NEW_ONLY') {
+    // 新規のお客様だけ仮予約になる設定の場合、この時点では仮予約かどうか確定できないため中立的な文言にする
+    return 'NEUTRAL';
+  }
+
+  return 'PROVISIONAL'; // "ALL"
+}
+
+/**
  * ブラウザ標準のconfirm()の代わりに、装飾できる確認ポップアップを表示する
  * @param {string} htmlMessage - 表示するメッセージ（HTMLタグの装飾も使える）
  * @returns {Promise<boolean>} 「はい」が押されたら true、「キャンセル」なら false
@@ -776,22 +807,15 @@ async function handleReservationSubmit(e) {
   e.preventDefault();
 
   const isChange = isChangeMode();
-  const selectedMenuValForConfirm = getSelectedMenusValue();
-  const selectedMenuListForConfirm = String(selectedMenuValForConfirm || '').split(',').map(m => m.trim());
-  const isMenuOnlyMatch = CONFIG.PROVISIONAL_RESERVATION_TARGET === 'MENU_ONLY' &&
-    selectedMenuListForConfirm.some(m => (CONFIG.PROVISIONAL_RESERVATION_TARGET_MENUS || []).includes(m));
 
   const confirmMsg = isChange
     ? '選択した新しい日時で予約を変更してもよろしいですか？'
-    : (!CONFIG.PROVISIONAL_RESERVATION_ENABLED
-        ? 'この内容で予約を確定してもよろしいですか？'
-        : (CONFIG.PROVISIONAL_RESERVATION_TARGET === 'MENU_ONLY'
-            // メニュー限定の場合、選択されたメニューで正確に判定できる
-            ? (isMenuOnlyMatch ? 'この内容で<span class="custom-confirm-highlight">仮予約</span>を申請してもよろしいですか？' : 'この内容で予約を確定してもよろしいですか？')
-            : (CONFIG.PROVISIONAL_RESERVATION_TARGET === 'NEW_ONLY'
-                // 新規のお客様だけ仮予約になる設定の場合、送信前は仮予約かどうか確定できないため中立的な文言にする
-                ? 'この内容で予約を送信してもよろしいですか？'
-                : 'この内容で<span class="custom-confirm-highlight">仮予約</span>を申請してもよろしいですか？')));
+    : (() => {
+        const mode = getProvisionalWordingMode();
+        if (mode === 'PROVISIONAL') return 'この内容で<span class="custom-confirm-highlight">仮予約</span>を申請してもよろしいですか？';
+        if (mode === 'NEUTRAL') return 'この内容で予約を送信してもよろしいですか？';
+        return 'この内容で予約を確定してもよろしいですか？';
+      })();
 
   const confirmed = await showCustomConfirm(confirmMsg);
   if (!confirmed) return;
