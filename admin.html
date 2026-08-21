@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIS 管理画面</title>
+  <link rel="stylesheet" href="./admin-style.css?v=1.0.0">
+</head>
+<body>
+
+<div id="gas-config-bridge" style="display: none;"></div>
+
+<!-- ==========================================
+     ログイン画面
+     ========================================== -->
+<div id="login-container" class="login-container">
+  <div class="login-box">
+    <h1 class="login-title">SIS 管理画面</h1>
+    <p class="login-subtitle">スタッフ専用ページです</p>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="admin-password">合言葉</label>
+        <input type="password" id="admin-password" required placeholder="合言葉を入力してください">
+      </div>
+      <div id="login-error" class="login-error" style="display: none;"></div>
+      <button type="submit" id="login-btn" class="btn-login">ログイン</button>
+    </form>
+  </div>
+</div>
+
+<!-- ==========================================
+     管理画面本体（ログイン後に表示）
+     ========================================== -->
+<div id="dashboard-container" class="dashboard-container" style="display: none;">
+  <header class="dashboard-header">
+    <h1 class="dashboard-title">SIS 管理画面</h1>
+    <button type="button" id="logout-btn" class="btn-logout">ログアウト</button>
+  </header>
+
+  <main class="dashboard-main">
+    <div class="dashboard-placeholder">
+      <p>ここに、今後カレンダー表示・顧客カルテなどの機能を追加していきます。</p>
+    </div>
+  </main>
+</div>
+
+<script src="./js/config.js?v=1.0.0"></script>
+<script src="./js/admin.js?v=1.0.0"></script>
+
+</body>
+</html>
