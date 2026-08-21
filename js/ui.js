@@ -45,7 +45,6 @@ const goToCheckBtn = document.getElementById('go-to-check-btn');
 const goToCheckBtnStep2 = document.getElementById('go-to-check-btn-step2');
 const homeBtn = document.getElementById('home-btn');
 const shopLogo = document.getElementById('shop-logo');
-const pageBody = document.getElementById('page-body');
 const stepIndicator = document.getElementById('step-indicator');
 const headerRight = document.getElementById('page-header-right');
 const headerPhone = document.getElementById('header-contact-phone');
@@ -128,27 +127,6 @@ function applySystemSettings(settings) {
   CONFIG.HOME_PAGE_URL = settings.homePageUrl || null;
   if (homeBtn) {
     homeBtn.style.display = CONFIG.HOME_PAGE_URL ? 'inline' : 'none';
-  }
-
-  CONFIG.BACKGROUND_IMAGE_URL = settings.backgroundImageUrl || null;
-  CONFIG.USE_DEFAULT_BACKGROUND = settings.useDefaultBackground !== false;
-
-  // 優先順位: ①個別に指定されたURL → ②同梱のデフォルト画像(pict/shop.jpg) → ③白背景
-  let effectiveBgUrl = null;
-  if (CONFIG.BACKGROUND_IMAGE_URL) {
-    effectiveBgUrl = CONFIG.BACKGROUND_IMAGE_URL;
-  } else if (CONFIG.USE_DEFAULT_BACKGROUND) {
-    effectiveBgUrl = CONFIG.DEFAULT_BACKGROUND_PATH;
-  }
-
-  if (pageBody) {
-    if (effectiveBgUrl) {
-      pageBody.style.backgroundImage = `url("${effectiveBgUrl}")`;
-      pageBody.classList.add('has-bg-image');
-    } else {
-      pageBody.style.backgroundImage = '';
-      pageBody.classList.remove('has-bg-image');
-    }
   }
 
   CONFIG.HEADER_CONTACT_INFO = settings.headerContactInfo || null;
