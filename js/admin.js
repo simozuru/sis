@@ -23,7 +23,16 @@ const reportResults = document.getElementById('report-results');
 const designationSummary = document.getElementById('designation-summary');
 const designationByStaff = document.getElementById('designation-by-staff');
 const menuPerformanceTbody = document.getElementById('menu-performance-tbody');
+const menuRateTbody = document.getElementById('menu-rate-tbody');
 const quickRangeButtons = document.querySelectorAll('.btn-quick-range');
+const reportTypeSelect = document.getElementById('report-type-select');
+const designationReportCard = document.getElementById('designation-report-card');
+const menuCountReportCard = document.getElementById('menu-count-report-card');
+const menuRateReportCard = document.getElementById('menu-rate-report-card');
+
+// 直近に取得したレポートデータ（プルダウン切り替え時に、再取得せずそのまま使い回す）
+let lastDesignationResult = null;
+let lastMenuResult = null;
 
 /**
  * 管理画面のAPI（doPost）に、合言葉付きでリクエストを送る共通関数
@@ -50,6 +59,53 @@ async function callAdminApi(action, extraParams = {}) {
 function showDashboard(isLoggedIn) {
   if (loginContainer) loginContainer.style.display = isLoggedIn ? 'none' : 'flex';
   if (dashboardContainer) dashboardContainer.style.display = isLoggedIn ? 'block' : 'none';
+
+  if (isLoggedIn) {
+    setupReportTypeOptions();
+  }
+}
+
+/**
+ * スタッフ人数を確認し、2人未満の場合は「指名率」の選択肢自体を消す
+ * （お客様向けの getSystemSettings は認証不要の公開APIなので、そのまま利用する）
+ */
+async function setupReportTypeOptions() {
+  if (!reportTypeSelect) return;
+
+  try {
+    const response = await fetch(`${CONFIG.GAS_WEB_APP_URL}?method=getSystemSettings`);
+    const settings = await response.json();
+    const staffCount = (settings && Array.isArray(settings.staffList)) ? settings.staffList.length : 0;
+
+    const designationOption = reportTypeSelect.querySelector('option[value="designation"]');
+    if (designationOption) {
+      designationOption.style.display = staffCount >= 2 ? '' : 'none';
+      // 指名率が選べない場合、プルダウンの選択が「指名率」のままにならないようにする
+      if (staffCount < 2 && reportTypeSelect.value === 'designation') {
+        reportTypeSelect.value = 'menuCount';
+      }
+    }
+  } catch (error) {
+    console.error('スタッフ人数の取得に失敗しました（指名率の表示判定をスキップします）:', error);
+  }
+
+  updateVisibleReportCard();
+}
+
+/**
+ * プルダウンで選ばれている種類のカードだけを表示する
+ */
+function updateVisibleReportCard() {
+  if (!reportTypeSelect) return;
+  const selected = reportTypeSelect.value;
+
+  if (designationReportCard) designationReportCard.style.display = (selected === 'designation') ? 'block' : 'none';
+  if (menuCountReportCard) menuCountReportCard.style.display = (selected === 'menuCount') ? 'block' : 'none';
+  if (menuRateReportCard) menuRateReportCard.style.display = (selected === 'menuRate') ? 'block' : 'none';
+}
+
+if (reportTypeSelect) {
+  reportTypeSelect.addEventListener('change', updateVisibleReportCard);
 }
 
 /**
@@ -141,10 +197,15 @@ async function runReport() {
       throw new Error(message);
     }
 
+    lastDesignationResult = designationResult;
+    lastMenuResult = menuResult;
+
     renderDesignationReport(designationResult);
     renderMenuPerformanceReport(menuResult);
+    renderMenuRateReport(menuResult);
 
     if (reportResults) reportResults.style.display = 'block';
+    updateVisibleReportCard();
   } catch (error) {
     console.error('レポート取得エラー:', error);
     if (reportError) {
@@ -209,6 +270,27 @@ function renderMenuPerformanceReport(data) {
   menuPerformanceTbody.innerHTML = ranking.map(item =>
     `<tr><td>${escapeHtmlAdmin(item.menuName)}</td><td>${item.count}件</td></tr>`
   ).join('');
+}
+
+/**
+ * メニュー率レポート（メニュー実績と同じデータから、割合を計算して表示する）
+ * @param {Object} data - getMenuPerformanceReport の戻り値
+ */
+function renderMenuRateReport(data) {
+  if (!menuRateTbody) return;
+
+  const ranking = data.ranking || [];
+  if (ranking.length === 0) {
+    menuRateTbody.innerHTML = '<tr><td colspan="2">この期間のメニューデータはありません。</td></tr>';
+    return;
+  }
+
+  const total = ranking.reduce((sum, item) => sum + item.count, 0);
+
+  menuRateTbody.innerHTML = ranking.map(item => {
+    const rate = total > 0 ? Math.round((item.count / total) * 1000) / 10 : 0;
+    return `<tr><td>${escapeHtmlAdmin(item.menuName)}</td><td>${rate}%</td></tr>`;
+  }).join('');
 }
 
 /**

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIS 管理画面</title>
-  <link rel="stylesheet" href="./admin-style.css?v=1.1.0">
+  <link rel="stylesheet" href="./admin-style.css?v=1.2.0">
 </head>
 <body>
 
@@ -40,9 +40,17 @@
 
   <main class="dashboard-main">
     <section class="report-section">
-      <h2 class="section-title">レポート（指名率・メニュー実績）</h2>
+      <h2 class="section-title">レポート</h2>
 
       <div class="report-controls">
+        <div class="report-control-group">
+          <label for="report-type-select">表示する集計</label>
+          <select id="report-type-select">
+            <option value="designation">指名率</option>
+            <option value="menuCount">メニュー実績</option>
+            <option value="menuRate">メニュー率</option>
+          </select>
+        </div>
         <div class="report-control-group">
           <label for="report-start-date">開始日</label>
           <input type="date" id="report-start-date">
@@ -62,17 +70,25 @@
       <div id="report-error" class="report-error" style="display: none;"></div>
 
       <div id="report-results" style="display: none;">
-        <div class="report-card">
+        <div id="designation-report-card" class="report-card">
           <h3 class="report-card-title">指名率</h3>
           <div id="designation-summary" class="designation-summary"></div>
           <div id="designation-by-staff" class="designation-by-staff"></div>
         </div>
 
-        <div class="report-card">
+        <div id="menu-count-report-card" class="report-card">
           <h3 class="report-card-title">メニュー実績</h3>
           <table class="report-table">
             <thead><tr><th>メニュー</th><th>件数</th></tr></thead>
             <tbody id="menu-performance-tbody"></tbody>
+          </table>
+        </div>
+
+        <div id="menu-rate-report-card" class="report-card">
+          <h3 class="report-card-title">メニュー率</h3>
+          <table class="report-table">
+            <thead><tr><th>メニュー</th><th>割合</th></tr></thead>
+            <tbody id="menu-rate-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -80,8 +96,8 @@
   </main>
 </div>
 
-<script src="./js/config.js?v=1.1.0"></script>
-<script src="./js/admin.js?v=1.1.0"></script>
+<script src="./js/config.js?v=1.2.0"></script>
+<script src="./js/admin.js?v=1.2.0"></script>
 
 </body>
 </html>
