@@ -433,3 +433,75 @@ font-weight: 600;
 
 font-size: 12px;
 }
+
+.date-range-controls,
+.dormant-controls {
+display: flex;
+flex-wrap: wrap;
+align-items: flex-end;
+
+gap: 14px;
+}
+
+.dormant-controls input[type="number"] {
+width: 90px;
+
+padding: 10px 12px;
+
+border: 1px solid var(--border-color);
+
+border-radius: var(--radius-sm);
+
+font-size: 14px;
+
+background: var(--input-bg);
+
+color: var(--text-color);
+}
+
+.dormant-count-label {
+font-size: 13px;
+
+color: var(--sub-text-color);
+
+margin-bottom: 12px;
+}
+
+.time-slot-table-wrap {
+overflow-x: auto;
+}
+
+.time-slot-table {
+width: 100%;
+
+border-collapse: collapse;
+
+font-size: 12px;
+}
+
+.time-slot-table th,
+.time-slot-table td {
+text-align: center;
+
+padding: 6px 4px;
+
+border: 1px solid var(--border-light);
+
+min-width: 34px;
+}
+
+.time-slot-table th {
+background: var(--border-light);
+
+color: var(--sub-text-color);
+
+font-weight: 600;
+}
+
+.time-slot-table td.has-count {
+background: rgba(169, 124, 83, 0.12);
+
+font-weight: 700;
+
+color: var(--accent-dark);
+}

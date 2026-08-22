@@ -29,10 +29,30 @@ const reportTypeSelect = document.getElementById('report-type-select');
 const designationReportCard = document.getElementById('designation-report-card');
 const menuCountReportCard = document.getElementById('menu-count-report-card');
 const menuRateReportCard = document.getElementById('menu-rate-report-card');
+const timeSlotReportCard = document.getElementById('time-slot-report-card');
+const newRepeatReportCard = document.getElementById('new-repeat-report-card');
+const frequencyReportCard = document.getElementById('frequency-report-card');
+const dormantReportCard = document.getElementById('dormant-report-card');
+const dateRangeControls = document.getElementById('date-range-controls');
+const dormantControls = document.getElementById('dormant-controls');
+const dormantMonthsInput = document.getElementById('dormant-months-input');
+const timeSlotTableWrap = document.getElementById('time-slot-table-wrap');
+const newRepeatSummary = document.getElementById('new-repeat-summary');
+const frequencySummary = document.getElementById('frequency-summary');
+const dormantCountLabel = document.getElementById('dormant-count-label');
+const dormantTbody = document.getElementById('dormant-tbody');
 
-// 直近に取得したレポートデータ（プルダウン切り替え時に、再取得せずそのまま使い回す）
-let lastDesignationResult = null;
-let lastMenuResult = null;
+// レポートの種類ごとに、表示するカードの要素IDを対応させておく
+const REPORT_CARD_MAP = {
+  designation: designationReportCard,
+  menuCount: menuCountReportCard,
+  menuRate: menuRateReportCard,
+  timeSlot: timeSlotReportCard,
+  newRepeat: newRepeatReportCard,
+  frequency: frequencyReportCard,
+  dormant: dormantReportCard
+};
+
 
 /**
  * 管理画面のAPI（doPost）に、合言葉付きでリクエストを送る共通関数
@@ -93,15 +113,20 @@ async function setupReportTypeOptions() {
 }
 
 /**
- * プルダウンで選ばれている種類のカードだけを表示する
+ * プルダウンで選ばれている種類のカードだけを表示し、操作欄（期間指定 or 月数指定）も切り替える
  */
 function updateVisibleReportCard() {
   if (!reportTypeSelect) return;
   const selected = reportTypeSelect.value;
 
-  if (designationReportCard) designationReportCard.style.display = (selected === 'designation') ? 'block' : 'none';
-  if (menuCountReportCard) menuCountReportCard.style.display = (selected === 'menuCount') ? 'block' : 'none';
-  if (menuRateReportCard) menuRateReportCard.style.display = (selected === 'menuRate') ? 'block' : 'none';
+  Object.keys(REPORT_CARD_MAP).forEach(key => {
+    const card = REPORT_CARD_MAP[key];
+    if (card) card.style.display = (key === selected) ? 'block' : 'none';
+  });
+
+  const isDormant = (selected === 'dormant');
+  if (dateRangeControls) dateRangeControls.style.display = isDormant ? 'none' : 'flex';
+  if (dormantControls) dormantControls.style.display = isDormant ? 'flex' : 'none';
 }
 
 if (reportTypeSelect) {
@@ -164,16 +189,21 @@ if (quickRangeButtons) {
 }
 
 /**
- * 指名率・メニュー実績、両方のレポートをまとめて取得して表示する
+ * プルダウンで選ばれているレポートだけを取得・表示する
+ * （メニュー実績とメニュー率は、同じデータから両方描画できるので、片方選んだ時点でもう片方も一緒に計算しておく）
  */
 async function runReport() {
+  const selected = reportTypeSelect ? reportTypeSelect.value : 'designation';
+  const isDormant = (selected === 'dormant');
+
   const startDate = reportStartDateInput ? reportStartDateInput.value : '';
   const endDate = reportEndDateInput ? reportEndDateInput.value : '';
+  const monthsThreshold = dormantMonthsInput ? dormantMonthsInput.value : '3';
 
   if (reportError) reportError.style.display = 'none';
   if (reportResults) reportResults.style.display = 'none';
 
-  if (!startDate || !endDate) {
+  if (!isDormant && (!startDate || !endDate)) {
     if (reportError) {
       reportError.textContent = '開始日・終了日を入力してください。';
       reportError.style.display = 'block';
@@ -187,22 +217,39 @@ async function runReport() {
   }
 
   try {
-    const [designationResult, menuResult] = await Promise.all([
-      callAdminApi('getDesignationRateReport', { startDate, endDate }),
-      callAdminApi('getMenuPerformanceReport', { startDate, endDate })
-    ]);
+    let result;
 
-    if (!designationResult.success || !menuResult.success) {
-      const message = (designationResult && designationResult.message) || (menuResult && menuResult.message) || '集計に失敗しました。';
-      throw new Error(message);
+    if (selected === 'designation') {
+      result = await callAdminApi('getDesignationRateReport', { startDate, endDate });
+      if (!result.success) throw new Error(result.message || '集計に失敗しました。');
+      renderDesignationReport(result);
+
+    } else if (selected === 'menuCount' || selected === 'menuRate') {
+      result = await callAdminApi('getMenuPerformanceReport', { startDate, endDate });
+      if (!result.success) throw new Error(result.message || '集計に失敗しました。');
+      renderMenuPerformanceReport(result);
+      renderMenuRateReport(result);
+
+    } else if (selected === 'timeSlot') {
+      result = await callAdminApi('getTimeSlotPatternReport', { startDate, endDate });
+      if (!result.success) throw new Error(result.message || '集計に失敗しました。');
+      renderTimeSlotReport(result);
+
+    } else if (selected === 'newRepeat') {
+      result = await callAdminApi('getNewRepeatRatioReport', { startDate, endDate });
+      if (!result.success) throw new Error(result.message || '集計に失敗しました。');
+      renderNewRepeatReport(result);
+
+    } else if (selected === 'frequency') {
+      result = await callAdminApi('getVisitFrequencyDistributionReport', { startDate, endDate });
+      if (!result.success) throw new Error(result.message || '集計に失敗しました。');
+      renderFrequencyReport(result);
+
+    } else if (selected === 'dormant') {
+      result = await callAdminApi('getDormantCustomersReport', { monthsThreshold });
+      if (!result.success) throw new Error(result.message || '集計に失敗しました。');
+      renderDormantReport(result);
     }
-
-    lastDesignationResult = designationResult;
-    lastMenuResult = menuResult;
-
-    renderDesignationReport(designationResult);
-    renderMenuPerformanceReport(menuResult);
-    renderMenuRateReport(menuResult);
 
     if (reportResults) reportResults.style.display = 'block';
     updateVisibleReportCard();
@@ -291,6 +338,113 @@ function renderMenuRateReport(data) {
     const rate = total > 0 ? Math.round((item.count / total) * 1000) / 10 : 0;
     return `<tr><td>${escapeHtmlAdmin(item.menuName)}</td><td>${rate}%</td></tr>`;
   }).join('');
+}
+
+/**
+ * 曜日・時間帯の傾向レポートを表として描画する
+ * @param {Object} data - getTimeSlotPatternReport の戻り値
+ */
+function renderTimeSlotReport(data) {
+  if (!timeSlotTableWrap) return;
+
+  const grid = data.grid || {};
+  const dayLabels = data.dayLabels || ["日", "月", "火", "水", "木", "金", "土"];
+
+  // 実際にデータがある時間帯だけを列に出す（0〜23時全部は出さない）
+  const hoursSet = new Set();
+  Object.keys(grid).forEach(day => {
+    Object.keys(grid[day]).forEach(hour => hoursSet.add(parseInt(hour, 10)));
+  });
+  const hours = Array.from(hoursSet).sort((a, b) => a - b);
+
+  if (hours.length === 0) {
+    timeSlotTableWrap.innerHTML = '<p>この期間の予約データはありません。</p>';
+    return;
+  }
+
+  let html = '<table class="time-slot-table"><thead><tr><th>曜日＼時</th>';
+  hours.forEach(h => { html += `<th>${h}時</th>`; });
+  html += '</tr></thead><tbody>';
+
+  for (let d = 0; d < 7; d++) {
+    html += `<tr><th>${dayLabels[d]}</th>`;
+    hours.forEach(h => {
+      const count = (grid[d] && grid[d][h]) || 0;
+      html += count > 0 ? `<td class="has-count">${count}</td>` : `<td>-</td>`;
+    });
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+
+  timeSlotTableWrap.innerHTML = html;
+}
+
+/**
+ * 新規・リピート比率レポートを描画する
+ * @param {Object} data - getNewRepeatRatioReport の戻り値
+ */
+function renderNewRepeatReport(data) {
+  if (!newRepeatSummary) return;
+
+  newRepeatSummary.innerHTML = `
+    <div class="designation-summary-item">
+      <div class="designation-summary-value">${data.newRate}%</div>
+      <div class="designation-summary-label">新規（${data.newCount}人）</div>
+    </div>
+    <div class="designation-summary-item">
+      <div class="designation-summary-value">${data.repeatRate}%</div>
+      <div class="designation-summary-label">リピート（${data.repeatCount}人）</div>
+    </div>
+    <div class="designation-summary-item">
+      <div class="designation-summary-value">${data.totalCount}</div>
+      <div class="designation-summary-label">合計人数</div>
+    </div>
+  `;
+}
+
+/**
+ * 来店頻度の分布レポートを描画する
+ * @param {Object} data - getVisitFrequencyDistributionReport の戻り値
+ */
+function renderFrequencyReport(data) {
+  if (!frequencySummary) return;
+
+  frequencySummary.innerHTML = `
+    <div class="designation-summary-item">
+      <div class="designation-summary-value">${data.once}</div>
+      <div class="designation-summary-label">1回</div>
+    </div>
+    <div class="designation-summary-item">
+      <div class="designation-summary-value">${data.fewTimes}</div>
+      <div class="designation-summary-label">2〜3回</div>
+    </div>
+    <div class="designation-summary-item">
+      <div class="designation-summary-value">${data.loyal}</div>
+      <div class="designation-summary-label">4回以上</div>
+    </div>
+  `;
+}
+
+/**
+ * 休眠顧客リストを描画する
+ * @param {Object} data - getDormantCustomersReport の戻り値
+ */
+function renderDormantReport(data) {
+  if (dormantCountLabel) {
+    dormantCountLabel.textContent = `最終来店から${data.monthsThreshold}ヶ月以上：${data.count}名`;
+  }
+
+  if (!dormantTbody) return;
+
+  const list = data.list || [];
+  if (list.length === 0) {
+    dormantTbody.innerHTML = '<tr><td colspan="4">該当するお客様はいません。</td></tr>';
+    return;
+  }
+
+  dormantTbody.innerHTML = list.map(c =>
+    `<tr><td>${escapeHtmlAdmin(c.name)}</td><td>${escapeHtmlAdmin(c.tel)}</td><td>${c.lastVisitDate}</td><td>${c.visitCount}回</td></tr>`
+  ).join('');
 }
 
 /**

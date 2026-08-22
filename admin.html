@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIS 管理画面</title>
-  <link rel="stylesheet" href="./admin-style.css?v=1.2.0">
+  <link rel="stylesheet" href="./admin-style.css?v=1.3.0">
 </head>
 <body>
 
@@ -49,21 +49,38 @@
             <option value="designation">指名率</option>
             <option value="menuCount">メニュー実績</option>
             <option value="menuRate">メニュー率</option>
+            <option value="timeSlot">曜日・時間帯の傾向</option>
+            <option value="newRepeat">新規・リピート比率</option>
+            <option value="frequency">来店頻度の分布</option>
+            <option value="dormant">休眠顧客リスト</option>
           </select>
         </div>
-        <div class="report-control-group">
-          <label for="report-start-date">開始日</label>
-          <input type="date" id="report-start-date">
+
+        <!-- 「休眠顧客リスト」以外は、この期間指定を使う -->
+        <div id="date-range-controls" class="date-range-controls">
+          <div class="report-control-group">
+            <label for="report-start-date">開始日</label>
+            <input type="date" id="report-start-date">
+          </div>
+          <div class="report-control-group">
+            <label for="report-end-date">終了日</label>
+            <input type="date" id="report-end-date">
+          </div>
+          <div class="report-quick-buttons">
+            <button type="button" class="btn-quick-range" data-range="thisWeek">今週</button>
+            <button type="button" class="btn-quick-range" data-range="thisMonth">今月</button>
+            <button type="button" class="btn-quick-range" data-range="lastMonth">先月</button>
+          </div>
         </div>
-        <div class="report-control-group">
-          <label for="report-end-date">終了日</label>
-          <input type="date" id="report-end-date">
+
+        <!-- 「休眠顧客リスト」だけ、この月数指定を使う -->
+        <div id="dormant-controls" class="dormant-controls" style="display: none;">
+          <div class="report-control-group">
+            <label for="dormant-months-input">最終来店から何ヶ月以上</label>
+            <input type="number" id="dormant-months-input" min="1" value="3">
+          </div>
         </div>
-        <div class="report-quick-buttons">
-          <button type="button" class="btn-quick-range" data-range="thisWeek">今週</button>
-          <button type="button" class="btn-quick-range" data-range="thisMonth">今月</button>
-          <button type="button" class="btn-quick-range" data-range="lastMonth">先月</button>
-        </div>
+
         <button type="button" id="run-report-btn" class="btn-run-report">集計する</button>
       </div>
 
@@ -91,13 +108,37 @@
             <tbody id="menu-rate-tbody"></tbody>
           </table>
         </div>
+
+        <div id="time-slot-report-card" class="report-card">
+          <h3 class="report-card-title">曜日・時間帯の傾向</h3>
+          <div id="time-slot-table-wrap" class="time-slot-table-wrap"></div>
+        </div>
+
+        <div id="new-repeat-report-card" class="report-card">
+          <h3 class="report-card-title">新規・リピート比率</h3>
+          <div id="new-repeat-summary" class="designation-summary"></div>
+        </div>
+
+        <div id="frequency-report-card" class="report-card">
+          <h3 class="report-card-title">来店頻度の分布</h3>
+          <div id="frequency-summary" class="designation-summary"></div>
+        </div>
+
+        <div id="dormant-report-card" class="report-card">
+          <h3 class="report-card-title">休眠顧客リスト</h3>
+          <p id="dormant-count-label" class="dormant-count-label"></p>
+          <table class="report-table">
+            <thead><tr><th>お客様名</th><th>電話番号</th><th>最終来店日</th><th>来店回数</th></tr></thead>
+            <tbody id="dormant-tbody"></tbody>
+          </table>
+        </div>
       </div>
     </section>
   </main>
 </div>
 
-<script src="./js/config.js?v=1.2.0"></script>
-<script src="./js/admin.js?v=1.2.0"></script>
+<script src="./js/config.js?v=1.3.0"></script>
+<script src="./js/admin.js?v=1.3.0"></script>
 
 </body>
 </html>
