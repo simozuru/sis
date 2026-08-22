@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIS 管理画面</title>
-  <link rel="stylesheet" href="./admin-style.css?v=1.0.0">
+  <link rel="stylesheet" href="./admin-style.css?v=1.1.0">
 </head>
 <body>
 
@@ -39,14 +39,49 @@
   </header>
 
   <main class="dashboard-main">
-    <div class="dashboard-placeholder">
-      <p>ここに、今後カレンダー表示・顧客カルテなどの機能を追加していきます。</p>
-    </div>
+    <section class="report-section">
+      <h2 class="section-title">レポート（指名率・メニュー実績）</h2>
+
+      <div class="report-controls">
+        <div class="report-control-group">
+          <label for="report-start-date">開始日</label>
+          <input type="date" id="report-start-date">
+        </div>
+        <div class="report-control-group">
+          <label for="report-end-date">終了日</label>
+          <input type="date" id="report-end-date">
+        </div>
+        <div class="report-quick-buttons">
+          <button type="button" class="btn-quick-range" data-range="thisWeek">今週</button>
+          <button type="button" class="btn-quick-range" data-range="thisMonth">今月</button>
+          <button type="button" class="btn-quick-range" data-range="lastMonth">先月</button>
+        </div>
+        <button type="button" id="run-report-btn" class="btn-run-report">集計する</button>
+      </div>
+
+      <div id="report-error" class="report-error" style="display: none;"></div>
+
+      <div id="report-results" style="display: none;">
+        <div class="report-card">
+          <h3 class="report-card-title">指名率</h3>
+          <div id="designation-summary" class="designation-summary"></div>
+          <div id="designation-by-staff" class="designation-by-staff"></div>
+        </div>
+
+        <div class="report-card">
+          <h3 class="report-card-title">メニュー実績</h3>
+          <table class="report-table">
+            <thead><tr><th>メニュー</th><th>件数</th></tr></thead>
+            <tbody id="menu-performance-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   </main>
 </div>
 
-<script src="./js/config.js?v=1.0.0"></script>
-<script src="./js/admin.js?v=1.0.0"></script>
+<script src="./js/config.js?v=1.1.0"></script>
+<script src="./js/admin.js?v=1.1.0"></script>
 
 </body>
 </html>
