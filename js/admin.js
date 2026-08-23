@@ -42,6 +42,29 @@ const frequencySummary = document.getElementById('frequency-summary');
 const dormantCountLabel = document.getElementById('dormant-count-label');
 const dormantTbody = document.getElementById('dormant-tbody');
 
+const tabButtons = document.querySelectorAll('.tab-btn');
+const tabPages = document.querySelectorAll('.tab-page');
+
+const settings1Loading = document.getElementById('settings1-loading');
+const settings1Error = document.getElementById('settings1-error');
+const settings1SavedMsg = document.getElementById('settings1-saved-msg');
+const settings1Form = document.getElementById('settings1-form');
+const s1ShopName = document.getElementById('s1-shop-name');
+const s1LogoUrl = document.getElementById('s1-logo-url');
+const s1ContactPhone = document.getElementById('s1-contact-phone');
+const s1ContactHours = document.getElementById('s1-contact-hours');
+const s1ContactClosed = document.getElementById('s1-contact-closed');
+const businessHoursRows = document.getElementById('business-hours-rows');
+const menuMasterRows = document.getElementById('menu-master-rows');
+const addMenuRowBtn = document.getElementById('add-menu-row-btn');
+const staffNameRows = document.getElementById('staff-name-rows');
+const s1MaxCapacity = document.getElementById('s1-max-capacity');
+const s1ReminderDays = document.getElementById('s1-reminder-days');
+const saveSettings1Btn = document.getElementById('save-settings1-btn');
+
+const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
+let settings1Loaded = false; // タブを開くたびに再取得しないよう、読み込み済みかどうかを覚えておく
+
 // レポートの種類ごとに、表示するカードの要素IDを対応させておく
 const REPORT_CARD_MAP = {
   designation: designationReportCard,
@@ -131,6 +154,26 @@ function updateVisibleReportCard() {
 
 if (reportTypeSelect) {
   reportTypeSelect.addEventListener('change', updateVisibleReportCard);
+}
+
+/**
+ * タブの切り替え。「基本設定」タブは、初めて開いた時だけサーバーから読み込む
+ */
+if (tabButtons) {
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetTab = btn.getAttribute('data-tab');
+
+      tabButtons.forEach(b => b.classList.toggle('active', b === btn));
+      tabPages.forEach(page => {
+        page.style.display = (page.id === `tab-${targetTab}`) ? 'block' : 'none';
+      });
+
+      if (targetTab === 'settings1' && !settings1Loaded) {
+        loadSettings1();
+      }
+    });
+  });
 }
 
 /**
@@ -456,6 +499,229 @@ function escapeHtmlAdmin(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+/**
+ * 「基本設定」タブの現在値を取得し、フォームに反映する
+ */
+async function loadSettings1() {
+  if (settings1Loading) settings1Loading.style.display = 'block';
+  if (settings1Error) settings1Error.style.display = 'none';
+  if (settings1Form) settings1Form.style.display = 'none';
+
+  try {
+    const result = await callAdminApi('getSettingsPage1');
+    if (!result.success) throw new Error(result.message || '設定の取得に失敗しました。');
+
+    // 店名・ロゴ
+    const branding = result.headerBranding || {};
+    if (s1ShopName) s1ShopName.value = branding.shopName || '';
+    if (s1LogoUrl) s1LogoUrl.value = branding.logoUrl || '';
+
+    // 連絡先情報
+    const contact = result.headerContactInfo || {};
+    if (s1ContactPhone) s1ContactPhone.value = contact.phone || '';
+    if (s1ContactHours) s1ContactHours.value = contact.hours || '';
+    if (s1ContactClosed) s1ContactClosed.value = contact.closedDay || '';
+
+    // 営業時間
+    renderBusinessHoursRows(result.business || {});
+
+    // メニュー・料金
+    renderMenuMasterRows(result.menuMaster || {});
+
+    // スタッフ名（カレンダーIDは隠しdata属性として保持しておく）
+    renderStaffNameRows(result.staffMaster || {});
+
+    // その他
+    if (s1MaxCapacity) s1MaxCapacity.value = result.maxCapacity;
+    if (s1ReminderDays) s1ReminderDays.value = result.reminderMailDaysBefore;
+
+    settings1Loaded = true;
+    if (settings1Form) settings1Form.style.display = 'block';
+  } catch (error) {
+    console.error('基本設定の取得エラー:', error);
+    if (settings1Error) {
+      settings1Error.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+      settings1Error.style.display = 'block';
+    }
+  } finally {
+    if (settings1Loading) settings1Loading.style.display = 'none';
+  }
+}
+
+/**
+ * 営業時間の入力行を、日〜土の7行分描画する
+ * @param {Object} business - { 曜日番号: [開始時, 閉店時] }
+ */
+function renderBusinessHoursRows(business) {
+  if (!businessHoursRows) return;
+
+  businessHoursRows.innerHTML = DAY_LABELS.map((label, dayIndex) => {
+    const hours = business[dayIndex] || business[String(dayIndex)] || null;
+    const openHour = hours ? hours[0] : '';
+    const closeHour = hours ? hours[1] : '';
+    return `
+      <div class="business-hours-row" data-day="${dayIndex}">
+        <span class="day-label">${label}曜日</span>
+        <input type="number" class="business-open-input" min="0" max="23" value="${openHour}" placeholder="休">
+        <span class="time-sep">時 〜</span>
+        <input type="number" class="business-close-input" min="0" max="23" value="${closeHour}" placeholder="休">
+        <span class="time-sep">時</span>
+      </div>
+    `;
+  }).join('');
+}
+
+/**
+ * メニュー・料金の入力行を描画する
+ * @param {Object} menuMaster - { メニュー名: { minutes, price } }
+ */
+function renderMenuMasterRows(menuMaster) {
+  if (!menuMasterRows) return;
+
+  const entries = Object.keys(menuMaster).map(name => ({ name, ...menuMaster[name] }));
+  menuMasterRows.innerHTML = '';
+  entries.forEach(entry => addMenuRow(entry.name, entry.minutes, entry.price));
+
+  if (entries.length === 0) addMenuRow('', '', '');
+}
+
+/**
+ * メニュー行を1行追加する
+ */
+function addMenuRow(name = '', minutes = '', price = '') {
+  if (!menuMasterRows) return;
+
+  const row = document.createElement('div');
+  row.className = 'menu-master-row';
+  row.innerHTML = `
+    <input type="text" class="menu-name-input" placeholder="メニュー名（例：カット）" value="${escapeHtmlAdmin(name)}">
+    <input type="number" class="menu-minutes-input" placeholder="分" min="5" step="5" value="${minutes}">
+    <input type="number" class="menu-price-input" placeholder="円" min="0" value="${price}">
+    <button type="button" class="btn-remove-row" title="このメニューを削除">×</button>
+  `;
+  row.querySelector('.btn-remove-row').addEventListener('click', () => row.remove());
+  menuMasterRows.appendChild(row);
+}
+
+if (addMenuRowBtn) {
+  addMenuRowBtn.addEventListener('click', () => addMenuRow());
+}
+
+/**
+ * スタッフ名の入力行を描画する（カレンダーIDは隠しdata属性として各行に保持する）
+ * @param {Object} staffMaster - { スタッフ名: カレンダーID }
+ */
+function renderStaffNameRows(staffMaster) {
+  if (!staffNameRows) return;
+
+  const names = Object.keys(staffMaster);
+  staffNameRows.innerHTML = names.map((name, i) => `
+    <div class="staff-name-row" data-calendar-id="${escapeHtmlAdmin(staffMaster[name])}">
+      <span class="staff-label">担当${i + 1}</span>
+      <input type="text" class="staff-name-input" value="${escapeHtmlAdmin(name)}">
+    </div>
+  `).join('');
+}
+
+/**
+ * フォームの入力内容を集めて、Config.gsのキー名に合わせた形に組み立てる
+ * @returns {Object} saveSettings に渡す { 設定キー: 値 } のマップ
+ */
+function collectSettings1FormData() {
+  const settings = {};
+
+  // 店名・ロゴ（両方空なら null にして「未設定」に戻す）
+  const shopName = s1ShopName ? s1ShopName.value.trim() : '';
+  const logoUrl = s1LogoUrl ? s1LogoUrl.value.trim() : '';
+  settings.HEADER_BRANDING = (shopName || logoUrl) ? { shopName: shopName || null, logoUrl: logoUrl || null } : null;
+
+  // 連絡先情報
+  const phone = s1ContactPhone ? s1ContactPhone.value.trim() : '';
+  const hours = s1ContactHours ? s1ContactHours.value.trim() : '';
+  const closedDay = s1ContactClosed ? s1ContactClosed.value.trim() : '';
+  settings.HEADER_CONTACT_INFO = (phone || hours || closedDay) ? { phone: phone || null, hours: hours || null, closedDay: closedDay || null } : null;
+
+  // 営業時間
+  const business = {};
+  document.querySelectorAll('.business-hours-row').forEach(row => {
+    const day = row.getAttribute('data-day');
+    const openVal = row.querySelector('.business-open-input').value;
+    const closeVal = row.querySelector('.business-close-input').value;
+    if (openVal !== '' && closeVal !== '') {
+      business[day] = [parseInt(openVal, 10), parseInt(closeVal, 10)];
+    }
+  });
+  settings.BUSINESS = business;
+
+  // メニュー・料金
+  const menuMaster = {};
+  document.querySelectorAll('.menu-master-row').forEach(row => {
+    const name = row.querySelector('.menu-name-input').value.trim();
+    const minutes = parseInt(row.querySelector('.menu-minutes-input').value, 10);
+    const price = parseInt(row.querySelector('.menu-price-input').value, 10);
+    if (name && !isNaN(minutes) && minutes > 0) {
+      menuMaster[name] = { minutes: minutes, slots: Math.ceil(minutes / 5), price: isNaN(price) ? 0 : price };
+    }
+  });
+  settings.MENU_MASTER = menuMaster;
+
+  // スタッフ名（カレンダーIDは、読み込み時に保持しておいたものをそのまま使う）
+  const staffMaster = {};
+  document.querySelectorAll('.staff-name-row').forEach(row => {
+    const calendarId = row.getAttribute('data-calendar-id');
+    const name = row.querySelector('.staff-name-input').value.trim();
+    if (name && calendarId) {
+      staffMaster[name] = calendarId;
+    }
+  });
+  settings.STAFF_MASTER = staffMaster;
+
+  // その他
+  if (s1MaxCapacity && s1MaxCapacity.value !== '') settings.MAX_CAPACITY = parseInt(s1MaxCapacity.value, 10);
+  if (s1ReminderDays && s1ReminderDays.value !== '') settings.REMINDER_MAIL_DAYS_BEFORE = parseInt(s1ReminderDays.value, 10);
+
+  return settings;
+}
+
+if (settings1Form) {
+  settings1Form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (settings1Error) settings1Error.style.display = 'none';
+    if (settings1SavedMsg) settings1SavedMsg.style.display = 'none';
+    if (saveSettings1Btn) {
+      saveSettings1Btn.disabled = true;
+      saveSettings1Btn.textContent = '保存中...';
+    }
+
+    try {
+      const settings = collectSettings1FormData();
+      const password = sessionStorage.getItem(SESSION_STORAGE_KEY) || '';
+
+      const response = await fetch(CONFIG.GAS_WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'saveSettings', settings: JSON.stringify(settings), password: password })
+      });
+      const result = await response.json();
+
+      if (!result.success) throw new Error(result.message || '保存に失敗しました。');
+
+      if (settings1SavedMsg) settings1SavedMsg.style.display = 'block';
+    } catch (error) {
+      console.error('基本設定の保存エラー:', error);
+      if (settings1Error) {
+        settings1Error.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+        settings1Error.style.display = 'block';
+      }
+    } finally {
+      if (saveSettings1Btn) {
+        saveSettings1Btn.disabled = false;
+        saveSettings1Btn.textContent = '保存する';
+      }
+    }
+  });
 }
 
 if (runReportBtn) {
