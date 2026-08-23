@@ -125,8 +125,10 @@ function applySystemSettings(settings) {
   CONFIG.PROVISIONAL_RESERVATION_TARGET = settings.provisionalReservationTarget || "ALL";
   CONFIG.PROVISIONAL_RESERVATION_TARGET_MENUS = settings.provisionalReservationTargetMenus || [];
   CONFIG.HOME_PAGE_URL = settings.homePageUrl || null;
+  CONFIG.HOME_PAGE_LABEL = settings.homePageLabel || null;
   if (homeBtn) {
     homeBtn.style.display = CONFIG.HOME_PAGE_URL ? 'inline' : 'none';
+    homeBtn.textContent = `⬅ ${CONFIG.HOME_PAGE_LABEL || 'トップページに戻る'}`;
   }
 
   CONFIG.HEADER_CONTACT_INFO = settings.headerContactInfo || null;
