@@ -13,7 +13,13 @@ const INFO_CARD_ICONS = {
   store: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5V20a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9.5"/><path d="M3 4h18l1.2 5.2a2 2 0 0 1-2 2.4h-.4a2 2 0 0 1-2-1.7 2 2 0 0 1-2 1.7 2 2 0 0 1-2-1.7 2 2 0 0 1-2 1.7 2 2 0 0 1-2-1.7 2 2 0 0 1-2 1.7h-.4a2 2 0 0 1-2-2.4L3 4z"/></svg>',
   menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>',
   map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-6-2.5V4.5L9 7l6-2.5 6 2.5v13l-6-2.5-6 2.5z"/><path d="M9 7v13"/><path d="M15 4.5v13"/></svg>',
-  staff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6.2 6.5-6.2s6.5 2.6 6.5 6.2"/><circle cx="17" cy="7" r="2.4"/><path d="M15.5 13.3c2.6.5 4.5 2.7 4.5 5.4"/></svg>'
+  staff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6.2 6.5-6.2s6.5 2.6 6.5 6.2"/><circle cx="17" cy="7" r="2.4"/><path d="M15.5 13.3c2.6.5 4.5 2.7 4.5 5.4"/></svg>',
+  price: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5l6 7.5V20"/><path d="M18 5l-6 7.5"/><path d="M3.5 10h9"/><path d="M3.5 13h9"/></svg>',
+  scissors: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><path d="M8 8l12 12"/><path d="M8 16L20 4"/></svg>',
+  coupon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.5a1.7 1.7 0 0 0 0 3V15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.5a1.7 1.7 0 0 0 0-3V9z"/><path d="M9 7v10" stroke-dasharray="2 2"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h3.2l1.6 4.5-2 1.6a12 12 0 0 0 5.1 5.1l1.6-2 4.5 1.6V18a2 2 0 0 1-2 2A15 15 0 0 1 3 5a2 2 0 0 1 2-1z"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17"/><path d="M8 3v4"/><path d="M16 3v4"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.2 5.9-.9z"/></svg>'
 };
 
 // -----------------------------------------------------------------
@@ -179,6 +185,25 @@ function applySystemSettings(settings) {
  * トップ下部の情報セクション（ホームページ風の案内リンク集）を描画する
  * @param {Object|null} infoConfig - CONFIG.INFO_SECTION（GASのINFO_SECTION設定）
  */
+/**
+ * 情報セクションのカード1件分、アイコン円の中身を組み立てる
+ * - item.showIcon が false の場合：中身なし（丸だけ）
+ * - item.icon が http(s):// で始まる場合：その画像を読み込んで使う
+ * - それ以外：INFO_CARD_ICONS のプリセットSVGを使う（該当なしなら store のまま）
+ * @param {Object} item - 情報セクションのカード設定1件分
+ * @returns {string} アイコン円の中に入れるHTML
+ */
+function _buildInfoCardIconContent(item) {
+  if (item.showIcon === false) return '';
+
+  const iconValue = item.icon || '';
+  if (/^https?:\/\//i.test(iconValue)) {
+    return `<img src="${escapeHtml(iconValue)}" alt="" class="info-card-icon-img">`;
+  }
+
+  return INFO_CARD_ICONS[iconValue] || INFO_CARD_ICONS.store;
+}
+
 function renderInfoSection(infoConfig) {
   if (!infoSection || !infoCards) return;
 
@@ -203,7 +228,7 @@ function renderInfoSection(infoConfig) {
   // item.url のみの場合は、今まで通り同じタブで遷移する通常のリンクにする
   let html = '';
   items.forEach(item => {
-    const iconSvg = INFO_CARD_ICONS[item.icon] || INFO_CARD_ICONS.store;
+    const iconContent = _buildInfoCardIconContent(item);
     const titleStyle = [
       item.titleFontSize ? `font-size:${escapeHtml(item.titleFontSize)}` : '',
       item.titleColor ? `color:${escapeHtml(item.titleColor)}` : '',
@@ -216,7 +241,7 @@ function renderInfoSection(infoConfig) {
 
     html += `
       <a class="info-card" href="${hrefAttr}"${pageAttr}>
-        <div class="info-card-icon">${iconSvg}</div>
+        <div class="info-card-icon">${iconContent}</div>
         <div class="info-card-title"${titleStyle ? ` style="${titleStyle}"` : ''}>${escapeHtml(item.title || '')}</div>
         <div class="info-card-description">${escapeHtml(item.description || '')}</div>
       </a>

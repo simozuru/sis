@@ -100,7 +100,13 @@ const INFO_ICON_OPTIONS = [
   { value: 'store', label: 'お店情報アイコン' },
   { value: 'menu', label: 'メニューアイコン' },
   { value: 'map', label: 'マップアイコン' },
-  { value: 'staff', label: 'スタッフアイコン' }
+  { value: 'staff', label: 'スタッフアイコン' },
+  { value: 'price', label: '料金（￥）アイコン' },
+  { value: 'scissors', label: 'ハサミ（技術）アイコン' },
+  { value: 'coupon', label: 'クーポンアイコン' },
+  { value: 'phone', label: '電話アイコン' },
+  { value: 'calendar', label: 'カレンダーアイコン' },
+  { value: 'star', label: '星（口コミ）アイコン' }
 ];
 
 // レポートの種類ごとに、表示するカードの要素IDを対応させておく
@@ -940,13 +946,32 @@ function renderInfoItemRows(items) {
   for (let i = 0; i < 4; i++) {
     const item = items[i] || {};
     const isUrlType = !!item.url && !item.page;
+    const showIcon = item.showIcon !== false; // 未指定の場合は「使う」扱い
+    const iconValue = item.icon || '';
+    const isIconUrlType = /^https?:\/\//i.test(iconValue);
+
     html += `
       <div class="info-item-block" data-slot="${i}">
         <div class="info-item-block-title">カード${i + 1}（空欄のままなら、このカードは表示されません）</div>
-        <div class="form-group">
-          <label>アイコン</label>
-          <select class="info-icon-select">${iconOptionsHtml}</select>
+
+        <div class="form-group checkbox-group">
+          <label><input type="checkbox" class="info-show-icon-check" ${showIcon ? 'checked' : ''}> アイコンを使う</label>
         </div>
+        <div class="info-icon-settings" style="${showIcon ? '' : 'display: none;'}">
+          <div class="info-item-link-type">
+            <label><input type="radio" name="info-icon-type-${i}" value="preset" ${!isIconUrlType ? 'checked' : ''}> 用意されたアイコンから選ぶ</label>
+            <label><input type="radio" name="info-icon-type-${i}" value="image" ${isIconUrlType ? 'checked' : ''}> 画像URLを指定する</label>
+          </div>
+          <div class="form-group info-icon-preset-group" style="${isIconUrlType ? 'display: none;' : ''}">
+            <label>アイコンの種類</label>
+            <select class="info-icon-select">${iconOptionsHtml}</select>
+          </div>
+          <div class="form-group info-icon-image-group" style="${isIconUrlType ? '' : 'display: none;'}">
+            <label>アイコン画像のURL</label>
+            <input type="text" class="info-icon-image-input" value="${escapeHtmlAdmin(isIconUrlType ? iconValue : '')}" placeholder="https://example.com/icon.png">
+          </div>
+        </div>
+
         <div class="form-group">
           <label>タイトル</label>
           <input type="text" class="info-title-input" value="${escapeHtmlAdmin(item.title || '')}" placeholder="例：お店情報">
@@ -971,7 +996,32 @@ function renderInfoItemRows(items) {
   // 読み込んだアイコンの選択状態を反映する（HTML文字列にselectedを埋め込むより、後からJSで設定する方が安全）
   items.forEach((item, i) => {
     const select = infoItemRows.querySelector(`.info-item-block[data-slot="${i}"] .info-icon-select`);
-    if (select && item.icon) select.value = item.icon;
+    if (select && item.icon && !/^https?:\/\//i.test(item.icon)) select.value = item.icon;
+  });
+
+  // 「アイコンを使う」チェックの切り替えで、アイコン設定エリア自体を表示・非表示にする
+  infoItemRows.querySelectorAll('.info-show-icon-check').forEach(check => {
+    check.addEventListener('change', () => {
+      const settingsArea = check.closest('.info-item-block').querySelector('.info-icon-settings');
+      if (settingsArea) settingsArea.style.display = check.checked ? 'block' : 'none';
+    });
+  });
+
+  // 「プリセット / 画像URL」の切り替えで、該当する入力欄だけを表示する
+  infoItemRows.querySelectorAll('.info-item-block').forEach(block => {
+    const presetGroup = block.querySelector('.info-icon-preset-group');
+    const imageGroup = block.querySelector('.info-icon-image-group');
+    block.querySelectorAll('input[type="radio"][name^="info-icon-type-"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.checked && radio.value === 'preset') {
+          if (presetGroup) presetGroup.style.display = 'block';
+          if (imageGroup) imageGroup.style.display = 'none';
+        } else if (radio.checked && radio.value === 'image') {
+          if (presetGroup) presetGroup.style.display = 'none';
+          if (imageGroup) imageGroup.style.display = 'block';
+        }
+      });
+    });
   });
 }
 
@@ -1039,13 +1089,18 @@ function collectInfoItems() {
     const title = block.querySelector('.info-title-input').value.trim();
     if (!title) return; // タイトル未入力の枠は、カードとして保存しない
 
-    const icon = block.querySelector('.info-icon-select').value;
     const description = block.querySelector('.info-desc-input').value.trim();
     const slot = block.getAttribute('data-slot');
     const linkType = getRadioValue(`info-link-type-${slot}`);
     const linkValue = block.querySelector('.info-link-value-input').value.trim();
 
-    const item = { icon: icon, title: title, description: description };
+    const showIcon = block.querySelector('.info-show-icon-check').checked;
+    const iconType = getRadioValue(`info-icon-type-${slot}`);
+    const icon = (showIcon && iconType === 'image')
+      ? block.querySelector('.info-icon-image-input').value.trim()
+      : block.querySelector('.info-icon-select').value;
+
+    const item = { icon: icon, showIcon: showIcon, title: title, description: description };
     if (linkType === 'url') {
       item.url = linkValue;
     } else {
