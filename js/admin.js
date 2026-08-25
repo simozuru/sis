@@ -64,6 +64,24 @@ const saveSettings1Btn = document.getElementById('save-settings1-btn');
 
 const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
 let settings1Loaded = false; // タブを開くたびに再取得しないよう、読み込み済みかどうかを覚えておく
+let settings2Loaded = false;
+
+const settings2Loading = document.getElementById('settings2-loading');
+const settings2Error = document.getElementById('settings2-error');
+const settings2SavedMsg = document.getElementById('settings2-saved-msg');
+const settings2Form = document.getElementById('settings2-form');
+const s2CancelBuffer = document.getElementById('s2-cancel-buffer');
+const s2ChangeBuffer = document.getElementById('s2-change-buffer');
+const s2ShowMenuMinutes = document.getElementById('s2-show-menu-minutes');
+const s2ShowMenuPrice = document.getElementById('s2-show-menu-price');
+const s2ShowStaffSelector = document.getElementById('s2-show-staff-selector');
+const s2AllowNoAssign = document.getElementById('s2-allow-no-assign');
+const s2NoAssignLabel = document.getElementById('s2-no-assign-label');
+const s2MaxFutureDays = document.getElementById('s2-max-future-days');
+const s2DisplayDays = document.getElementById('s2-display-days');
+const s2HomeUrl = document.getElementById('s2-home-url');
+const s2HomeLabel = document.getElementById('s2-home-label');
+const saveSettings2Btn = document.getElementById('save-settings2-btn');
 
 // レポートの種類ごとに、表示するカードの要素IDを対応させておく
 const REPORT_CARD_MAP = {
@@ -171,6 +189,9 @@ if (tabButtons) {
 
       if (targetTab === 'settings1' && !settings1Loaded) {
         loadSettings1();
+      }
+      if (targetTab === 'settings2' && !settings2Loaded) {
+        loadSettings2();
       }
     });
   });
@@ -719,6 +740,126 @@ if (settings1Form) {
       if (saveSettings1Btn) {
         saveSettings1Btn.disabled = false;
         saveSettings1Btn.textContent = '保存する';
+      }
+    }
+  });
+}
+
+/**
+ * 「設定2」タブの現在値を取得し、フォームに反映する
+ */
+async function loadSettings2() {
+  if (settings2Loading) settings2Loading.style.display = 'block';
+  if (settings2Error) settings2Error.style.display = 'none';
+  if (settings2Form) settings2Form.style.display = 'none';
+
+  try {
+    const result = await callAdminApi('getSettingsPage2');
+    if (!result.success) throw new Error(result.message || '設定の取得に失敗しました。');
+
+    if (s2CancelBuffer) s2CancelBuffer.value = result.cancelBufferHours;
+    if (s2ChangeBuffer) s2ChangeBuffer.value = result.changeBufferHours;
+
+    setRadioValue('s2-menu-selector-type', result.menuSelectorType);
+    if (s2ShowMenuMinutes) s2ShowMenuMinutes.checked = !!result.showMenuMinutes;
+    if (s2ShowMenuPrice) s2ShowMenuPrice.checked = !!result.showMenuPrice;
+
+    if (s2ShowStaffSelector) s2ShowStaffSelector.checked = !!result.showStaffSelector;
+    if (s2AllowNoAssign) s2AllowNoAssign.checked = !!result.allowNoAssign;
+    if (s2NoAssignLabel) s2NoAssignLabel.value = result.noAssignLabel || '';
+    setRadioValue('s2-no-assign-mode', String(result.noAssignMode));
+    setRadioValue('s2-no-assign-type', result.noAssignType);
+
+    if (s2MaxFutureDays) s2MaxFutureDays.value = result.maxFutureDaysToReserve;
+    if (s2DisplayDays) s2DisplayDays.value = String(result.displayDays);
+
+    if (s2HomeUrl) s2HomeUrl.value = result.homePageUrl || '';
+    if (s2HomeLabel) s2HomeLabel.value = result.homePageLabel || '';
+
+    settings2Loaded = true;
+    if (settings2Form) settings2Form.style.display = 'block';
+  } catch (error) {
+    console.error('設定2の取得エラー:', error);
+    if (settings2Error) {
+      settings2Error.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+      settings2Error.style.display = 'block';
+    }
+  } finally {
+    if (settings2Loading) settings2Loading.style.display = 'none';
+  }
+}
+
+/**
+ * name属性を指定して、ラジオボタンのうち該当する値のものだけをチェックする
+ * @param {string} name - ラジオボタンのname属性
+ * @param {string} value - チェックしたい値
+ */
+function setRadioValue(name, value) {
+  const radios = document.querySelectorAll(`input[name="${name}"]`);
+  radios.forEach(radio => {
+    radio.checked = (radio.value === value);
+  });
+}
+
+/**
+ * チェックされているラジオボタンの値を取得する
+ * @param {string} name - ラジオボタンのname属性
+ * @returns {string|null}
+ */
+function getRadioValue(name) {
+  const checked = document.querySelector(`input[name="${name}"]:checked`);
+  return checked ? checked.value : null;
+}
+
+if (settings2Form) {
+  settings2Form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (settings2Error) settings2Error.style.display = 'none';
+    if (settings2SavedMsg) settings2SavedMsg.style.display = 'none';
+    if (saveSettings2Btn) {
+      saveSettings2Btn.disabled = true;
+      saveSettings2Btn.textContent = '保存中...';
+    }
+
+    try {
+      const settings = {
+        CANCEL_BUFFER_HOURS_BEFORE_RESERVATION: parseInt(s2CancelBuffer.value, 10),
+        CHANGE_BUFFER_HOURS_BEFORE_RESERVATION: parseInt(s2ChangeBuffer.value, 10),
+        MENU_SELECTOR_TYPE: getRadioValue('s2-menu-selector-type') || 'TYPE_B',
+        SHOW_MENU_MINUTES: !!s2ShowMenuMinutes.checked,
+        SHOW_MENU_PRICE: !!s2ShowMenuPrice.checked,
+        SHOW_STAFF_SELECTOR: !!s2ShowStaffSelector.checked,
+        ALLOW_NO_ASSIGN: !!s2AllowNoAssign.checked,
+        NO_ASSIGN_LABEL: s2NoAssignLabel.value.trim() || '指名なし',
+        NO_ASSIGN_MODE: parseInt(getRadioValue('s2-no-assign-mode'), 10) || 2,
+        NO_ASSIGN_TYPE: getRadioValue('s2-no-assign-type') || 'TYPE_B',
+        MAX_FUTURE_DAYS_TO_RESERVE: parseInt(s2MaxFutureDays.value, 10),
+        DISPLAY_DAYS: parseInt(s2DisplayDays.value, 10),
+        HOME_PAGE_URL: s2HomeUrl.value.trim() || null,
+        HOME_PAGE_LABEL: s2HomeLabel.value.trim() || null
+      };
+
+      const password = sessionStorage.getItem(SESSION_STORAGE_KEY) || '';
+      const response = await fetch(CONFIG.GAS_WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'saveSettings', settings: JSON.stringify(settings), password: password })
+      });
+      const result = await response.json();
+
+      if (!result.success) throw new Error(result.message || '保存に失敗しました。');
+
+      if (settings2SavedMsg) settings2SavedMsg.style.display = 'block';
+    } catch (error) {
+      console.error('設定2の保存エラー:', error);
+      if (settings2Error) {
+        settings2Error.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+        settings2Error.style.display = 'block';
+      }
+    } finally {
+      if (saveSettings2Btn) {
+        saveSettings2Btn.disabled = false;
+        saveSettings2Btn.textContent = '保存する';
       }
     }
   });

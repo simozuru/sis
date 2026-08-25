@@ -760,3 +760,48 @@ opacity: 0.6;
 
 cursor: not-allowed;
 }
+
+.radio-group,
+.checkbox-group {
+display: flex;
+flex-direction: column;
+
+gap: 8px;
+}
+
+.radio-group label,
+.checkbox-group label {
+display: flex;
+align-items: center;
+
+gap: 8px;
+
+font-size: 14px;
+font-weight: 400;
+
+cursor: pointer;
+}
+
+.radio-group input[type="radio"],
+.checkbox-group input[type="checkbox"] {
+width: 16px;
+height: 16px;
+
+accent-color: var(--accent-color);
+}
+
+.settings-card select {
+width: 100%;
+
+padding: 10px 12px;
+
+border: 1px solid var(--border-color);
+
+border-radius: var(--radius-sm);
+
+font-size: 14px;
+
+background: var(--input-bg);
+
+color: var(--text-color);
+}

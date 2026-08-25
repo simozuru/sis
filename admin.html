@@ -38,6 +38,7 @@
     <nav class="dashboard-tabs">
       <button type="button" class="tab-btn active" data-tab="report">レポート</button>
       <button type="button" class="tab-btn" data-tab="settings1">基本設定</button>
+      <button type="button" class="tab-btn" data-tab="settings2">設定2</button>
     </nav>
     <button type="button" id="logout-btn" class="btn-logout">ログアウト</button>
   </header>
@@ -216,11 +217,99 @@
       </form>
     </section>
 
+    <!-- ==========================================
+         タブ③：設定2
+         ========================================== -->
+    <section id="tab-settings2" class="tab-page" style="display: none;">
+      <h2 class="section-title">設定2</h2>
+
+      <div id="settings2-loading" class="settings-loading">読み込み中...</div>
+      <div id="settings2-error" class="report-error" style="display: none;"></div>
+      <div id="settings2-saved-msg" class="settings-saved-msg" style="display: none;">保存しました。</div>
+
+      <form id="settings2-form" style="display: none;">
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">キャンセル・変更の受付締切</h3>
+          <div class="form-group">
+            <label for="s2-cancel-buffer">キャンセルは、来店の何時間前まで受け付けるか</label>
+            <input type="number" id="s2-cancel-buffer" min="0">
+          </div>
+          <div class="form-group">
+            <label for="s2-change-buffer">日時変更は、来店の何時間前まで受け付けるか</label>
+            <input type="number" id="s2-change-buffer" min="0">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">メニューの選び方</h3>
+          <div class="form-group radio-group">
+            <label><input type="radio" name="s2-menu-selector-type" value="TYPE_B"> チェックボックス式（複数選択できる）</label>
+            <label><input type="radio" name="s2-menu-selector-type" value="TYPE_A"> プルダウン式（1つだけ選ぶ）</label>
+          </div>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s2-show-menu-minutes"> 施術時間を表示する</label>
+            <label><input type="checkbox" id="s2-show-menu-price"> 金額を表示する</label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">担当スタッフの選択</h3>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s2-show-staff-selector"> 担当スタッフの選択欄を表示する</label>
+            <label><input type="checkbox" id="s2-allow-no-assign"> 「指名なし」を選べるようにする</label>
+          </div>
+          <div class="form-group">
+            <label for="s2-no-assign-label">「指名なし」の表示文言</label>
+            <input type="text" id="s2-no-assign-label" placeholder="指名なし">
+          </div>
+          <div class="form-group radio-group">
+            <label><input type="radio" name="s2-no-assign-mode" value="1"> 自動的に空いているスタッフに振り分ける</label>
+            <label><input type="radio" name="s2-no-assign-mode" value="2"> 振り分けず「指名なし専用カレンダー」にそのまま登録する（手動配置向け）</label>
+          </div>
+          <div class="form-group radio-group">
+            <label><input type="radio" name="s2-no-assign-type" value="TYPE_A"> 空いている人からランダムに選ぶ</label>
+            <label><input type="radio" name="s2-no-assign-type" value="TYPE_B"> スタッフ名の登録順で、空いている人を優先する</label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">予約可能な期間</h3>
+          <div class="form-group">
+            <label for="s2-max-future-days">何日先まで予約できるか</label>
+            <input type="number" id="s2-max-future-days" min="1">
+          </div>
+          <div class="form-group">
+            <label for="s2-display-days">タイムテーブルに一度に表示する日数</label>
+            <select id="s2-display-days">
+              <option value="1">1日分</option>
+              <option value="3">3日分</option>
+              <option value="7">1週間分</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">トップページに戻るボタン</h3>
+          <div class="form-group">
+            <label for="s2-home-url">リンク先URL（空欄にするとボタン自体が非表示になります）</label>
+            <input type="text" id="s2-home-url" placeholder="https://example.com">
+          </div>
+          <div class="form-group">
+            <label for="s2-home-label">ボタンの文言</label>
+            <input type="text" id="s2-home-label" placeholder="トップページに戻る">
+          </div>
+        </div>
+
+        <button type="submit" id="save-settings2-btn" class="btn-save-settings">保存する</button>
+      </form>
+    </section>
+
   </main>
 </div>
 
-<script src="./js/config.js?v=1.4.0"></script>
-<script src="./js/admin.js?v=1.4.0"></script>
+<script src="./js/config.js?v=1.5.0"></script>
+<script src="./js/admin.js?v=1.5.0"></script>
 
 </body>
 </html>
