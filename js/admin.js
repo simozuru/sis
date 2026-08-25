@@ -82,6 +82,27 @@ const s2DisplayDays = document.getElementById('s2-display-days');
 const s2HomeUrl = document.getElementById('s2-home-url');
 const s2HomeLabel = document.getElementById('s2-home-label');
 const saveSettings2Btn = document.getElementById('save-settings2-btn');
+let settings3Loaded = false;
+
+const settings3Loading = document.getElementById('settings3-loading');
+const settings3Error = document.getElementById('settings3-error');
+const settings3SavedMsg = document.getElementById('settings3-saved-msg');
+const settings3Form = document.getElementById('settings3-form');
+const s3ProvisionalEnabled = document.getElementById('s3-provisional-enabled');
+const s3ProvisionalTargetMenus = document.getElementById('s3-provisional-target-menus');
+const s3ProvisionalDeadline = document.getElementById('s3-provisional-deadline');
+const s3CalendarSyncEnabled = document.getElementById('s3-calendar-sync-enabled');
+const s3InfoEnabled = document.getElementById('s3-info-enabled');
+const s3InfoHeading = document.getElementById('s3-info-heading');
+const infoItemRows = document.getElementById('info-item-rows');
+const saveSettings3Btn = document.getElementById('save-settings3-btn');
+
+const INFO_ICON_OPTIONS = [
+  { value: 'store', label: 'お店情報アイコン' },
+  { value: 'menu', label: 'メニューアイコン' },
+  { value: 'map', label: 'マップアイコン' },
+  { value: 'staff', label: 'スタッフアイコン' }
+];
 
 // レポートの種類ごとに、表示するカードの要素IDを対応させておく
 const REPORT_CARD_MAP = {
@@ -192,6 +213,9 @@ if (tabButtons) {
       }
       if (targetTab === 'settings2' && !settings2Loaded) {
         loadSettings2();
+      }
+      if (targetTab === 'settings3' && !settings3Loaded) {
+        loadSettings3();
       }
     });
   });
@@ -863,6 +887,176 @@ if (settings2Form) {
       }
     }
   });
+}
+
+/**
+ * 「設定3」タブの現在値を取得し、フォームに反映する
+ */
+async function loadSettings3() {
+  if (settings3Loading) settings3Loading.style.display = 'block';
+  if (settings3Error) settings3Error.style.display = 'none';
+  if (settings3Form) settings3Form.style.display = 'none';
+
+  try {
+    const result = await callAdminApi('getSettingsPage3');
+    if (!result.success) throw new Error(result.message || '設定の取得に失敗しました。');
+
+    const provisional = result.provisionalReservation || {};
+    if (s3ProvisionalEnabled) s3ProvisionalEnabled.checked = !!provisional.enabled;
+    setRadioValue('s3-provisional-target', provisional.target || 'ALL');
+    if (s3ProvisionalTargetMenus) s3ProvisionalTargetMenus.value = (provisional.targetMenus || []).join(',');
+    if (s3ProvisionalDeadline) s3ProvisionalDeadline.value = provisional.confirmDeadlineHours || 12;
+    setRadioValue('s3-provisional-auto-action', provisional.autoAction || 'NONE');
+
+    if (s3CalendarSyncEnabled) s3CalendarSyncEnabled.checked = !!result.calendarSyncEnabled;
+
+    const info = result.infoSection || {};
+    if (s3InfoEnabled) s3InfoEnabled.checked = !!info.enabled;
+    if (s3InfoHeading) s3InfoHeading.value = (info.heading && info.heading.text) || '';
+    renderInfoItemRows(info.items || []);
+
+    settings3Loaded = true;
+    if (settings3Form) settings3Form.style.display = 'block';
+  } catch (error) {
+    console.error('設定3の取得エラー:', error);
+    if (settings3Error) {
+      settings3Error.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+      settings3Error.style.display = 'block';
+    }
+  } finally {
+    if (settings3Loading) settings3Loading.style.display = 'none';
+  }
+}
+
+/**
+ * 情報セクションのカード入力欄（固定4枠）を描画する
+ * @param {Array} items - 既存のカード設定（0〜4件）
+ */
+function renderInfoItemRows(items) {
+  if (!infoItemRows) return;
+
+  const iconOptionsHtml = INFO_ICON_OPTIONS.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('');
+
+  let html = '';
+  for (let i = 0; i < 4; i++) {
+    const item = items[i] || {};
+    const isUrlType = !!item.url && !item.page;
+    html += `
+      <div class="info-item-block" data-slot="${i}">
+        <div class="info-item-block-title">カード${i + 1}（空欄のままなら、このカードは表示されません）</div>
+        <div class="form-group">
+          <label>アイコン</label>
+          <select class="info-icon-select">${iconOptionsHtml}</select>
+        </div>
+        <div class="form-group">
+          <label>タイトル</label>
+          <input type="text" class="info-title-input" value="${escapeHtmlAdmin(item.title || '')}" placeholder="例：お店情報">
+        </div>
+        <div class="form-group">
+          <label>説明文</label>
+          <input type="text" class="info-desc-input" value="${escapeHtmlAdmin(item.description || '')}" placeholder="例：サロンの詳しい情報はこちら">
+        </div>
+        <div class="info-item-link-type">
+          <label><input type="radio" name="info-link-type-${i}" value="page" ${!isUrlType ? 'checked' : ''}> サイト内のページ（1〜4）</label>
+          <label><input type="radio" name="info-link-type-${i}" value="url" ${isUrlType ? 'checked' : ''}> 外部URL</label>
+        </div>
+        <div class="form-group">
+          <label>ページ番号 または URL</label>
+          <input type="text" class="info-link-value-input" value="${escapeHtmlAdmin(isUrlType ? item.url : (item.page || ''))}" placeholder="例：1 または https://example.com">
+        </div>
+      </div>
+    `;
+  }
+  infoItemRows.innerHTML = html;
+
+  // 読み込んだアイコンの選択状態を反映する（HTML文字列にselectedを埋め込むより、後からJSで設定する方が安全）
+  items.forEach((item, i) => {
+    const select = infoItemRows.querySelector(`.info-item-block[data-slot="${i}"] .info-icon-select`);
+    if (select && item.icon) select.value = item.icon;
+  });
+}
+
+if (settings3Form) {
+  settings3Form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (settings3Error) settings3Error.style.display = 'none';
+    if (settings3SavedMsg) settings3SavedMsg.style.display = 'none';
+    if (saveSettings3Btn) {
+      saveSettings3Btn.disabled = true;
+      saveSettings3Btn.textContent = '保存中...';
+    }
+
+    try {
+      const targetMenus = s3ProvisionalTargetMenus.value.split(',').map(m => m.trim()).filter(m => m.length > 0);
+
+      const settings = {
+        PROVISIONAL_RESERVATION: {
+          enabled: !!s3ProvisionalEnabled.checked,
+          target: getRadioValue('s3-provisional-target') || 'ALL',
+          targetMenus: targetMenus,
+          confirmDeadlineHours: parseInt(s3ProvisionalDeadline.value, 10) || 12,
+          autoAction: getRadioValue('s3-provisional-auto-action') || 'NONE'
+        },
+        CALENDAR_SYNC_ENABLED: !!s3CalendarSyncEnabled.checked,
+        INFO_SECTION: {
+          enabled: !!s3InfoEnabled.checked,
+          heading: { text: s3InfoHeading.value.trim() || null, fontSize: null, color: null, fontFamily: null },
+          items: collectInfoItems()
+        }
+      };
+
+      const password = sessionStorage.getItem(SESSION_STORAGE_KEY) || '';
+      const response = await fetch(CONFIG.GAS_WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'saveSettings', settings: JSON.stringify(settings), password: password })
+      });
+      const result = await response.json();
+
+      if (!result.success) throw new Error(result.message || '保存に失敗しました。');
+
+      if (settings3SavedMsg) settings3SavedMsg.style.display = 'block';
+    } catch (error) {
+      console.error('設定3の保存エラー:', error);
+      if (settings3Error) {
+        settings3Error.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+        settings3Error.style.display = 'block';
+      }
+    } finally {
+      if (saveSettings3Btn) {
+        saveSettings3Btn.disabled = false;
+        saveSettings3Btn.textContent = '保存する';
+      }
+    }
+  });
+}
+
+/**
+ * 情報セクションの4枠から、タイトルが入力されているものだけを取り出して配列にする
+ * @returns {Array} INFO_SECTION.items に渡す配列
+ */
+function collectInfoItems() {
+  const items = [];
+  document.querySelectorAll('.info-item-block').forEach(block => {
+    const title = block.querySelector('.info-title-input').value.trim();
+    if (!title) return; // タイトル未入力の枠は、カードとして保存しない
+
+    const icon = block.querySelector('.info-icon-select').value;
+    const description = block.querySelector('.info-desc-input').value.trim();
+    const slot = block.getAttribute('data-slot');
+    const linkType = getRadioValue(`info-link-type-${slot}`);
+    const linkValue = block.querySelector('.info-link-value-input').value.trim();
+
+    const item = { icon: icon, title: title, description: description };
+    if (linkType === 'url') {
+      item.url = linkValue;
+    } else {
+      const pageNum = parseInt(linkValue, 10);
+      if (!isNaN(pageNum)) item.page = pageNum;
+    }
+    items.push(item);
+  });
+  return items;
 }
 
 if (runReportBtn) {

@@ -39,6 +39,7 @@
       <button type="button" class="tab-btn active" data-tab="report">レポート</button>
       <button type="button" class="tab-btn" data-tab="settings1">基本設定</button>
       <button type="button" class="tab-btn" data-tab="settings2">設定2</button>
+      <button type="button" class="tab-btn" data-tab="settings3">設定3</button>
     </nav>
     <button type="button" id="logout-btn" class="btn-logout">ログアウト</button>
   </header>
@@ -305,11 +306,73 @@
       </form>
     </section>
 
+    <!-- ==========================================
+         タブ④：設定3
+         ========================================== -->
+    <section id="tab-settings3" class="tab-page" style="display: none;">
+      <h2 class="section-title">設定3</h2>
+
+      <div id="settings3-loading" class="settings-loading">読み込み中...</div>
+      <div id="settings3-error" class="report-error" style="display: none;"></div>
+      <div id="settings3-saved-msg" class="settings-saved-msg" style="display: none;">保存しました。</div>
+
+      <form id="settings3-form" style="display: none;">
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">仮予約制度</h3>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s3-provisional-enabled"> 仮予約制度を使う</label>
+          </div>
+          <div class="form-group radio-group">
+            <label><input type="radio" name="s3-provisional-target" value="ALL"> 全員を仮予約対象にする</label>
+            <label><input type="radio" name="s3-provisional-target" value="NEW_ONLY"> 新規のお客様だけ対象にする</label>
+            <label><input type="radio" name="s3-provisional-target" value="MENU_ONLY"> 特定のメニューだけ対象にする</label>
+          </div>
+          <div class="form-group">
+            <label for="s3-provisional-target-menus">対象メニュー（「特定のメニューだけ」を選んだ時のみ有効。カンマ区切りで複数指定可）</label>
+            <input type="text" id="s3-provisional-target-menus" placeholder="例：ヘアブリーチ,縮毛矯正">
+          </div>
+          <div class="form-group">
+            <label for="s3-provisional-deadline">確認期限（受付から何時間以内に確定するか）</label>
+            <input type="number" id="s3-provisional-deadline" min="1">
+          </div>
+          <div class="form-group radio-group">
+            <label><input type="radio" name="s3-provisional-auto-action" value="NONE"> 自動処理なし（手動で確認・キャンセル）</label>
+            <label><input type="radio" name="s3-provisional-auto-action" value="AUTO_CANCEL"> 期限を過ぎたら自動キャンセル</label>
+            <label><input type="radio" name="s3-provisional-auto-action" value="AUTO_CONFIRM"> 期限を過ぎたら自動的に本予約として確定</label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">カレンダーでの直接編集を自動検知する機能</h3>
+          <p class="settings-card-note">スタッフがGoogleカレンダー上で予定を直接ドラッグ移動した時、その内容をスプレッドシートにも反映する機能です。OFFにしても、予約自体の受付・カレンダーへの反映は今まで通り動きます。</p>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s3-calendar-sync-enabled"> 使う</label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">情報セクション（トップ下部の案内リンク集）</h3>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s3-info-enabled"> 表示する</label>
+          </div>
+          <div class="form-group">
+            <label for="s3-info-heading">見出し文言（空欄で「Information」）</label>
+            <input type="text" id="s3-info-heading" placeholder="Information">
+          </div>
+
+          <div id="info-item-rows"></div>
+        </div>
+
+        <button type="submit" id="save-settings3-btn" class="btn-save-settings">保存する</button>
+      </form>
+    </section>
+
   </main>
 </div>
 
-<script src="./js/config.js?v=1.5.0"></script>
-<script src="./js/admin.js?v=1.5.0"></script>
+<script src="./js/config.js?v=1.6.0"></script>
+<script src="./js/admin.js?v=1.6.0"></script>
 
 </body>
 </html>
