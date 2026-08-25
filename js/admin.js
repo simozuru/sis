@@ -49,38 +49,41 @@ const settings1Loading = document.getElementById('settings1-loading');
 const settings1Error = document.getElementById('settings1-error');
 const settings1SavedMsg = document.getElementById('settings1-saved-msg');
 const settings1Form = document.getElementById('settings1-form');
-const s1ShopName = document.getElementById('s1-shop-name');
-const s1LogoUrl = document.getElementById('s1-logo-url');
-const s1ContactPhone = document.getElementById('s1-contact-phone');
-const s1ContactHours = document.getElementById('s1-contact-hours');
-const s1ContactClosed = document.getElementById('s1-contact-closed');
+const s1SlotStepMinutes = document.getElementById('s1-slot-step-minutes');
 const businessHoursRows = document.getElementById('business-hours-rows');
 const menuMasterRows = document.getElementById('menu-master-rows');
 const addMenuRowBtn = document.getElementById('add-menu-row-btn');
+const s1ShowMenuMinutes = document.getElementById('s1-show-menu-minutes');
+const s1ShowMenuPrice = document.getElementById('s1-show-menu-price');
+const s1ProvisionalEnabled = document.getElementById('s1-provisional-enabled');
+const s1ProvisionalTargetMenus = document.getElementById('s1-provisional-target-menus');
+const s1ProvisionalDeadline = document.getElementById('s1-provisional-deadline');
 const staffNameRows = document.getElementById('staff-name-rows');
-const s1MaxCapacity = document.getElementById('s1-max-capacity');
-const s1ReminderDays = document.getElementById('s1-reminder-days');
+const s1ShowStaffSelector = document.getElementById('s1-show-staff-selector');
+const s1AllowNoAssign = document.getElementById('s1-allow-no-assign');
+const s1NoAssignLabel = document.getElementById('s1-no-assign-label');
 const saveSettings1Btn = document.getElementById('save-settings1-btn');
 
 const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
 let settings1Loaded = false; // タブを開くたびに再取得しないよう、読み込み済みかどうかを覚えておく
+let baseSlotMinutesForConversion = 5; // ページ1取得時にサーバー側の値で更新する（分↔スロット変換用）
 let settings2Loaded = false;
 
 const settings2Loading = document.getElementById('settings2-loading');
 const settings2Error = document.getElementById('settings2-error');
 const settings2SavedMsg = document.getElementById('settings2-saved-msg');
 const settings2Form = document.getElementById('settings2-form');
+const s2MaxCapacity = document.getElementById('s2-max-capacity');
+const s2ReminderDays = document.getElementById('s2-reminder-days');
+const s2AdminEmail = document.getElementById('s2-admin-email');
+const s2HistoryRetention = document.getElementById('s2-history-retention');
+const s2BufferMinutes = document.getElementById('s2-buffer-minutes');
+const s2MailHeader = document.getElementById('s2-mail-header');
+const s2MailFooter = document.getElementById('s2-mail-footer');
 const s2CancelBuffer = document.getElementById('s2-cancel-buffer');
 const s2ChangeBuffer = document.getElementById('s2-change-buffer');
-const s2ShowMenuMinutes = document.getElementById('s2-show-menu-minutes');
-const s2ShowMenuPrice = document.getElementById('s2-show-menu-price');
-const s2ShowStaffSelector = document.getElementById('s2-show-staff-selector');
-const s2AllowNoAssign = document.getElementById('s2-allow-no-assign');
-const s2NoAssignLabel = document.getElementById('s2-no-assign-label');
 const s2MaxFutureDays = document.getElementById('s2-max-future-days');
 const s2DisplayDays = document.getElementById('s2-display-days');
-const s2HomeUrl = document.getElementById('s2-home-url');
-const s2HomeLabel = document.getElementById('s2-home-label');
 const saveSettings2Btn = document.getElementById('save-settings2-btn');
 let settings3Loaded = false;
 
@@ -88,9 +91,13 @@ const settings3Loading = document.getElementById('settings3-loading');
 const settings3Error = document.getElementById('settings3-error');
 const settings3SavedMsg = document.getElementById('settings3-saved-msg');
 const settings3Form = document.getElementById('settings3-form');
-const s3ProvisionalEnabled = document.getElementById('s3-provisional-enabled');
-const s3ProvisionalTargetMenus = document.getElementById('s3-provisional-target-menus');
-const s3ProvisionalDeadline = document.getElementById('s3-provisional-deadline');
+const s3ShopName = document.getElementById('s3-shop-name');
+const s3LogoUrl = document.getElementById('s3-logo-url');
+const s3ContactPhone = document.getElementById('s3-contact-phone');
+const s3ContactHours = document.getElementById('s3-contact-hours');
+const s3ContactClosed = document.getElementById('s3-contact-closed');
+const s3HomeUrl = document.getElementById('s3-home-url');
+const s3HomeLabel = document.getElementById('s3-home-label');
 const s3InfoEnabled = document.getElementById('s3-info-enabled');
 const s3InfoHeading = document.getElementById('s3-info-heading');
 const infoItemRows = document.getElementById('info-item-rows');
@@ -563,16 +570,9 @@ async function loadSettings1() {
     const result = await callAdminApi('getSettingsPage1');
     if (!result.success) throw new Error(result.message || '設定の取得に失敗しました。');
 
-    // 店名・ロゴ
-    const branding = result.headerBranding || {};
-    if (s1ShopName) s1ShopName.value = branding.shopName || '';
-    if (s1LogoUrl) s1LogoUrl.value = branding.logoUrl || '';
-
-    // 連絡先情報
-    const contact = result.headerContactInfo || {};
-    if (s1ContactPhone) s1ContactPhone.value = contact.phone || '';
-    if (s1ContactHours) s1ContactHours.value = contact.hours || '';
-    if (s1ContactClosed) s1ContactClosed.value = contact.closedDay || '';
+    // 予約枠の刻み幅（内部はスロット数だが、画面上は分で表示する）
+    baseSlotMinutesForConversion = result.baseSlotMinutes || 5;
+    if (s1SlotStepMinutes) s1SlotStepMinutes.value = result.displaySlotStepMinutes || 30;
 
     // 営業時間
     renderBusinessHoursRows(result.business || {}, result.lastOrderOverride || {});
@@ -580,12 +580,28 @@ async function loadSettings1() {
     // メニュー・料金
     renderMenuMasterRows(result.menuMaster || {});
 
+    // メニューの選び方
+    setRadioValue('s1-menu-selector-type', result.menuSelectorType || 'TYPE_B');
+    if (s1ShowMenuMinutes) s1ShowMenuMinutes.checked = !!result.showMenuMinutes;
+    if (s1ShowMenuPrice) s1ShowMenuPrice.checked = !!result.showMenuPrice;
+
+    // 仮予約制度
+    const provisional = result.provisionalReservation || {};
+    if (s1ProvisionalEnabled) s1ProvisionalEnabled.checked = !!provisional.enabled;
+    setRadioValue('s1-provisional-target', provisional.target || 'ALL');
+    if (s1ProvisionalTargetMenus) s1ProvisionalTargetMenus.value = (provisional.targetMenus || []).join(',');
+    if (s1ProvisionalDeadline) s1ProvisionalDeadline.value = provisional.confirmDeadlineHours || 12;
+    setRadioValue('s1-provisional-auto-action', provisional.autoAction || 'NONE');
+
     // スタッフ名（カレンダーIDは隠しdata属性として保持しておく）
     renderStaffNameRows(result.staffMaster || {});
 
-    // その他
-    if (s1MaxCapacity) s1MaxCapacity.value = result.maxCapacity;
-    if (s1ReminderDays) s1ReminderDays.value = result.reminderMailDaysBefore;
+    // 担当スタッフの選択
+    if (s1ShowStaffSelector) s1ShowStaffSelector.checked = !!result.showStaffSelector;
+    if (s1AllowNoAssign) s1AllowNoAssign.checked = !!result.allowNoAssign;
+    if (s1NoAssignLabel) s1NoAssignLabel.value = result.noAssignLabel || '';
+    setRadioValue('s1-no-assign-mode', String(result.noAssignMode));
+    setRadioValue('s1-no-assign-type', result.noAssignType);
 
     settings1Loaded = true;
     if (settings1Form) settings1Form.style.display = 'block';
@@ -705,16 +721,11 @@ function renderStaffNameRows(staffMaster) {
 function collectSettings1FormData() {
   const settings = {};
 
-  // 店名・ロゴ（両方空なら null にして「未設定」に戻す）
-  const shopName = s1ShopName ? s1ShopName.value.trim() : '';
-  const logoUrl = s1LogoUrl ? s1LogoUrl.value.trim() : '';
-  settings.HEADER_BRANDING = (shopName || logoUrl) ? { shopName: shopName || null, logoUrl: logoUrl || null } : null;
-
-  // 連絡先情報
-  const phone = s1ContactPhone ? s1ContactPhone.value.trim() : '';
-  const hours = s1ContactHours ? s1ContactHours.value.trim() : '';
-  const closedDay = s1ContactClosed ? s1ContactClosed.value.trim() : '';
-  settings.HEADER_CONTACT_INFO = (phone || hours || closedDay) ? { phone: phone || null, hours: hours || null, closedDay: closedDay || null } : null;
+  // 予約枠の刻み幅（画面上の「分」を、内部のスロット数に変換して保存する）
+  const stepMinutes = s1SlotStepMinutes ? parseInt(s1SlotStepMinutes.value, 10) : 30;
+  if (!isNaN(stepMinutes) && stepMinutes > 0) {
+    settings.DISPLAY_SLOT_STEP = Math.round(stepMinutes / baseSlotMinutesForConversion);
+  }
 
   // 営業時間
   const business = {};
@@ -755,6 +766,21 @@ function collectSettings1FormData() {
   });
   settings.MENU_MASTER = menuMaster;
 
+  // メニューの選び方
+  settings.MENU_SELECTOR_TYPE = getRadioValue('s1-menu-selector-type') || 'TYPE_B';
+  settings.SHOW_MENU_MINUTES = !!s1ShowMenuMinutes.checked;
+  settings.SHOW_MENU_PRICE = !!s1ShowMenuPrice.checked;
+
+  // 仮予約制度
+  const targetMenus = s1ProvisionalTargetMenus.value.split(',').map(m => m.trim()).filter(m => m.length > 0);
+  settings.PROVISIONAL_RESERVATION = {
+    enabled: !!s1ProvisionalEnabled.checked,
+    target: getRadioValue('s1-provisional-target') || 'ALL',
+    targetMenus: targetMenus,
+    confirmDeadlineHours: parseInt(s1ProvisionalDeadline.value, 10) || 12,
+    autoAction: getRadioValue('s1-provisional-auto-action') || 'NONE'
+  };
+
   // スタッフ名（カレンダーIDは、読み込み時に保持しておいたものをそのまま使う）
   const staffMaster = {};
   document.querySelectorAll('.staff-name-row').forEach(row => {
@@ -766,9 +792,12 @@ function collectSettings1FormData() {
   });
   settings.STAFF_MASTER = staffMaster;
 
-  // その他
-  if (s1MaxCapacity && s1MaxCapacity.value !== '') settings.MAX_CAPACITY = parseInt(s1MaxCapacity.value, 10);
-  if (s1ReminderDays && s1ReminderDays.value !== '') settings.REMINDER_MAIL_DAYS_BEFORE = parseInt(s1ReminderDays.value, 10);
+  // 担当スタッフの選択
+  settings.SHOW_STAFF_SELECTOR = !!s1ShowStaffSelector.checked;
+  settings.ALLOW_NO_ASSIGN = !!s1AllowNoAssign.checked;
+  settings.NO_ASSIGN_LABEL = s1NoAssignLabel.value.trim() || '指名なし';
+  settings.NO_ASSIGN_MODE = parseInt(getRadioValue('s1-no-assign-mode'), 10) || 2;
+  settings.NO_ASSIGN_TYPE = getRadioValue('s1-no-assign-type') || 'TYPE_B';
 
   return settings;
 }
@@ -824,24 +853,20 @@ async function loadSettings2() {
     const result = await callAdminApi('getSettingsPage2');
     if (!result.success) throw new Error(result.message || '設定の取得に失敗しました。');
 
+    if (s2MaxCapacity) s2MaxCapacity.value = result.maxCapacity;
+    if (s2ReminderDays) s2ReminderDays.value = result.reminderMailDaysBefore;
+    if (s2AdminEmail) s2AdminEmail.value = result.adminEmail || '';
+    if (s2HistoryRetention) s2HistoryRetention.value = result.historyRetentionMonths;
+    if (s2BufferMinutes) s2BufferMinutes.value = result.bufferMinutesBeforeReservation;
+
+    if (s2MailHeader) s2MailHeader.value = result.customerMailHeader || '';
+    if (s2MailFooter) s2MailFooter.value = result.customerMailFooter || '';
+
     if (s2CancelBuffer) s2CancelBuffer.value = result.cancelBufferHours;
     if (s2ChangeBuffer) s2ChangeBuffer.value = result.changeBufferHours;
 
-    setRadioValue('s2-menu-selector-type', result.menuSelectorType);
-    if (s2ShowMenuMinutes) s2ShowMenuMinutes.checked = !!result.showMenuMinutes;
-    if (s2ShowMenuPrice) s2ShowMenuPrice.checked = !!result.showMenuPrice;
-
-    if (s2ShowStaffSelector) s2ShowStaffSelector.checked = !!result.showStaffSelector;
-    if (s2AllowNoAssign) s2AllowNoAssign.checked = !!result.allowNoAssign;
-    if (s2NoAssignLabel) s2NoAssignLabel.value = result.noAssignLabel || '';
-    setRadioValue('s2-no-assign-mode', String(result.noAssignMode));
-    setRadioValue('s2-no-assign-type', result.noAssignType);
-
     if (s2MaxFutureDays) s2MaxFutureDays.value = result.maxFutureDaysToReserve;
     if (s2DisplayDays) s2DisplayDays.value = String(result.displayDays);
-
-    if (s2HomeUrl) s2HomeUrl.value = result.homePageUrl || '';
-    if (s2HomeLabel) s2HomeLabel.value = result.homePageLabel || '';
 
     settings2Loaded = true;
     if (settings2Form) settings2Form.style.display = 'block';
@@ -891,20 +916,17 @@ if (settings2Form) {
 
     try {
       const settings = {
+        MAX_CAPACITY: parseInt(s2MaxCapacity.value, 10),
+        REMINDER_MAIL_DAYS_BEFORE: parseInt(s2ReminderDays.value, 10),
+        ADMIN_EMAIL: s2AdminEmail.value.trim(),
+        HISTORY_RETENTION_MONTHS: parseInt(s2HistoryRetention.value, 10),
+        BUFFER_MINUTES_BEFORE_RESERVATION: parseInt(s2BufferMinutes.value, 10),
+        CUSTOMER_MAIL_HEADER: s2MailHeader.value,
+        CUSTOMER_MAIL_FOOTER: s2MailFooter.value,
         CANCEL_BUFFER_HOURS_BEFORE_RESERVATION: parseInt(s2CancelBuffer.value, 10),
         CHANGE_BUFFER_HOURS_BEFORE_RESERVATION: parseInt(s2ChangeBuffer.value, 10),
-        MENU_SELECTOR_TYPE: getRadioValue('s2-menu-selector-type') || 'TYPE_B',
-        SHOW_MENU_MINUTES: !!s2ShowMenuMinutes.checked,
-        SHOW_MENU_PRICE: !!s2ShowMenuPrice.checked,
-        SHOW_STAFF_SELECTOR: !!s2ShowStaffSelector.checked,
-        ALLOW_NO_ASSIGN: !!s2AllowNoAssign.checked,
-        NO_ASSIGN_LABEL: s2NoAssignLabel.value.trim() || '指名なし',
-        NO_ASSIGN_MODE: parseInt(getRadioValue('s2-no-assign-mode'), 10) || 2,
-        NO_ASSIGN_TYPE: getRadioValue('s2-no-assign-type') || 'TYPE_B',
         MAX_FUTURE_DAYS_TO_RESERVE: parseInt(s2MaxFutureDays.value, 10),
-        DISPLAY_DAYS: parseInt(s2DisplayDays.value, 10),
-        HOME_PAGE_URL: s2HomeUrl.value.trim() || null,
-        HOME_PAGE_LABEL: s2HomeLabel.value.trim() || null
+        DISPLAY_DAYS: parseInt(s2DisplayDays.value, 10)
       };
 
       const password = sessionStorage.getItem(SESSION_STORAGE_KEY) || '';
@@ -944,15 +966,22 @@ async function loadSettings3() {
     const result = await callAdminApi('getSettingsPage3');
     if (!result.success) throw new Error(result.message || '設定の取得に失敗しました。');
 
-    const provisional = result.provisionalReservation || {};
-    if (s3ProvisionalEnabled) s3ProvisionalEnabled.checked = !!provisional.enabled;
-    setRadioValue('s3-provisional-target', provisional.target || 'ALL');
-    if (s3ProvisionalTargetMenus) s3ProvisionalTargetMenus.value = (provisional.targetMenus || []).join(',');
-    if (s3ProvisionalDeadline) s3ProvisionalDeadline.value = provisional.confirmDeadlineHours || 12;
-    setRadioValue('s3-provisional-auto-action', provisional.autoAction || 'NONE');
+    // 店名・ロゴ
+    const branding = result.headerBranding || {};
+    if (s3ShopName) s3ShopName.value = branding.shopName || '';
+    if (s3LogoUrl) s3LogoUrl.value = branding.logoUrl || '';
 
+    // 連絡先情報
+    const contact = result.headerContactInfo || {};
+    if (s3ContactPhone) s3ContactPhone.value = contact.phone || '';
+    if (s3ContactHours) s3ContactHours.value = contact.hours || '';
+    if (s3ContactClosed) s3ContactClosed.value = contact.closedDay || '';
 
+    // トップページに戻るボタン
+    if (s3HomeUrl) s3HomeUrl.value = result.homePageUrl || '';
+    if (s3HomeLabel) s3HomeLabel.value = result.homePageLabel || '';
 
+    // 情報セクション
     const info = result.infoSection || {};
     if (s3InfoEnabled) s3InfoEnabled.checked = !!info.enabled;
     if (s3InfoHeading) s3InfoHeading.value = (info.heading && info.heading.text) || '';
@@ -1075,16 +1104,22 @@ if (settings3Form) {
     }
 
     try {
-      const targetMenus = s3ProvisionalTargetMenus.value.split(',').map(m => m.trim()).filter(m => m.length > 0);
+      // 店名・ロゴ（両方空なら null にして「未設定」に戻す）
+      const shopName = s3ShopName.value.trim();
+      const logoUrl = s3LogoUrl.value.trim();
+      const headerBranding = (shopName || logoUrl) ? { shopName: shopName || null, logoUrl: logoUrl || null } : null;
+
+      // 連絡先情報
+      const phone = s3ContactPhone.value.trim();
+      const hours = s3ContactHours.value.trim();
+      const closedDay = s3ContactClosed.value.trim();
+      const headerContactInfo = (phone || hours || closedDay) ? { phone: phone || null, hours: hours || null, closedDay: closedDay || null } : null;
 
       const settings = {
-        PROVISIONAL_RESERVATION: {
-          enabled: !!s3ProvisionalEnabled.checked,
-          target: getRadioValue('s3-provisional-target') || 'ALL',
-          targetMenus: targetMenus,
-          confirmDeadlineHours: parseInt(s3ProvisionalDeadline.value, 10) || 12,
-          autoAction: getRadioValue('s3-provisional-auto-action') || 'NONE'
-        },
+        HEADER_BRANDING: headerBranding,
+        HEADER_CONTACT_INFO: headerContactInfo,
+        HOME_PAGE_URL: s3HomeUrl.value.trim() || null,
+        HOME_PAGE_LABEL: s3HomeLabel.value.trim() || null,
         INFO_SECTION: {
           enabled: !!s3InfoEnabled.checked,
           heading: { text: s3InfoHeading.value.trim() || null, fontSize: null, color: null, fontFamily: null },

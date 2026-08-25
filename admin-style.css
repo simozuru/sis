@@ -606,7 +606,8 @@ margin-bottom: 0;
 }
 
 .settings-card input[type="text"],
-.settings-card input[type="number"] {
+.settings-card input[type="number"],
+.settings-card textarea {
 width: 100%;
 
 padding: 10px 12px;
@@ -620,6 +621,14 @@ font-size: 14px;
 background: var(--input-bg);
 
 color: var(--text-color);
+}
+
+.settings-card textarea {
+resize: vertical;
+
+font-family: inherit;
+
+line-height: 1.6;
 }
 
 .business-hours-row,
