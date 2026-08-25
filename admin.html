@@ -158,19 +158,19 @@
       <form id="settings1-form" style="display: none;">
 
         <div class="settings-card">
-          <h3 class="settings-card-title">店名・ロゴ</h3>
+          <h3 class="settings-card-title">左上部、店名・ロゴ</h3>
           <div class="form-group">
-            <label for="s1-shop-name">店舗名（未入力時「SIS Web Reservation」が表示）</label>
+            <label for="s1-shop-name">店舗名（未入力「SIS Web Reservation」が表示）</label>
             <input type="text" id="s1-shop-name" placeholder="例：美容室〇〇">
           </div>
           <div class="form-group">
-            <label for="s1-logo-url">ロゴ画像のURL（未入力、表示なし）</label>
+            <label for="s1-logo-url">ロゴ画像のURL（未入力表示なし）</label>
             <input type="text" id="s1-logo-url" placeholder="https://example.com/logo.png">
           </div>
         </div>
 
         <div class="settings-card">
-          <h3 class="settings-card-title">上部右部、情報（未入力、表示なし）</h3>
+          <h3 class="settings-card-title">左上部、情報（未入力表示なし）</h3>
           <div class="form-group">
             <label for="s1-contact-phone">１段目</label>
             <input type="text" id="s1-contact-phone" placeholder="例：電話番号 〇〇〇-〇〇〇〇ー〇〇〇〇">
@@ -187,6 +187,7 @@
 
         <div class="settings-card">
           <h3 class="settings-card-title">営業時間</h3>
+          <p class="settings-card-note">「最終受付制」にチェックを入れると、その曜日だけ、メニューの所要時間に関わらず決まった時刻で新規受付を締め切り、実際の終了時刻の上限も別に設定できます（チェックを外した曜日は、通常通り閉店時刻がそのまま最終受付になります）。</p>
           <div id="business-hours-rows" class="business-hours-rows"></div>
         </div>
 
@@ -363,8 +364,8 @@
   </main>
 </div>
 
-<script src="./js/config.js?v=1.7.1"></script>
-<script src="./js/admin.js?v=1.7.1"></script>
+<script src="./js/config.js?v=1.8.0"></script>
+<script src="./js/admin.js?v=1.8.0"></script>
 
 </body>
 </html>

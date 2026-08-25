@@ -575,7 +575,7 @@ async function loadSettings1() {
     if (s1ContactClosed) s1ContactClosed.value = contact.closedDay || '';
 
     // 営業時間
-    renderBusinessHoursRows(result.business || {});
+    renderBusinessHoursRows(result.business || {}, result.lastOrderOverride || {});
 
     // メニュー・料金
     renderMenuMasterRows(result.menuMaster || {});
@@ -604,13 +604,21 @@ async function loadSettings1() {
  * 営業時間の入力行を、日〜土の7行分描画する
  * @param {Object} business - { 曜日番号: [開始時, 閉店時] }
  */
-function renderBusinessHoursRows(business) {
+function renderBusinessHoursRows(business, lastOrderOverride) {
   if (!businessHoursRows) return;
+
+  lastOrderOverride = lastOrderOverride || {};
 
   businessHoursRows.innerHTML = DAY_LABELS.map((label, dayIndex) => {
     const hours = business[dayIndex] || business[String(dayIndex)] || null;
     const openHour = hours ? hours[0] : '';
     const closeHour = hours ? hours[1] : '';
+
+    const override = lastOrderOverride[dayIndex] || lastOrderOverride[String(dayIndex)] || null;
+    const hasOverride = !!override;
+    const lastOrderTime = override ? override.lastOrderTime : '';
+    const overrideCloseTime = override ? override.closeTime : '';
+
     return `
       <div class="business-hours-row" data-day="${dayIndex}">
         <span class="day-label">${label}曜日</span>
@@ -619,8 +627,23 @@ function renderBusinessHoursRows(business) {
         <input type="number" class="business-close-input" min="0" max="23" value="${closeHour}" placeholder="休">
         <span class="time-sep">時</span>
       </div>
+      <div class="last-order-row" data-day="${dayIndex}">
+        <label><input type="checkbox" class="last-order-check" ${hasOverride ? 'checked' : ''}> 最終受付制を設定する</label>
+        <span class="last-order-time-pair"><span>最終受付</span><input type="time" class="last-order-time-input" value="${lastOrderTime}" ${hasOverride ? '' : 'disabled'}></span>
+        <span class="last-order-time-pair"><span>終了時刻</span><input type="time" class="last-order-close-input" value="${overrideCloseTime}" ${hasOverride ? '' : 'disabled'}></span>
+      </div>
     `;
   }).join('');
+
+  // チェックのON/OFFで、時刻入力欄の有効・無効を切り替える
+  businessHoursRows.querySelectorAll('.last-order-check').forEach(check => {
+    check.addEventListener('change', () => {
+      const row = check.closest('.last-order-row');
+      row.querySelectorAll('input[type="time"]').forEach(input => {
+        input.disabled = !check.checked;
+      });
+    });
+  });
 }
 
 /**
@@ -704,6 +727,21 @@ function collectSettings1FormData() {
     }
   });
   settings.BUSINESS = business;
+
+  // 最終受付制（曜日ごとにチェックが入っている行だけを対象にする）
+  const lastOrderOverride = {};
+  document.querySelectorAll('.last-order-row').forEach(row => {
+    const day = row.getAttribute('data-day');
+    const check = row.querySelector('.last-order-check');
+    if (!check.checked) return;
+
+    const lastOrderTime = row.querySelector('.last-order-time-input').value;
+    const closeTime = row.querySelector('.last-order-close-input').value;
+    if (lastOrderTime && closeTime) {
+      lastOrderOverride[day] = { lastOrderTime: lastOrderTime, closeTime: closeTime };
+    }
+  });
+  settings.LAST_ORDER_OVERRIDE = lastOrderOverride;
 
   // メニュー・料金
   const menuMaster = {};
