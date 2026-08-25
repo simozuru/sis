@@ -91,7 +91,6 @@ const settings3Form = document.getElementById('settings3-form');
 const s3ProvisionalEnabled = document.getElementById('s3-provisional-enabled');
 const s3ProvisionalTargetMenus = document.getElementById('s3-provisional-target-menus');
 const s3ProvisionalDeadline = document.getElementById('s3-provisional-deadline');
-const s3CalendarSyncEnabled = document.getElementById('s3-calendar-sync-enabled');
 const s3InfoEnabled = document.getElementById('s3-info-enabled');
 const s3InfoHeading = document.getElementById('s3-info-heading');
 const infoItemRows = document.getElementById('info-item-rows');
@@ -908,7 +907,7 @@ async function loadSettings3() {
     if (s3ProvisionalDeadline) s3ProvisionalDeadline.value = provisional.confirmDeadlineHours || 12;
     setRadioValue('s3-provisional-auto-action', provisional.autoAction || 'NONE');
 
-    if (s3CalendarSyncEnabled) s3CalendarSyncEnabled.checked = !!result.calendarSyncEnabled;
+
 
     const info = result.infoSection || {};
     if (s3InfoEnabled) s3InfoEnabled.checked = !!info.enabled;
@@ -998,7 +997,6 @@ if (settings3Form) {
           confirmDeadlineHours: parseInt(s3ProvisionalDeadline.value, 10) || 12,
           autoAction: getRadioValue('s3-provisional-auto-action') || 'NONE'
         },
-        CALENDAR_SYNC_ENABLED: !!s3CalendarSyncEnabled.checked,
         INFO_SECTION: {
           enabled: !!s3InfoEnabled.checked,
           heading: { text: s3InfoHeading.value.trim() || null, fontSize: null, color: null, fontFamily: null },
