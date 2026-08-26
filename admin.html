@@ -38,6 +38,7 @@
     <nav class="dashboard-tabs">
       <button type="button" class="tab-btn active" data-tab="report">レポート</button>
       <button type="button" class="tab-btn" data-tab="settings1">基本設定</button>
+      <button type="button" class="tab-btn" data-tab="settings4">設定1</button>
       <button type="button" class="tab-btn" data-tab="settings2">設定2</button>
       <button type="button" class="tab-btn" data-tab="settings3">設定3</button>
     </nav>
@@ -215,38 +216,55 @@
           </div>
         </div>
 
-        <div class="settings-card">
-          <h3 class="settings-card-title">スタッフ名</h3>
-          <p class="settings-card-note">カレンダーIDは変更されません。名前だけを書き換えます。スタッフの追加・削除はできません。</p>
-          <div id="staff-name-rows" class="staff-name-rows"></div>
-        </div>
-
-        <div class="settings-card">
-          <h3 class="settings-card-title">担当スタッフの選択</h3>
-          <div class="form-group checkbox-group">
-            <label><input type="checkbox" id="s1-show-staff-selector"> 担当スタッフの選択欄を表示する</label>
-            <label><input type="checkbox" id="s1-allow-no-assign"> 「指名なし」を選べるようにする</label>
-          </div>
-          <div class="form-group">
-            <label for="s1-no-assign-label">「指名なし」の表示文言</label>
-            <input type="text" id="s1-no-assign-label" placeholder="指名なし">
-          </div>
-          <div class="form-group radio-group">
-            <label><input type="radio" name="s1-no-assign-mode" value="1"> 自動的に空いているスタッフに振り分ける</label>
-            <label><input type="radio" name="s1-no-assign-mode" value="2"> 振り分けず「指名なし専用カレンダー」にそのまま登録する（手動配置向け）</label>
-          </div>
-          <div class="form-group radio-group">
-            <label><input type="radio" name="s1-no-assign-type" value="TYPE_A"> 空いている人からランダムに選ぶ</label>
-            <label><input type="radio" name="s1-no-assign-type" value="TYPE_B"> スタッフ名の登録順で、空いている人を優先する</label>
-          </div>
-        </div>
-
         <button type="submit" id="save-settings1-btn" class="btn-save-settings">保存する</button>
       </form>
     </section>
 
     <!-- ==========================================
-         タブ③：設定2
+         タブ③：設定1（スタッフ・カレンダーID・担当スタッフの選択）
+         ========================================== -->
+    <section id="tab-settings4" class="tab-page" style="display: none;">
+      <h2 class="section-title">設定1</h2>
+
+      <div id="settings4-loading" class="settings-loading">読み込み中...</div>
+      <div id="settings4-error" class="report-error" style="display: none;"></div>
+      <div id="settings4-saved-msg" class="settings-saved-msg" style="display: none;">保存しました。</div>
+
+      <form id="settings4-form" style="display: none;">
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">スタッフ名・カレンダーID</h3>
+          <p class="settings-card-note">カレンダーIDを間違えると、そのスタッフの予約が正しく登録されなくなります。コピー＆ペーストで、正確に入力してください。</p>
+          <div id="staff-name-rows" class="staff-name-rows"></div>
+          <button type="button" id="add-staff-row-btn" class="btn-add-row">＋ スタッフを追加</button>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">担当スタッフの選択</h3>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s4-show-staff-selector"> 担当スタッフの選択欄を表示する</label>
+            <label><input type="checkbox" id="s4-allow-no-assign"> 「指名なし」を選べるようにする</label>
+          </div>
+          <div class="form-group">
+            <label for="s4-no-assign-label">「指名なし」の表示文言</label>
+            <input type="text" id="s4-no-assign-label" placeholder="指名なし">
+          </div>
+          <div class="form-group radio-group">
+            <label><input type="radio" name="s4-no-assign-mode" value="1"> 自動的に空いているスタッフに振り分ける</label>
+            <label><input type="radio" name="s4-no-assign-mode" value="2"> 振り分けず「指名なし専用カレンダー」にそのまま登録する（手動配置向け）</label>
+          </div>
+          <div class="form-group radio-group">
+            <label><input type="radio" name="s4-no-assign-type" value="TYPE_A"> 空いている人からランダムに選ぶ</label>
+            <label><input type="radio" name="s4-no-assign-type" value="TYPE_B"> スタッフ名の登録順で、空いている人を優先する</label>
+          </div>
+        </div>
+
+        <button type="submit" id="save-settings4-btn" class="btn-save-settings">保存する</button>
+      </form>
+    </section>
+
+    <!-- ==========================================
+         タブ④：設定2
          ========================================== -->
     <section id="tab-settings2" class="tab-page" style="display: none;">
       <h2 class="section-title">設定2</h2>
@@ -398,8 +416,8 @@
   </main>
 </div>
 
-<script src="./js/config.js?v=1.9.0"></script>
-<script src="./js/admin.js?v=1.9.0"></script>
+<script src="./js/config.js?v=2.0.0"></script>
+<script src="./js/admin.js?v=2.0.0"></script>
 
 </body>
 </html>

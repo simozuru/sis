@@ -58,16 +58,24 @@ const s1ShowMenuPrice = document.getElementById('s1-show-menu-price');
 const s1ProvisionalEnabled = document.getElementById('s1-provisional-enabled');
 const s1ProvisionalTargetMenus = document.getElementById('s1-provisional-target-menus');
 const s1ProvisionalDeadline = document.getElementById('s1-provisional-deadline');
-const staffNameRows = document.getElementById('staff-name-rows');
-const s1ShowStaffSelector = document.getElementById('s1-show-staff-selector');
-const s1AllowNoAssign = document.getElementById('s1-allow-no-assign');
-const s1NoAssignLabel = document.getElementById('s1-no-assign-label');
 const saveSettings1Btn = document.getElementById('save-settings1-btn');
 
 const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
 let settings1Loaded = false; // タブを開くたびに再取得しないよう、読み込み済みかどうかを覚えておく
 let baseSlotMinutesForConversion = 5; // ページ1取得時にサーバー側の値で更新する（分↔スロット変換用）
 let settings2Loaded = false;
+let settings4Loaded = false;
+
+const staffNameRows = document.getElementById('staff-name-rows');
+const addStaffRowBtn = document.getElementById('add-staff-row-btn');
+const settings4Loading = document.getElementById('settings4-loading');
+const settings4Error = document.getElementById('settings4-error');
+const settings4SavedMsg = document.getElementById('settings4-saved-msg');
+const settings4Form = document.getElementById('settings4-form');
+const s4ShowStaffSelector = document.getElementById('s4-show-staff-selector');
+const s4AllowNoAssign = document.getElementById('s4-allow-no-assign');
+const s4NoAssignLabel = document.getElementById('s4-no-assign-label');
+const saveSettings4Btn = document.getElementById('save-settings4-btn');
 
 const settings2Loading = document.getElementById('settings2-loading');
 const settings2Error = document.getElementById('settings2-error');
@@ -222,6 +230,9 @@ if (tabButtons) {
 
       if (targetTab === 'settings1' && !settings1Loaded) {
         loadSettings1();
+      }
+      if (targetTab === 'settings4' && !settings4Loaded) {
+        loadSettings4();
       }
       if (targetTab === 'settings2' && !settings2Loaded) {
         loadSettings2();
@@ -593,16 +604,6 @@ async function loadSettings1() {
     if (s1ProvisionalDeadline) s1ProvisionalDeadline.value = provisional.confirmDeadlineHours || 12;
     setRadioValue('s1-provisional-auto-action', provisional.autoAction || 'NONE');
 
-    // スタッフ名（カレンダーIDは隠しdata属性として保持しておく）
-    renderStaffNameRows(result.staffMaster || {});
-
-    // 担当スタッフの選択
-    if (s1ShowStaffSelector) s1ShowStaffSelector.checked = !!result.showStaffSelector;
-    if (s1AllowNoAssign) s1AllowNoAssign.checked = !!result.allowNoAssign;
-    if (s1NoAssignLabel) s1NoAssignLabel.value = result.noAssignLabel || '';
-    setRadioValue('s1-no-assign-mode', String(result.noAssignMode));
-    setRadioValue('s1-no-assign-type', result.noAssignType);
-
     settings1Loaded = true;
     if (settings1Form) settings1Form.style.display = 'block';
   } catch (error) {
@@ -702,16 +703,39 @@ if (addMenuRowBtn) {
  * スタッフ名の入力行を描画する（カレンダーIDは隠しdata属性として各行に保持する）
  * @param {Object} staffMaster - { スタッフ名: カレンダーID }
  */
+/**
+ * スタッフ名・カレンダーIDの入力行を描画する
+ * @param {Object} staffMaster - { スタッフ名: カレンダーID }
+ */
 function renderStaffNameRows(staffMaster) {
   if (!staffNameRows) return;
 
   const names = Object.keys(staffMaster);
-  staffNameRows.innerHTML = names.map((name, i) => `
-    <div class="staff-name-row" data-calendar-id="${escapeHtmlAdmin(staffMaster[name])}">
-      <span class="staff-label">担当${i + 1}</span>
-      <input type="text" class="staff-name-input" value="${escapeHtmlAdmin(name)}">
-    </div>
-  `).join('');
+  staffNameRows.innerHTML = '';
+  names.forEach(name => addStaffRow(name, staffMaster[name]));
+
+  if (names.length === 0) addStaffRow('', '');
+}
+
+/**
+ * スタッフ行を1行追加する（名前・カレンダーID・削除ボタン）
+ */
+function addStaffRow(name = '', calendarId = '') {
+  if (!staffNameRows) return;
+
+  const row = document.createElement('div');
+  row.className = 'staff-name-row';
+  row.innerHTML = `
+    <input type="text" class="staff-name-input" placeholder="スタッフ名（例：下鶴）" value="${escapeHtmlAdmin(name)}">
+    <input type="text" class="staff-calendar-id-input" placeholder="カレンダーID（xxxx@group.calendar.google.com）" value="${escapeHtmlAdmin(calendarId)}">
+    <button type="button" class="btn-remove-row" title="このスタッフを削除">×</button>
+  `;
+  row.querySelector('.btn-remove-row').addEventListener('click', () => row.remove());
+  staffNameRows.appendChild(row);
+}
+
+if (addStaffRowBtn) {
+  addStaffRowBtn.addEventListener('click', () => addStaffRow());
 }
 
 /**
@@ -781,24 +805,6 @@ function collectSettings1FormData() {
     autoAction: getRadioValue('s1-provisional-auto-action') || 'NONE'
   };
 
-  // スタッフ名（カレンダーIDは、読み込み時に保持しておいたものをそのまま使う）
-  const staffMaster = {};
-  document.querySelectorAll('.staff-name-row').forEach(row => {
-    const calendarId = row.getAttribute('data-calendar-id');
-    const name = row.querySelector('.staff-name-input').value.trim();
-    if (name && calendarId) {
-      staffMaster[name] = calendarId;
-    }
-  });
-  settings.STAFF_MASTER = staffMaster;
-
-  // 担当スタッフの選択
-  settings.SHOW_STAFF_SELECTOR = !!s1ShowStaffSelector.checked;
-  settings.ALLOW_NO_ASSIGN = !!s1AllowNoAssign.checked;
-  settings.NO_ASSIGN_LABEL = s1NoAssignLabel.value.trim() || '指名なし';
-  settings.NO_ASSIGN_MODE = parseInt(getRadioValue('s1-no-assign-mode'), 10) || 2;
-  settings.NO_ASSIGN_TYPE = getRadioValue('s1-no-assign-type') || 'TYPE_B';
-
   return settings;
 }
 
@@ -836,6 +842,95 @@ if (settings1Form) {
       if (saveSettings1Btn) {
         saveSettings1Btn.disabled = false;
         saveSettings1Btn.textContent = '保存する';
+      }
+    }
+  });
+}
+
+/**
+ * 「設定1」タブ（スタッフ・カレンダーID・担当スタッフの選択）の現在値を取得し、フォームに反映する
+ */
+async function loadSettings4() {
+  if (settings4Loading) settings4Loading.style.display = 'block';
+  if (settings4Error) settings4Error.style.display = 'none';
+  if (settings4Form) settings4Form.style.display = 'none';
+
+  try {
+    const result = await callAdminApi('getSettingsPage4');
+    if (!result.success) throw new Error(result.message || '設定の取得に失敗しました。');
+
+    renderStaffNameRows(result.staffMaster || {});
+
+    if (s4ShowStaffSelector) s4ShowStaffSelector.checked = !!result.showStaffSelector;
+    if (s4AllowNoAssign) s4AllowNoAssign.checked = !!result.allowNoAssign;
+    if (s4NoAssignLabel) s4NoAssignLabel.value = result.noAssignLabel || '';
+    setRadioValue('s4-no-assign-mode', String(result.noAssignMode));
+    setRadioValue('s4-no-assign-type', result.noAssignType);
+
+    settings4Loaded = true;
+    if (settings4Form) settings4Form.style.display = 'block';
+  } catch (error) {
+    console.error('設定1の取得エラー:', error);
+    if (settings4Error) {
+      settings4Error.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+      settings4Error.style.display = 'block';
+    }
+  } finally {
+    if (settings4Loading) settings4Loading.style.display = 'none';
+  }
+}
+
+if (settings4Form) {
+  settings4Form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (settings4Error) settings4Error.style.display = 'none';
+    if (settings4SavedMsg) settings4SavedMsg.style.display = 'none';
+    if (saveSettings4Btn) {
+      saveSettings4Btn.disabled = true;
+      saveSettings4Btn.textContent = '保存中...';
+    }
+
+    try {
+      // スタッフ名・カレンダーID（両方入力されている行だけを対象にする）
+      const staffMaster = {};
+      document.querySelectorAll('.staff-name-row').forEach(row => {
+        const name = row.querySelector('.staff-name-input').value.trim();
+        const calendarId = row.querySelector('.staff-calendar-id-input').value.trim();
+        if (name && calendarId) {
+          staffMaster[name] = calendarId;
+        }
+      });
+
+      const settings = {
+        STAFF_MASTER: staffMaster,
+        SHOW_STAFF_SELECTOR: !!s4ShowStaffSelector.checked,
+        ALLOW_NO_ASSIGN: !!s4AllowNoAssign.checked,
+        NO_ASSIGN_LABEL: s4NoAssignLabel.value.trim() || '指名なし',
+        NO_ASSIGN_MODE: parseInt(getRadioValue('s4-no-assign-mode'), 10) || 2,
+        NO_ASSIGN_TYPE: getRadioValue('s4-no-assign-type') || 'TYPE_B'
+      };
+
+      const password = sessionStorage.getItem(SESSION_STORAGE_KEY) || '';
+      const response = await fetch(CONFIG.GAS_WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'saveSettings', settings: JSON.stringify(settings), password: password })
+      });
+      const result = await response.json();
+
+      if (!result.success) throw new Error(result.message || '保存に失敗しました。');
+
+      if (settings4SavedMsg) settings4SavedMsg.style.display = 'block';
+    } catch (error) {
+      console.error('設定1の保存エラー:', error);
+      if (settings4Error) {
+        settings4Error.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+        settings4Error.style.display = 'block';
+      }
+    } finally {
+      if (saveSettings4Btn) {
+        saveSettings4Btn.disabled = false;
+        saveSettings4Btn.textContent = '保存する';
       }
     }
   });
