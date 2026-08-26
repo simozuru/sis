@@ -234,21 +234,31 @@
 
         <div class="settings-card">
           <h3 class="settings-card-title">スタッフ名・カレンダーID</h3>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s4-show-staff-selector"> スタッフ選択欄を表示する</label>
+          </div>
           <p class="settings-card-note">カレンダーIDを間違えると、そのスタッフの予約が正しく登録されなくなります。コピー＆ペーストで、正確に入力してください。</p>
           <div id="staff-name-rows" class="staff-name-rows"></div>
           <button type="button" id="add-staff-row-btn" class="btn-add-row">＋ スタッフを追加</button>
         </div>
 
         <div class="settings-card">
-          <h3 class="settings-card-title">担当スタッフの選択</h3>
+          <h3 class="settings-card-title">指名なし予約</h3>
           <div class="form-group checkbox-group">
-            <label><input type="checkbox" id="s4-show-staff-selector"> 担当スタッフの選択欄を表示する</label>
-            <label><input type="checkbox" id="s4-allow-no-assign"> 「指名なし」を選べるようにする</label>
+            <label><input type="checkbox" id="s4-allow-no-assign"> スタッフ選択肢に「指名なし」を表示する</label>
           </div>
           <div class="form-group">
-            <label for="s4-no-assign-label">「指名なし」の表示文言</label>
+            <label for="s4-no-assign-label">表示名（未入力の場合「指名なし」のまま）</label>
             <input type="text" id="s4-no-assign-label" placeholder="指名なし">
           </div>
+          <div class="form-group">
+            <label for="s4-no-assign-calendar-id">カレンダーID</label>
+            <input type="text" id="s4-no-assign-calendar-id" placeholder="カレンダーID（xxxx@group.calendar.google.com）">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">指名なし予約の振り分け方法</h3>
           <div class="form-group radio-group">
             <label><input type="radio" name="s4-no-assign-mode" value="1"> 自動的に空いているスタッフに振り分ける</label>
             <label><input type="radio" name="s4-no-assign-mode" value="2"> 振り分けず「指名なし専用カレンダー」にそのまま登録する（手動配置向け）</label>
@@ -416,8 +426,8 @@
   </main>
 </div>
 
-<script src="./js/config.js?v=2.0.0"></script>
-<script src="./js/admin.js?v=2.0.0"></script>
+<script src="./js/config.js?v=2.1.0"></script>
+<script src="./js/admin.js?v=2.1.0"></script>
 
 </body>
 </html>

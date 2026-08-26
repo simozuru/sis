@@ -75,6 +75,7 @@ const settings4Form = document.getElementById('settings4-form');
 const s4ShowStaffSelector = document.getElementById('s4-show-staff-selector');
 const s4AllowNoAssign = document.getElementById('s4-allow-no-assign');
 const s4NoAssignLabel = document.getElementById('s4-no-assign-label');
+const s4NoAssignCalendarId = document.getElementById('s4-no-assign-calendar-id');
 const saveSettings4Btn = document.getElementById('save-settings4-btn');
 
 const settings2Loading = document.getElementById('settings2-loading');
@@ -864,6 +865,7 @@ async function loadSettings4() {
     if (s4ShowStaffSelector) s4ShowStaffSelector.checked = !!result.showStaffSelector;
     if (s4AllowNoAssign) s4AllowNoAssign.checked = !!result.allowNoAssign;
     if (s4NoAssignLabel) s4NoAssignLabel.value = result.noAssignLabel || '';
+    if (s4NoAssignCalendarId) s4NoAssignCalendarId.value = result.noAssignCalendarId || '';
     setRadioValue('s4-no-assign-mode', String(result.noAssignMode));
     setRadioValue('s4-no-assign-type', result.noAssignType);
 
@@ -907,6 +909,7 @@ if (settings4Form) {
         SHOW_STAFF_SELECTOR: !!s4ShowStaffSelector.checked,
         ALLOW_NO_ASSIGN: !!s4AllowNoAssign.checked,
         NO_ASSIGN_LABEL: s4NoAssignLabel.value.trim() || '指名なし',
+        NO_ASSIGN_CALENDAR_ID: s4NoAssignCalendarId.value.trim(),
         NO_ASSIGN_MODE: parseInt(getRadioValue('s4-no-assign-mode'), 10) || 2,
         NO_ASSIGN_TYPE: getRadioValue('s4-no-assign-type') || 'TYPE_B'
       };
