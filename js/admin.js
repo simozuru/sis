@@ -72,7 +72,6 @@ const settings4Loading = document.getElementById('settings4-loading');
 const settings4Error = document.getElementById('settings4-error');
 const settings4SavedMsg = document.getElementById('settings4-saved-msg');
 const settings4Form = document.getElementById('settings4-form');
-const s4ShowStaffSelector = document.getElementById('s4-show-staff-selector');
 const s4AllowNoAssign = document.getElementById('s4-allow-no-assign');
 const s4NoAssignLabel = document.getElementById('s4-no-assign-label');
 const s4NoAssignCalendarId = document.getElementById('s4-no-assign-calendar-id');
@@ -89,10 +88,10 @@ const s2HistoryRetention = document.getElementById('s2-history-retention');
 const s2BufferMinutes = document.getElementById('s2-buffer-minutes');
 const s2MailHeader = document.getElementById('s2-mail-header');
 const s2MailFooter = document.getElementById('s2-mail-footer');
-const s2CancelBuffer = document.getElementById('s2-cancel-buffer');
-const s2ChangeBuffer = document.getElementById('s2-change-buffer');
-const s2MaxFutureDays = document.getElementById('s2-max-future-days');
-const s2DisplayDays = document.getElementById('s2-display-days');
+const s1CancelBuffer = document.getElementById('s1-cancel-buffer');
+const s1ChangeBuffer = document.getElementById('s1-change-buffer');
+const s1MaxFutureDays = document.getElementById('s1-max-future-days');
+const s1DisplayDays = document.getElementById('s1-display-days');
 const saveSettings2Btn = document.getElementById('save-settings2-btn');
 let settings3Loaded = false;
 
@@ -605,6 +604,14 @@ async function loadSettings1() {
     if (s1ProvisionalDeadline) s1ProvisionalDeadline.value = provisional.confirmDeadlineHours || 12;
     setRadioValue('s1-provisional-auto-action', provisional.autoAction || 'NONE');
 
+    // キャンセル・変更の受付締切
+    if (s1CancelBuffer) s1CancelBuffer.value = result.cancelBufferHours;
+    if (s1ChangeBuffer) s1ChangeBuffer.value = result.changeBufferHours;
+
+    // 予約可能な期間
+    if (s1MaxFutureDays) s1MaxFutureDays.value = result.maxFutureDaysToReserve;
+    if (s1DisplayDays) s1DisplayDays.value = String(result.displayDays);
+
     settings1Loaded = true;
     if (settings1Form) settings1Form.style.display = 'block';
   } catch (error) {
@@ -806,6 +813,14 @@ function collectSettings1FormData() {
     autoAction: getRadioValue('s1-provisional-auto-action') || 'NONE'
   };
 
+  // キャンセル・変更の受付締切
+  settings.CANCEL_BUFFER_HOURS_BEFORE_RESERVATION = parseInt(s1CancelBuffer.value, 10);
+  settings.CHANGE_BUFFER_HOURS_BEFORE_RESERVATION = parseInt(s1ChangeBuffer.value, 10);
+
+  // 予約可能な期間
+  settings.MAX_FUTURE_DAYS_TO_RESERVE = parseInt(s1MaxFutureDays.value, 10);
+  settings.DISPLAY_DAYS = parseInt(s1DisplayDays.value, 10);
+
   return settings;
 }
 
@@ -862,7 +877,6 @@ async function loadSettings4() {
 
     renderStaffNameRows(result.staffMaster || {});
 
-    if (s4ShowStaffSelector) s4ShowStaffSelector.checked = !!result.showStaffSelector;
     if (s4AllowNoAssign) s4AllowNoAssign.checked = !!result.allowNoAssign;
     if (s4NoAssignLabel) s4NoAssignLabel.value = result.noAssignLabel || '';
     if (s4NoAssignCalendarId) s4NoAssignCalendarId.value = result.noAssignCalendarId || '';
@@ -906,7 +920,6 @@ if (settings4Form) {
 
       const settings = {
         STAFF_MASTER: staffMaster,
-        SHOW_STAFF_SELECTOR: !!s4ShowStaffSelector.checked,
         ALLOW_NO_ASSIGN: !!s4AllowNoAssign.checked,
         NO_ASSIGN_LABEL: s4NoAssignLabel.value.trim() || '指名なし',
         NO_ASSIGN_CALENDAR_ID: s4NoAssignCalendarId.value.trim(),
@@ -959,12 +972,6 @@ async function loadSettings2() {
 
     if (s2MailHeader) s2MailHeader.value = result.customerMailHeader || '';
     if (s2MailFooter) s2MailFooter.value = result.customerMailFooter || '';
-
-    if (s2CancelBuffer) s2CancelBuffer.value = result.cancelBufferHours;
-    if (s2ChangeBuffer) s2ChangeBuffer.value = result.changeBufferHours;
-
-    if (s2MaxFutureDays) s2MaxFutureDays.value = result.maxFutureDaysToReserve;
-    if (s2DisplayDays) s2DisplayDays.value = String(result.displayDays);
 
     settings2Loaded = true;
     if (settings2Form) settings2Form.style.display = 'block';
@@ -1020,11 +1027,7 @@ if (settings2Form) {
         HISTORY_RETENTION_MONTHS: parseInt(s2HistoryRetention.value, 10),
         BUFFER_MINUTES_BEFORE_RESERVATION: parseInt(s2BufferMinutes.value, 10),
         CUSTOMER_MAIL_HEADER: s2MailHeader.value,
-        CUSTOMER_MAIL_FOOTER: s2MailFooter.value,
-        CANCEL_BUFFER_HOURS_BEFORE_RESERVATION: parseInt(s2CancelBuffer.value, 10),
-        CHANGE_BUFFER_HOURS_BEFORE_RESERVATION: parseInt(s2ChangeBuffer.value, 10),
-        MAX_FUTURE_DAYS_TO_RESERVE: parseInt(s2MaxFutureDays.value, 10),
-        DISPLAY_DAYS: parseInt(s2DisplayDays.value, 10)
+        CUSTOMER_MAIL_FOOTER: s2MailFooter.value
       };
 
       const password = sessionStorage.getItem(SESSION_STORAGE_KEY) || '';

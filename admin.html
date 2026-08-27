@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIS 管理画面</title>
-  <link rel="stylesheet" href="./admin-style.css?v=1.3.0">
+  <link rel="stylesheet" href="./admin-style.css?v=1.4.0">
 </head>
 <body>
 
@@ -38,9 +38,9 @@
     <nav class="dashboard-tabs">
       <button type="button" class="tab-btn active" data-tab="report">レポート</button>
       <button type="button" class="tab-btn" data-tab="settings1">基本設定</button>
-      <button type="button" class="tab-btn" data-tab="settings4">設定1</button>
-      <button type="button" class="tab-btn" data-tab="settings2">設定2</button>
-      <button type="button" class="tab-btn" data-tab="settings3">設定3</button>
+      <button type="button" class="tab-btn" data-tab="settings4">スタッフ関係</button>
+      <button type="button" class="tab-btn" data-tab="settings2">メール関係</button>
+      <button type="button" class="tab-btn" data-tab="settings3">レイアウト関係</button>
     </nav>
     <button type="button" id="logout-btn" class="btn-logout">ログアウト</button>
   </header>
@@ -180,6 +180,34 @@
         </div>
 
         <div class="settings-card">
+          <h3 class="settings-card-title">キャンセル・変更の受付締切</h3>
+          <div class="form-group">
+            <label for="s1-cancel-buffer">キャンセルは、来店の何時間前まで受け付けるか</label>
+            <input type="number" id="s1-cancel-buffer" min="0">
+          </div>
+          <div class="form-group">
+            <label for="s1-change-buffer">日時変更は、来店の何時間前まで受け付けるか</label>
+            <input type="number" id="s1-change-buffer" min="0">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">予約可能な期間</h3>
+          <div class="form-group">
+            <label for="s1-max-future-days">何日先まで予約できるか</label>
+            <input type="number" id="s1-max-future-days" min="1">
+          </div>
+          <div class="form-group">
+            <label for="s1-display-days">タイムテーブルに一度に表示する日数</label>
+            <select id="s1-display-days">
+              <option value="1">1日分</option>
+              <option value="3">3日分</option>
+              <option value="7">1週間分</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-card">
           <h3 class="settings-card-title">メニューの選び方</h3>
           <div class="form-group radio-group">
             <label><input type="radio" name="s1-menu-selector-type" value="TYPE_B"> チェックボックス式（複数選択できる）</label>
@@ -224,7 +252,7 @@
          タブ③：設定1（スタッフ・カレンダーID・担当スタッフの選択）
          ========================================== -->
     <section id="tab-settings4" class="tab-page" style="display: none;">
-      <h2 class="section-title">設定1</h2>
+      <h2 class="section-title">スタッフ関係</h2>
 
       <div id="settings4-loading" class="settings-loading">読み込み中...</div>
       <div id="settings4-error" class="report-error" style="display: none;"></div>
@@ -234,10 +262,7 @@
 
         <div class="settings-card">
           <h3 class="settings-card-title">スタッフ名・カレンダーID</h3>
-          <div class="form-group checkbox-group">
-            <label><input type="checkbox" id="s4-show-staff-selector"> スタッフ選択欄を表示する</label>
-          </div>
-          <p class="settings-card-note">カレンダーIDを間違えると、そのスタッフの予約が正しく登録されなくなります。コピー＆ペーストで、正確に入力してください。</p>
+          <p class="settings-card-note">スタッフが2名以上の時だけ、お客様向けの選択欄が自動的に表示されます（1名の場合は表示不要のため自動で非表示になります）。カレンダーIDを間違えると、そのスタッフの予約が正しく登録されなくなります。コピー＆ペーストで、正確に入力してください。</p>
           <div id="staff-name-rows" class="staff-name-rows"></div>
           <button type="button" id="add-staff-row-btn" class="btn-add-row">＋ スタッフを追加</button>
         </div>
@@ -260,12 +285,12 @@
         <div class="settings-card">
           <h3 class="settings-card-title">指名なし予約の振り分け方法</h3>
           <div class="form-group radio-group">
-            <label><input type="radio" name="s4-no-assign-mode" value="1"> 自動的に空いているスタッフに振り分ける</label>
             <label><input type="radio" name="s4-no-assign-mode" value="2"> 振り分けず「指名なし専用カレンダー」にそのまま登録する（手動配置向け）</label>
+            <label><input type="radio" name="s4-no-assign-mode" value="1"> 自動的に空いているスタッフに振り分ける</label>
           </div>
           <div class="form-group radio-group">
-            <label><input type="radio" name="s4-no-assign-type" value="TYPE_A"> 空いている人からランダムに選ぶ</label>
-            <label><input type="radio" name="s4-no-assign-type" value="TYPE_B"> スタッフ名の登録順で、空いている人を優先する</label>
+            <label><input type="radio" name="s4-no-assign-type" value="TYPE_B"> スタッフ名の登録順</label>
+            <label><input type="radio" name="s4-no-assign-type" value="TYPE_A"> 空いている人を優先</label>
           </div>
         </div>
 
@@ -277,7 +302,7 @@
          タブ④：設定2
          ========================================== -->
     <section id="tab-settings2" class="tab-page" style="display: none;">
-      <h2 class="section-title">設定2</h2>
+      <h2 class="section-title">メール関係</h2>
 
       <div id="settings2-loading" class="settings-loading">読み込み中...</div>
       <div id="settings2-error" class="report-error" style="display: none;"></div>
@@ -322,34 +347,6 @@
           </div>
         </div>
 
-        <div class="settings-card">
-          <h3 class="settings-card-title">キャンセル・変更の受付締切</h3>
-          <div class="form-group">
-            <label for="s2-cancel-buffer">キャンセルは、来店の何時間前まで受け付けるか</label>
-            <input type="number" id="s2-cancel-buffer" min="0">
-          </div>
-          <div class="form-group">
-            <label for="s2-change-buffer">日時変更は、来店の何時間前まで受け付けるか</label>
-            <input type="number" id="s2-change-buffer" min="0">
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <h3 class="settings-card-title">予約可能な期間</h3>
-          <div class="form-group">
-            <label for="s2-max-future-days">何日先まで予約できるか</label>
-            <input type="number" id="s2-max-future-days" min="1">
-          </div>
-          <div class="form-group">
-            <label for="s2-display-days">タイムテーブルに一度に表示する日数</label>
-            <select id="s2-display-days">
-              <option value="1">1日分</option>
-              <option value="3">3日分</option>
-              <option value="7">1週間分</option>
-            </select>
-          </div>
-        </div>
-
         <button type="submit" id="save-settings2-btn" class="btn-save-settings">保存する</button>
       </form>
     </section>
@@ -358,7 +355,7 @@
          タブ④：設定3
          ========================================== -->
     <section id="tab-settings3" class="tab-page" style="display: none;">
-      <h2 class="section-title">設定3</h2>
+      <h2 class="section-title">レイアウト関係</h2>
 
       <div id="settings3-loading" class="settings-loading">読み込み中...</div>
       <div id="settings3-error" class="report-error" style="display: none;"></div>
@@ -426,8 +423,8 @@
   </main>
 </div>
 
-<script src="./js/config.js?v=2.1.0"></script>
-<script src="./js/admin.js?v=2.1.0"></script>
+<script src="./js/config.js?v=2.2.0"></script>
+<script src="./js/admin.js?v=2.2.0"></script>
 
 </body>
 </html>
