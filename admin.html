@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIS 管理画面</title>
-  <link rel="stylesheet" href="./admin-style.css?v=1.4.0">
+  <link rel="stylesheet" href="./admin-style.css?v=1.5.0">
 </head>
 <body>
 
@@ -160,21 +160,30 @@
 
         <div class="settings-card">
           <h3 class="settings-card-title">予約枠の刻み幅</h3>
-          <p class="settings-card-note">内部的には5分単位で管理していますが、ここでは分かりやすく「分」で設定できます。</p>
           <div class="form-group">
-            <label for="s1-slot-step-minutes">お客様が選べるボタンの間隔（分）</label>
+            <label for="s1-slot-step-minutes">予約時間の間隔（分）</label>
+            <p class="settings-card-note">お客様が選択できる予約時間の間隔です。「30」に設定すると、9:00、9:30、10:00…のように30分単位で選択できます。</p>
             <input type="number" id="s1-slot-step-minutes" min="5" step="5">
           </div>
         </div>
 
         <div class="settings-card">
           <h3 class="settings-card-title">営業時間</h3>
-          <p class="settings-card-note">「最終受付制」にチェックを入れると、その曜日だけ、メニューの所要時間に関わらず決まった時刻で新規受付を締め切り、実際の終了時刻の上限も別に設定できます（チェックを外した曜日は、通常通り閉店時刻がそのまま最終受付になります）。</p>
+          <p class="settings-card-note">通常の予約時間とは別に最終受付時間を設定できます。<br>
+          最終受付は、終了時刻を越さない範囲で予約できます。<br><br>
+          例えば、最終受付を18:00、終了時刻を20:00にすると、<br>
+          施術時間が２時間までのメニューは18:00まで予約受け付け可能。<br>
+          施術時間が３時間のメニューの場合は20:00が上限なので最終受付が17：00になります。</p>
           <div id="business-hours-rows" class="business-hours-rows"></div>
         </div>
 
         <div class="settings-card">
           <h3 class="settings-card-title">メニュー・料金</h3>
+          <div class="menu-master-header">
+            <span class="menu-name-input">メニュー</span>
+            <span class="menu-minutes-input">施術時間</span>
+            <span class="menu-price-input">料金</span>
+          </div>
           <div id="menu-master-rows" class="menu-master-rows"></div>
           <button type="button" id="add-menu-row-btn" class="btn-add-row">＋ メニューを追加</button>
         </div>
@@ -423,8 +432,8 @@
   </main>
 </div>
 
-<script src="./js/config.js?v=2.2.0"></script>
-<script src="./js/admin.js?v=2.2.0"></script>
+<script src="./js/config.js?v=2.2.1"></script>
+<script src="./js/admin.js?v=2.2.1"></script>
 
 </body>
 </html>

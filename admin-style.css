@@ -743,6 +743,29 @@ flex: 1 1 auto;
 width: 90px;
 }
 
+.menu-master-header {
+display: flex;
+align-items: center;
+
+gap: 10px;
+
+margin-bottom: 8px;
+
+font-size: 12px;
+font-weight: 600;
+
+color: var(--sub-text-color);
+}
+
+.menu-master-header span.menu-name-input {
+flex: 1 1 auto;
+}
+
+.menu-master-header span.menu-minutes-input,
+.menu-master-header span.menu-price-input {
+width: 90px;
+}
+
 .staff-name-row input {
 padding: 8px 10px;
 
