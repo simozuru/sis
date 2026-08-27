@@ -766,6 +766,12 @@ flex: 1 1 auto;
 width: 90px;
 }
 
+.menu-master-header .menu-header-spacer {
+flex: 0 0 auto;
+
+width: 28px;
+}
+
 .staff-name-row input {
 padding: 8px 10px;
 
