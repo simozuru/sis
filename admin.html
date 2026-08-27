@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIS 管理画面</title>
-  <link rel="stylesheet" href="./admin-style.css?v=1.5.1">
+  <link rel="stylesheet" href="./admin-style.css?v=1.6.0">
 </head>
 <body>
 
@@ -159,7 +159,7 @@
       <form id="settings1-form" style="display: none;">
 
         <div class="settings-card">
-          <h3 class="settings-card-title">予約枠の刻み幅</h3>
+          <h3 class="settings-card-title">予約時間の間隔</h3>
           <div class="form-group">
             <label for="s1-slot-step-minutes">予約時間の間隔（分）</label>
             <p class="settings-card-note">お客様が選択できる予約時間の間隔です。「30」に設定すると、9:00、9:30、10:00…のように30分単位で選択できます。</p>
@@ -178,15 +178,19 @@
         </div>
 
         <div class="settings-card">
-          <h3 class="settings-card-title">メニュー・料金</h3>
-          <div class="menu-master-header">
-            <span class="menu-name-input">メニュー</span>
-            <span class="menu-minutes-input">施術時間</span>
-            <span class="menu-price-input">料金</span>
-            <span class="menu-header-spacer"></span>
+          <h3 class="settings-card-title">予約可能な期間</h3>
+          <div class="form-group">
+            <label for="s1-max-future-days">何日先まで予約できるか</label>
+            <input type="number" id="s1-max-future-days" min="1">
           </div>
-          <div id="menu-master-rows" class="menu-master-rows"></div>
-          <button type="button" id="add-menu-row-btn" class="btn-add-row">＋ メニューを追加</button>
+          <div class="form-group">
+            <label for="s1-display-days">タイムテーブルに一度に表示する日数</label>
+            <select id="s1-display-days">
+              <option value="1">1日分</option>
+              <option value="3">3日分</option>
+              <option value="7">1週間分</option>
+            </select>
+          </div>
         </div>
 
         <div class="settings-card">
@@ -202,19 +206,9 @@
         </div>
 
         <div class="settings-card">
-          <h3 class="settings-card-title">予約可能な期間</h3>
-          <div class="form-group">
-            <label for="s1-max-future-days">何日先まで予約できるか</label>
-            <input type="number" id="s1-max-future-days" min="1">
-          </div>
-          <div class="form-group">
-            <label for="s1-display-days">タイムテーブルに一度に表示する日数</label>
-            <select id="s1-display-days">
-              <option value="1">1日分</option>
-              <option value="3">3日分</option>
-              <option value="7">1週間分</option>
-            </select>
-          </div>
+          <h3 class="settings-card-title">メニュー・料金</h3>
+          <div id="menu-master-rows" class="menu-master-rows"></div>
+          <button type="button" id="add-menu-row-btn" class="btn-add-row">＋ メニューを追加</button>
         </div>
 
         <div class="settings-card">
