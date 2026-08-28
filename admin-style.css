@@ -905,6 +905,32 @@ height: 16px;
 accent-color: var(--accent-color);
 }
 
+/* 上の選択肢の「子項目」であることを示す、ツリー状の連結線 */
+.tree-sub-options {
+margin-left: 22px;
+
+padding-left: 18px;
+
+border-left: 2px solid var(--border-color);
+}
+
+.tree-sub-options label {
+position: relative;
+}
+
+.tree-sub-options label::before {
+content: '';
+
+position: absolute;
+left: -18px;
+top: 50%;
+
+width: 14px;
+height: 2px;
+
+background: var(--border-color);
+}
+
 .settings-card select {
 width: 100%;
 
