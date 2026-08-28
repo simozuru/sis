@@ -38,6 +38,8 @@
     <nav class="dashboard-tabs">
       <button type="button" class="tab-btn active" data-tab="report">レポート</button>
       <button type="button" class="tab-btn" data-tab="settings1">基本設定</button>
+      <button type="button" class="tab-btn" data-tab="settings5">メニュー関係</button>
+      <button type="button" class="tab-btn" data-tab="settings6">営業時間</button>
       <button type="button" class="tab-btn" data-tab="settings4">スタッフ関係</button>
       <button type="button" class="tab-btn" data-tab="settings2">メール関係</button>
       <button type="button" class="tab-btn" data-tab="settings3">レイアウト関係</button>
@@ -168,16 +170,6 @@
         </div>
 
         <div class="settings-card">
-          <h3 class="settings-card-title">営業時間</h3>
-          <p class="settings-card-note">通常の予約時間とは別に最終受付時間を設定できます。<br>
-          最終受付は、終了時刻を越さない範囲で予約できます。<br><br>
-          例えば、最終受付を18:00、終了時刻を20:00にすると、<br>
-          施術時間が２時間までのメニューは18:00まで予約受け付け可能。<br>
-          施術時間が３時間のメニューの場合は20:00が上限なので最終受付が17：00になります。</p>
-          <div id="business-hours-rows" class="business-hours-rows"></div>
-        </div>
-
-        <div class="settings-card">
           <h3 class="settings-card-title">予約可能な期間</h3>
           <div class="form-group">
             <label for="s1-max-future-days">何日先まで予約できるか</label>
@@ -206,20 +198,18 @@
         </div>
 
         <div class="settings-card">
-          <h3 class="settings-card-title">メニュー・料金</h3>
-          <div id="menu-master-rows" class="menu-master-rows"></div>
-          <button type="button" id="add-menu-row-btn" class="btn-add-row">＋ メニューを追加</button>
-        </div>
-
-        <div class="settings-card">
-          <h3 class="settings-card-title">メニューの選び方</h3>
-          <div class="form-group radio-group">
-            <label><input type="radio" name="s1-menu-selector-type" value="TYPE_B"> チェックボックス式（複数選択できる）</label>
-            <label><input type="radio" name="s1-menu-selector-type" value="TYPE_A"> プルダウン式（1つだけ選ぶ）</label>
+          <h3 class="settings-card-title">受付の基本設定</h3>
+          <div class="form-group">
+            <label for="s1-max-capacity">同時受付上限（同じ時間帯に、全体で何件まで受け付けるか）</label>
+            <input type="number" id="s1-max-capacity" min="1">
           </div>
-          <div class="form-group checkbox-group">
-            <label><input type="checkbox" id="s1-show-menu-minutes"> 施術時間を表示する</label>
-            <label><input type="checkbox" id="s1-show-menu-price"> 金額を表示する</label>
+          <div class="form-group">
+            <label for="s1-history-retention">予約履歴の保持期間（月数。-1で無期限）</label>
+            <input type="number" id="s1-history-retention" min="-1">
+          </div>
+          <div class="form-group">
+            <label for="s1-buffer-minutes">新規予約の最短受付タイミング（今から何分後以降の枠なら予約できるか）</label>
+            <input type="number" id="s1-buffer-minutes" min="0">
           </div>
         </div>
 
@@ -249,6 +239,66 @@
         </div>
 
         <button type="submit" id="save-settings1-btn" class="btn-save-settings">保存する</button>
+      </form>
+    </section>
+
+    <!-- ==========================================
+         タブ：メニュー関係
+         ========================================== -->
+    <section id="tab-settings5" class="tab-page" style="display: none;">
+      <h2 class="section-title">メニュー関係</h2>
+
+      <div id="settings5-loading" class="settings-loading">読み込み中...</div>
+      <div id="settings5-error" class="report-error" style="display: none;"></div>
+      <div id="settings5-saved-msg" class="settings-saved-msg" style="display: none;">保存しました。</div>
+
+      <form id="settings5-form" style="display: none;">
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">メニュー・料金</h3>
+          <div id="menu-master-rows" class="menu-master-rows"></div>
+          <button type="button" id="add-menu-row-btn" class="btn-add-row">＋ メニューを追加</button>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">メニューの選び方</h3>
+          <div class="form-group radio-group">
+            <label><input type="radio" name="s5-menu-selector-type" value="TYPE_B"> チェックボックス式（複数選択できる）</label>
+            <label><input type="radio" name="s5-menu-selector-type" value="TYPE_A"> プルダウン式（1つだけ選ぶ）</label>
+          </div>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s5-show-menu-minutes"> 施術時間を表示する</label>
+            <label><input type="checkbox" id="s5-show-menu-price"> 金額を表示する</label>
+          </div>
+        </div>
+
+        <button type="submit" id="save-settings5-btn" class="btn-save-settings">保存する</button>
+      </form>
+    </section>
+
+    <!-- ==========================================
+         タブ：営業時間
+         ========================================== -->
+    <section id="tab-settings6" class="tab-page" style="display: none;">
+      <h2 class="section-title">営業時間</h2>
+
+      <div id="settings6-loading" class="settings-loading">読み込み中...</div>
+      <div id="settings6-error" class="report-error" style="display: none;"></div>
+      <div id="settings6-saved-msg" class="settings-saved-msg" style="display: none;">保存しました。</div>
+
+      <form id="settings6-form" style="display: none;">
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">営業時間</h3>
+          <p class="settings-card-note">通常の予約時間とは別に最終受付時間を設定できます。<br>
+          最終受付は、終了時刻を越さない範囲で予約できます。<br><br>
+          例えば、最終受付を18:00、終了時刻を20:00にすると、<br>
+          施術時間が２時間までのメニューは18:00まで予約受け付け可能。<br>
+          施術時間が３時間のメニューの場合は20:00が上限なので最終受付が17：00になります。</p>
+          <div id="business-hours-rows" class="business-hours-rows"></div>
+        </div>
+
+        <button type="submit" id="save-settings6-btn" class="btn-save-settings">保存する</button>
       </form>
     </section>
 
@@ -315,11 +365,7 @@
       <form id="settings2-form" style="display: none;">
 
         <div class="settings-card">
-          <h3 class="settings-card-title">受付・通知の基本設定</h3>
-          <div class="form-group">
-            <label for="s2-max-capacity">同時受付上限（同じ時間帯に、全体で何件まで受け付けるか）</label>
-            <input type="number" id="s2-max-capacity" min="1">
-          </div>
+          <h3 class="settings-card-title">メール送信の基本設定</h3>
           <div class="form-group">
             <label for="s2-reminder-days">予約前日メールを送るタイミング（何日前に送るか。0で送信しない）</label>
             <input type="number" id="s2-reminder-days" min="0">
@@ -327,14 +373,6 @@
           <div class="form-group">
             <label for="s2-admin-email">管理者への通知メール宛先</label>
             <input type="text" id="s2-admin-email" placeholder="例：owner@example.com">
-          </div>
-          <div class="form-group">
-            <label for="s2-history-retention">予約履歴の保持期間（月数。-1で無期限）</label>
-            <input type="number" id="s2-history-retention" min="-1">
-          </div>
-          <div class="form-group">
-            <label for="s2-buffer-minutes">新規予約の最短受付タイミング（今から何分後以降の枠なら予約できるか）</label>
-            <input type="number" id="s2-buffer-minutes" min="0">
           </div>
         </div>
 

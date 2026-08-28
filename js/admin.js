@@ -50,14 +50,12 @@ const settings1Error = document.getElementById('settings1-error');
 const settings1SavedMsg = document.getElementById('settings1-saved-msg');
 const settings1Form = document.getElementById('settings1-form');
 const s1SlotStepMinutes = document.getElementById('s1-slot-step-minutes');
-const businessHoursRows = document.getElementById('business-hours-rows');
-const menuMasterRows = document.getElementById('menu-master-rows');
-const addMenuRowBtn = document.getElementById('add-menu-row-btn');
-const s1ShowMenuMinutes = document.getElementById('s1-show-menu-minutes');
-const s1ShowMenuPrice = document.getElementById('s1-show-menu-price');
 const s1ProvisionalEnabled = document.getElementById('s1-provisional-enabled');
 const s1ProvisionalTargetMenus = document.getElementById('s1-provisional-target-menus');
 const s1ProvisionalDeadline = document.getElementById('s1-provisional-deadline');
+const s1MaxCapacity = document.getElementById('s1-max-capacity');
+const s1HistoryRetention = document.getElementById('s1-history-retention');
+const s1BufferMinutes = document.getElementById('s1-buffer-minutes');
 const saveSettings1Btn = document.getElementById('save-settings1-btn');
 
 const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
@@ -65,6 +63,8 @@ let settings1Loaded = false; // タブを開くたびに再取得しないよう
 let baseSlotMinutesForConversion = 5; // ページ1取得時にサーバー側の値で更新する（分↔スロット変換用）
 let settings2Loaded = false;
 let settings4Loaded = false;
+let settings5Loaded = false;
+let settings6Loaded = false;
 
 const staffNameRows = document.getElementById('staff-name-rows');
 const addStaffRowBtn = document.getElementById('add-staff-row-btn');
@@ -81,11 +81,8 @@ const settings2Loading = document.getElementById('settings2-loading');
 const settings2Error = document.getElementById('settings2-error');
 const settings2SavedMsg = document.getElementById('settings2-saved-msg');
 const settings2Form = document.getElementById('settings2-form');
-const s2MaxCapacity = document.getElementById('s2-max-capacity');
 const s2ReminderDays = document.getElementById('s2-reminder-days');
 const s2AdminEmail = document.getElementById('s2-admin-email');
-const s2HistoryRetention = document.getElementById('s2-history-retention');
-const s2BufferMinutes = document.getElementById('s2-buffer-minutes');
 const s2MailHeader = document.getElementById('s2-mail-header');
 const s2MailFooter = document.getElementById('s2-mail-footer');
 const s1CancelBuffer = document.getElementById('s1-cancel-buffer');
@@ -94,6 +91,23 @@ const s1MaxFutureDays = document.getElementById('s1-max-future-days');
 const s1DisplayDays = document.getElementById('s1-display-days');
 const saveSettings2Btn = document.getElementById('save-settings2-btn');
 let settings3Loaded = false;
+
+const menuMasterRows = document.getElementById('menu-master-rows');
+const addMenuRowBtn = document.getElementById('add-menu-row-btn');
+const settings5Loading = document.getElementById('settings5-loading');
+const settings5Error = document.getElementById('settings5-error');
+const settings5SavedMsg = document.getElementById('settings5-saved-msg');
+const settings5Form = document.getElementById('settings5-form');
+const s5ShowMenuMinutes = document.getElementById('s5-show-menu-minutes');
+const s5ShowMenuPrice = document.getElementById('s5-show-menu-price');
+const saveSettings5Btn = document.getElementById('save-settings5-btn');
+
+const businessHoursRows = document.getElementById('business-hours-rows');
+const settings6Loading = document.getElementById('settings6-loading');
+const settings6Error = document.getElementById('settings6-error');
+const settings6SavedMsg = document.getElementById('settings6-saved-msg');
+const settings6Form = document.getElementById('settings6-form');
+const saveSettings6Btn = document.getElementById('save-settings6-btn');
 
 const settings3Loading = document.getElementById('settings3-loading');
 const settings3Error = document.getElementById('settings3-error');
@@ -230,6 +244,12 @@ if (tabButtons) {
 
       if (targetTab === 'settings1' && !settings1Loaded) {
         loadSettings1();
+      }
+      if (targetTab === 'settings5' && !settings5Loaded) {
+        loadSettings5();
+      }
+      if (targetTab === 'settings6' && !settings6Loaded) {
+        loadSettings6();
       }
       if (targetTab === 'settings4' && !settings4Loaded) {
         loadSettings4();
@@ -585,17 +605,6 @@ async function loadSettings1() {
     baseSlotMinutesForConversion = result.baseSlotMinutes || 5;
     if (s1SlotStepMinutes) s1SlotStepMinutes.value = result.displaySlotStepMinutes || 30;
 
-    // 営業時間
-    renderBusinessHoursRows(result.business || {}, result.lastOrderOverride || {});
-
-    // メニュー・料金
-    renderMenuMasterRows(result.menuMaster || {});
-
-    // メニューの選び方
-    setRadioValue('s1-menu-selector-type', result.menuSelectorType || 'TYPE_B');
-    if (s1ShowMenuMinutes) s1ShowMenuMinutes.checked = !!result.showMenuMinutes;
-    if (s1ShowMenuPrice) s1ShowMenuPrice.checked = !!result.showMenuPrice;
-
     // 仮予約制度
     const provisional = result.provisionalReservation || {};
     if (s1ProvisionalEnabled) s1ProvisionalEnabled.checked = !!provisional.enabled;
@@ -611,6 +620,11 @@ async function loadSettings1() {
     // 予約可能な期間
     if (s1MaxFutureDays) s1MaxFutureDays.value = result.maxFutureDaysToReserve;
     if (s1DisplayDays) s1DisplayDays.value = String(result.displayDays);
+
+    // 受付の基本設定
+    if (s1MaxCapacity) s1MaxCapacity.value = result.maxCapacity;
+    if (s1HistoryRetention) s1HistoryRetention.value = result.historyRetentionMonths;
+    if (s1BufferMinutes) s1BufferMinutes.value = result.bufferMinutesBeforeReservation;
 
     settings1Loaded = true;
     if (settings1Form) settings1Form.style.display = 'block';
@@ -759,50 +773,6 @@ function collectSettings1FormData() {
     settings.DISPLAY_SLOT_STEP = Math.round(stepMinutes / baseSlotMinutesForConversion);
   }
 
-  // 営業時間
-  const business = {};
-  document.querySelectorAll('.business-hours-row').forEach(row => {
-    const day = row.getAttribute('data-day');
-    const openVal = row.querySelector('.business-open-input').value;
-    const closeVal = row.querySelector('.business-close-input').value;
-    if (openVal !== '' && closeVal !== '') {
-      business[day] = [parseInt(openVal, 10), parseInt(closeVal, 10)];
-    }
-  });
-  settings.BUSINESS = business;
-
-  // 最終受付制（曜日ごとにチェックが入っている行だけを対象にする）
-  const lastOrderOverride = {};
-  document.querySelectorAll('.last-order-row').forEach(row => {
-    const day = row.getAttribute('data-day');
-    const check = row.querySelector('.last-order-check');
-    if (!check.checked) return;
-
-    const lastOrderTime = row.querySelector('.last-order-time-input').value;
-    const closeTime = row.querySelector('.last-order-close-input').value;
-    if (lastOrderTime && closeTime) {
-      lastOrderOverride[day] = { lastOrderTime: lastOrderTime, closeTime: closeTime };
-    }
-  });
-  settings.LAST_ORDER_OVERRIDE = lastOrderOverride;
-
-  // メニュー・料金
-  const menuMaster = {};
-  document.querySelectorAll('.menu-master-row').forEach(row => {
-    const name = row.querySelector('.menu-name-input').value.trim();
-    const minutes = parseInt(row.querySelector('.menu-minutes-input').value, 10);
-    const price = parseInt(row.querySelector('.menu-price-input').value, 10);
-    if (name && !isNaN(minutes) && minutes > 0) {
-      menuMaster[name] = { minutes: minutes, slots: Math.ceil(minutes / 5), price: isNaN(price) ? 0 : price };
-    }
-  });
-  settings.MENU_MASTER = menuMaster;
-
-  // メニューの選び方
-  settings.MENU_SELECTOR_TYPE = getRadioValue('s1-menu-selector-type') || 'TYPE_B';
-  settings.SHOW_MENU_MINUTES = !!s1ShowMenuMinutes.checked;
-  settings.SHOW_MENU_PRICE = !!s1ShowMenuPrice.checked;
-
   // 仮予約制度
   const targetMenus = s1ProvisionalTargetMenus.value.split(',').map(m => m.trim()).filter(m => m.length > 0);
   settings.PROVISIONAL_RESERVATION = {
@@ -820,6 +790,11 @@ function collectSettings1FormData() {
   // 予約可能な期間
   settings.MAX_FUTURE_DAYS_TO_RESERVE = parseInt(s1MaxFutureDays.value, 10);
   settings.DISPLAY_DAYS = parseInt(s1DisplayDays.value, 10);
+
+  // 受付の基本設定
+  settings.MAX_CAPACITY = parseInt(s1MaxCapacity.value, 10);
+  settings.HISTORY_RETENTION_MONTHS = parseInt(s1HistoryRetention.value, 10);
+  settings.BUFFER_MINUTES_BEFORE_RESERVATION = parseInt(s1BufferMinutes.value, 10);
 
   return settings;
 }
@@ -858,6 +833,183 @@ if (settings1Form) {
       if (saveSettings1Btn) {
         saveSettings1Btn.disabled = false;
         saveSettings1Btn.textContent = '保存する';
+      }
+    }
+  });
+}
+
+/**
+ * 「メニュー関係」タブの現在値を取得し、フォームに反映する
+ */
+async function loadSettings5() {
+  if (settings5Loading) settings5Loading.style.display = 'block';
+  if (settings5Error) settings5Error.style.display = 'none';
+  if (settings5Form) settings5Form.style.display = 'none';
+
+  try {
+    const result = await callAdminApi('getSettingsPage5');
+    if (!result.success) throw new Error(result.message || '設定の取得に失敗しました。');
+
+    renderMenuMasterRows(result.menuMaster || {});
+
+    setRadioValue('s5-menu-selector-type', result.menuSelectorType || 'TYPE_B');
+    if (s5ShowMenuMinutes) s5ShowMenuMinutes.checked = !!result.showMenuMinutes;
+    if (s5ShowMenuPrice) s5ShowMenuPrice.checked = !!result.showMenuPrice;
+
+    settings5Loaded = true;
+    if (settings5Form) settings5Form.style.display = 'block';
+  } catch (error) {
+    console.error('メニュー関係の取得エラー:', error);
+    if (settings5Error) {
+      settings5Error.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+      settings5Error.style.display = 'block';
+    }
+  } finally {
+    if (settings5Loading) settings5Loading.style.display = 'none';
+  }
+}
+
+if (settings5Form) {
+  settings5Form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (settings5Error) settings5Error.style.display = 'none';
+    if (settings5SavedMsg) settings5SavedMsg.style.display = 'none';
+    if (saveSettings5Btn) {
+      saveSettings5Btn.disabled = true;
+      saveSettings5Btn.textContent = '保存中...';
+    }
+
+    try {
+      const menuMaster = {};
+      document.querySelectorAll('.menu-master-row').forEach(row => {
+        const name = row.querySelector('.menu-name-input').value.trim();
+        const minutes = parseInt(row.querySelector('.menu-minutes-input').value, 10);
+        const price = parseInt(row.querySelector('.menu-price-input').value, 10);
+        if (name && !isNaN(minutes) && minutes > 0) {
+          menuMaster[name] = { minutes: minutes, slots: Math.ceil(minutes / 5), price: isNaN(price) ? 0 : price };
+        }
+      });
+
+      const settings = {
+        MENU_MASTER: menuMaster,
+        MENU_SELECTOR_TYPE: getRadioValue('s5-menu-selector-type') || 'TYPE_B',
+        SHOW_MENU_MINUTES: !!s5ShowMenuMinutes.checked,
+        SHOW_MENU_PRICE: !!s5ShowMenuPrice.checked
+      };
+
+      const password = sessionStorage.getItem(SESSION_STORAGE_KEY) || '';
+      const response = await fetch(CONFIG.GAS_WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'saveSettings', settings: JSON.stringify(settings), password: password })
+      });
+      const result = await response.json();
+
+      if (!result.success) throw new Error(result.message || '保存に失敗しました。');
+
+      if (settings5SavedMsg) settings5SavedMsg.style.display = 'block';
+    } catch (error) {
+      console.error('メニュー関係の保存エラー:', error);
+      if (settings5Error) {
+        settings5Error.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+        settings5Error.style.display = 'block';
+      }
+    } finally {
+      if (saveSettings5Btn) {
+        saveSettings5Btn.disabled = false;
+        saveSettings5Btn.textContent = '保存する';
+      }
+    }
+  });
+}
+
+/**
+ * 「営業時間」タブの現在値を取得し、フォームに反映する
+ */
+async function loadSettings6() {
+  if (settings6Loading) settings6Loading.style.display = 'block';
+  if (settings6Error) settings6Error.style.display = 'none';
+  if (settings6Form) settings6Form.style.display = 'none';
+
+  try {
+    const result = await callAdminApi('getSettingsPage6');
+    if (!result.success) throw new Error(result.message || '設定の取得に失敗しました。');
+
+    renderBusinessHoursRows(result.business || {}, result.lastOrderOverride || {});
+
+    settings6Loaded = true;
+    if (settings6Form) settings6Form.style.display = 'block';
+  } catch (error) {
+    console.error('営業時間の取得エラー:', error);
+    if (settings6Error) {
+      settings6Error.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+      settings6Error.style.display = 'block';
+    }
+  } finally {
+    if (settings6Loading) settings6Loading.style.display = 'none';
+  }
+}
+
+if (settings6Form) {
+  settings6Form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (settings6Error) settings6Error.style.display = 'none';
+    if (settings6SavedMsg) settings6SavedMsg.style.display = 'none';
+    if (saveSettings6Btn) {
+      saveSettings6Btn.disabled = true;
+      saveSettings6Btn.textContent = '保存中...';
+    }
+
+    try {
+      const business = {};
+      document.querySelectorAll('.business-hours-row').forEach(row => {
+        const day = row.getAttribute('data-day');
+        const openVal = row.querySelector('.business-open-input').value;
+        const closeVal = row.querySelector('.business-close-input').value;
+        if (openVal !== '' && closeVal !== '') {
+          business[day] = [parseInt(openVal, 10), parseInt(closeVal, 10)];
+        }
+      });
+
+      const lastOrderOverride = {};
+      document.querySelectorAll('.last-order-row').forEach(row => {
+        const day = row.getAttribute('data-day');
+        const check = row.querySelector('.last-order-check');
+        if (!check.checked) return;
+
+        const lastOrderTime = row.querySelector('.last-order-time-input').value;
+        const closeTime = row.querySelector('.last-order-close-input').value;
+        if (lastOrderTime && closeTime) {
+          lastOrderOverride[day] = { lastOrderTime: lastOrderTime, closeTime: closeTime };
+        }
+      });
+
+      const settings = {
+        BUSINESS: business,
+        LAST_ORDER_OVERRIDE: lastOrderOverride
+      };
+
+      const password = sessionStorage.getItem(SESSION_STORAGE_KEY) || '';
+      const response = await fetch(CONFIG.GAS_WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'saveSettings', settings: JSON.stringify(settings), password: password })
+      });
+      const result = await response.json();
+
+      if (!result.success) throw new Error(result.message || '保存に失敗しました。');
+
+      if (settings6SavedMsg) settings6SavedMsg.style.display = 'block';
+    } catch (error) {
+      console.error('営業時間の保存エラー:', error);
+      if (settings6Error) {
+        settings6Error.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+        settings6Error.style.display = 'block';
+      }
+    } finally {
+      if (saveSettings6Btn) {
+        saveSettings6Btn.disabled = false;
+        saveSettings6Btn.textContent = '保存する';
       }
     }
   });
@@ -964,11 +1116,8 @@ async function loadSettings2() {
     const result = await callAdminApi('getSettingsPage2');
     if (!result.success) throw new Error(result.message || '設定の取得に失敗しました。');
 
-    if (s2MaxCapacity) s2MaxCapacity.value = result.maxCapacity;
     if (s2ReminderDays) s2ReminderDays.value = result.reminderMailDaysBefore;
     if (s2AdminEmail) s2AdminEmail.value = result.adminEmail || '';
-    if (s2HistoryRetention) s2HistoryRetention.value = result.historyRetentionMonths;
-    if (s2BufferMinutes) s2BufferMinutes.value = result.bufferMinutesBeforeReservation;
 
     if (s2MailHeader) s2MailHeader.value = result.customerMailHeader || '';
     if (s2MailFooter) s2MailFooter.value = result.customerMailFooter || '';
@@ -1021,11 +1170,8 @@ if (settings2Form) {
 
     try {
       const settings = {
-        MAX_CAPACITY: parseInt(s2MaxCapacity.value, 10),
         REMINDER_MAIL_DAYS_BEFORE: parseInt(s2ReminderDays.value, 10),
         ADMIN_EMAIL: s2AdminEmail.value.trim(),
-        HISTORY_RETENTION_MONTHS: parseInt(s2HistoryRetention.value, 10),
-        BUFFER_MINUTES_BEFORE_RESERVATION: parseInt(s2BufferMinutes.value, 10),
         CUSTOMER_MAIL_HEADER: s2MailHeader.value,
         CUSTOMER_MAIL_FOOTER: s2MailFooter.value
       };
