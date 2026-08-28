@@ -181,6 +181,21 @@ font-size: 18px;
 font-weight: 700;
 }
 
+.header-right {
+display: flex;
+align-items: center;
+
+gap: 16px;
+}
+
+.welcome-message {
+font-size: 13px;
+
+color: var(--sub-text-color);
+
+white-space: nowrap;
+}
+
 .btn-logout {
 padding: 8px 16px;
 

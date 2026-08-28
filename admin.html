@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIS 管理画面</title>
-  <link rel="stylesheet" href="./admin-style.css?v=1.9.0">
+  <link rel="stylesheet" href="./admin-style.css?v=2.0.0">
 </head>
 <body>
 
@@ -20,8 +20,12 @@
 
     <form id="login-form">
       <div class="form-group">
-        <label for="admin-password">合言葉</label>
-        <input type="password" id="admin-password" required placeholder="合言葉を入力してください">
+        <label for="admin-login-id">ログインID</label>
+        <input type="text" id="admin-login-id" required placeholder="ログインIDを入力してください" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="admin-password">パスワード</label>
+        <input type="password" id="admin-password" required placeholder="パスワードを入力してください" autocomplete="current-password">
       </div>
       <div id="login-error" class="login-error" style="display: none;"></div>
       <button type="submit" id="login-btn" class="btn-login">ログイン</button>
@@ -43,8 +47,12 @@
       <button type="button" class="tab-btn" data-tab="settings4">スタッフ関係</button>
       <button type="button" class="tab-btn" data-tab="settings2">メール関係</button>
       <button type="button" class="tab-btn" data-tab="settings3">レイアウト関係</button>
+      <button type="button" class="tab-btn" data-tab="accounts">アカウント管理</button>
     </nav>
-    <button type="button" id="logout-btn" class="btn-logout">ログアウト</button>
+    <div class="header-right">
+      <span id="welcome-message" class="welcome-message"></span>
+      <button type="button" id="logout-btn" class="btn-logout">ログアウト</button>
+    </div>
   </header>
 
   <main class="dashboard-main">
@@ -488,11 +496,51 @@
       </form>
     </section>
 
+    <!-- ==========================================
+         タブ：アカウント管理
+         ========================================== -->
+    <section id="tab-accounts" class="tab-page" style="display: none;">
+      <h2 class="section-title">アカウント管理</h2>
+
+      <div id="accounts-loading" class="settings-loading">読み込み中...</div>
+      <div id="accounts-error" class="report-error" style="display: none;"></div>
+
+      <div class="settings-card">
+        <h3 class="settings-card-title">登録済みのアカウント</h3>
+        <p class="settings-card-note">自分自身のアカウントは削除できません。</p>
+        <table class="report-table">
+          <thead><tr><th>ログインID</th><th>表示名</th><th></th></tr></thead>
+          <tbody id="accounts-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="settings-card">
+        <h3 class="settings-card-title">新しいアカウントを追加</h3>
+        <div id="add-account-error" class="report-error" style="display: none;"></div>
+        <div id="add-account-saved-msg" class="settings-saved-msg" style="display: none;">アカウントを追加しました。</div>
+        <form id="add-account-form">
+          <div class="form-group">
+            <label for="new-login-id">ログインID</label>
+            <input type="text" id="new-login-id" required>
+          </div>
+          <div class="form-group">
+            <label for="new-password">パスワード</label>
+            <input type="password" id="new-password" required>
+          </div>
+          <div class="form-group">
+            <label for="new-display-name">表示名</label>
+            <input type="text" id="new-display-name" placeholder="例：下鶴">
+          </div>
+          <button type="submit" id="add-account-btn" class="btn-save-settings">追加する</button>
+        </form>
+      </div>
+    </section>
+
   </main>
 </div>
 
-<script src="./js/config.js?v=2.2.1"></script>
-<script src="./js/admin.js?v=2.2.1"></script>
+<script src="./js/config.js?v=3.0.0"></script>
+<script src="./js/admin.js?v=3.0.0"></script>
 
 </body>
 </html>
