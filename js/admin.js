@@ -103,6 +103,7 @@ const s5ShowMenuPrice = document.getElementById('s5-show-menu-price');
 const saveSettings5Btn = document.getElementById('save-settings5-btn');
 
 const businessHoursRows = document.getElementById('business-hours-rows');
+const slotStepOverrideRows = document.getElementById('slot-step-override-rows');
 const settings6Loading = document.getElementById('settings6-loading');
 const settings6Error = document.getElementById('settings6-error');
 const settings6SavedMsg = document.getElementById('settings6-saved-msg');
@@ -686,9 +687,43 @@ function renderBusinessHoursRows(business, lastOrderOverride) {
 }
 
 /**
- * メニュー・料金の入力行を描画する
- * @param {Object} menuMaster - { メニュー名: { minutes, price } }
+ * 「指定時間、予約間隔の設定」の入力行を、日〜土の7行分描画する
+ * @param {Object} overrideByDay - { 曜日番号: { startTime, endTime, stepMinutes } }
  */
+function renderSlotStepOverrideRows(overrideByDay) {
+  if (!slotStepOverrideRows) return;
+
+  slotStepOverrideRows.innerHTML = DAY_LABELS.map((label, dayIndex) => {
+    const override = overrideByDay[dayIndex] || overrideByDay[String(dayIndex)] || null;
+    const hasOverride = !!override;
+    const startTime = override ? override.startTime : '';
+    const endTime = override ? override.endTime : '';
+    const stepMinutes = override ? override.stepMinutes : '';
+
+    return `
+      <div class="slot-step-override-row" data-day="${dayIndex}">
+        <span class="day-label">${label}曜日</span>
+        <label><input type="checkbox" class="slot-override-check" ${hasOverride ? 'checked' : ''}> 使う</label>
+        <input type="time" class="slot-override-start-input" value="${startTime}" ${hasOverride ? '' : 'disabled'}>
+        <span>〜</span>
+        <input type="time" class="slot-override-end-input" value="${endTime}" ${hasOverride ? '' : 'disabled'}>
+        <input type="number" class="slot-override-minutes-input" min="5" step="5" value="${stepMinutes}" placeholder="分" ${hasOverride ? '' : 'disabled'}>
+        <span>分間隔</span>
+      </div>
+    `;
+  }).join('');
+
+  slotStepOverrideRows.querySelectorAll('.slot-override-check').forEach(check => {
+    check.addEventListener('change', () => {
+      const row = check.closest('.slot-step-override-row');
+      row.querySelectorAll('input:not(.slot-override-check)').forEach(input => {
+        input.disabled = !check.checked;
+      });
+    });
+  });
+}
+
+
 function renderMenuMasterRows(menuMaster) {
   if (!menuMasterRows) return;
 
@@ -936,6 +971,7 @@ async function loadSettings6() {
     if (!result.success) throw new Error(result.message || '設定の取得に失敗しました。');
 
     renderBusinessHoursRows(result.business || {}, result.lastOrderOverride || {});
+    renderSlotStepOverrideRows(result.displaySlotStepOverride || {});
 
     settings6Loaded = true;
     if (settings6Form) settings6Form.style.display = 'block';
@@ -985,9 +1021,24 @@ if (settings6Form) {
         }
       });
 
+      const displaySlotStepOverride = {};
+      document.querySelectorAll('.slot-step-override-row').forEach(row => {
+        const day = row.getAttribute('data-day');
+        const check = row.querySelector('.slot-override-check');
+        if (!check.checked) return;
+
+        const startTime = row.querySelector('.slot-override-start-input').value;
+        const endTime = row.querySelector('.slot-override-end-input').value;
+        const stepMinutes = parseInt(row.querySelector('.slot-override-minutes-input').value, 10);
+        if (startTime && endTime && !isNaN(stepMinutes) && stepMinutes > 0) {
+          displaySlotStepOverride[day] = { startTime: startTime, endTime: endTime, stepMinutes: stepMinutes };
+        }
+      });
+
       const settings = {
         BUSINESS: business,
-        LAST_ORDER_OVERRIDE: lastOrderOverride
+        LAST_ORDER_OVERRIDE: lastOrderOverride,
+        DISPLAY_SLOT_STEP_OVERRIDE: displaySlotStepOverride
       };
 
       const password = sessionStorage.getItem(SESSION_STORAGE_KEY) || '';

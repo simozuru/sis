@@ -931,6 +931,48 @@ height: 2px;
 background: var(--border-color);
 }
 
+.slot-step-override-row {
+display: flex;
+flex-wrap: wrap;
+align-items: center;
+
+gap: 10px;
+
+padding: 10px 12px;
+
+background: var(--bg-color);
+
+border-radius: var(--radius-sm);
+
+margin-bottom: 10px;
+
+font-size: 13px;
+}
+
+.slot-step-override-row .day-label {
+flex: 0 0 60px;
+
+font-size: 13px;
+font-weight: 600;
+
+color: var(--sub-text-color);
+}
+
+.slot-step-override-row input[type="time"],
+.slot-step-override-row input[type="number"] {
+padding: 6px 8px;
+
+border: 1px solid var(--border-color);
+
+border-radius: var(--radius-sm);
+
+font-size: 13px;
+}
+
+.slot-step-override-row input[type="number"] {
+width: 70px;
+}
+
 .settings-card select {
 width: 100%;
 
