@@ -644,6 +644,47 @@ async function loadSettings1() {
  * 営業時間の入力行を、日〜土の7行分描画する
  * @param {Object} business - { 曜日番号: [開始時, 閉店時] }
  */
+/**
+ * 「時」「分」を別々のプルダウンで選ぶ入力欄一式を組み立てる（ブラウザ標準のtime入力は、スクロールで進みすぎて使いにくいため）
+ * @param {string} className - この入力欄一式に共通で付けるクラス名（値の取得時に使う）
+ * @param {string} timeStr - 初期値（"HH:mm"形式。空文字なら未選択状態）
+ * @param {boolean} disabled - 無効状態で表示するか
+ * @returns {string} HTML文字列
+ */
+function buildTimeSelectHtml(className, timeStr, disabled) {
+  const [hourVal, minuteVal] = (timeStr || '').split(':');
+
+  let hourOptions = '<option value="">--</option>';
+  for (let h = 0; h < 24; h++) {
+    const hh = String(h).padStart(2, '0');
+    hourOptions += `<option value="${hh}" ${hourVal === hh ? 'selected' : ''}>${hh}</option>`;
+  }
+
+  let minuteOptions = '<option value="">--</option>';
+  for (let m = 0; m < 60; m += 5) {
+    const mm = String(m).padStart(2, '0');
+    minuteOptions += `<option value="${mm}" ${minuteVal === mm ? 'selected' : ''}>${mm}</option>`;
+  }
+
+  const disabledAttr = disabled ? 'disabled' : '';
+  return `<span class="time-select-pair ${className}"><select class="time-hour-select" ${disabledAttr}>${hourOptions}</select>:<select class="time-minute-select" ${disabledAttr}>${minuteOptions}</select></span>`;
+}
+
+/**
+ * buildTimeSelectHtmlで作った時・分プルダウンから、"HH:mm"形式の値を読み取る（片方でも未選択なら空文字を返す）
+ * @param {Element} container - プルダウンが含まれる親要素
+ * @param {string} className - buildTimeSelectHtmlに渡したのと同じクラス名
+ * @returns {string} "HH:mm" または 空文字
+ */
+function getTimeFromSelects(container, className) {
+  const wrap = container.querySelector(`.${className}`);
+  if (!wrap) return '';
+  const hour = wrap.querySelector('.time-hour-select').value;
+  const minute = wrap.querySelector('.time-minute-select').value;
+  if (!hour || !minute) return '';
+  return `${hour}:${minute}`;
+}
+
 function renderBusinessHoursRows(business, lastOrderOverride) {
   if (!businessHoursRows) return;
 
@@ -669,8 +710,8 @@ function renderBusinessHoursRows(business, lastOrderOverride) {
       </div>
       <div class="last-order-row" data-day="${dayIndex}">
         <label><input type="checkbox" class="last-order-check" ${hasOverride ? 'checked' : ''}> 最終受付制を設定する</label>
-        <span class="last-order-time-pair"><span>最終受付</span><input type="time" class="last-order-time-input" value="${lastOrderTime}" ${hasOverride ? '' : 'disabled'}></span>
-        <span class="last-order-time-pair"><span>終了時刻</span><input type="time" class="last-order-close-input" value="${overrideCloseTime}" ${hasOverride ? '' : 'disabled'}></span>
+        <span class="last-order-time-pair"><span>最終受付</span>${buildTimeSelectHtml('last-order-time-select', lastOrderTime, !hasOverride)}</span>
+        <span class="last-order-time-pair"><span>終了時刻</span>${buildTimeSelectHtml('last-order-close-select', overrideCloseTime, !hasOverride)}</span>
       </div>
     `;
   }).join('');
@@ -679,8 +720,8 @@ function renderBusinessHoursRows(business, lastOrderOverride) {
   businessHoursRows.querySelectorAll('.last-order-check').forEach(check => {
     check.addEventListener('change', () => {
       const row = check.closest('.last-order-row');
-      row.querySelectorAll('input[type="time"]').forEach(input => {
-        input.disabled = !check.checked;
+      row.querySelectorAll('select').forEach(select => {
+        select.disabled = !check.checked;
       });
     });
   });
@@ -704,9 +745,9 @@ function renderSlotStepOverrideRows(overrideByDay) {
       <div class="slot-step-override-row" data-day="${dayIndex}">
         <span class="day-label">${label}曜日</span>
         <label><input type="checkbox" class="slot-override-check" ${hasOverride ? 'checked' : ''}> 使う</label>
-        <input type="time" class="slot-override-start-input" value="${startTime}" ${hasOverride ? '' : 'disabled'}>
+        ${buildTimeSelectHtml('slot-override-start-select', startTime, !hasOverride)}
         <span>〜</span>
-        <input type="time" class="slot-override-end-input" value="${endTime}" ${hasOverride ? '' : 'disabled'}>
+        ${buildTimeSelectHtml('slot-override-end-select', endTime, !hasOverride)}
         <input type="number" class="slot-override-minutes-input" min="5" step="5" value="${stepMinutes}" placeholder="分" ${hasOverride ? '' : 'disabled'}>
         <span>分間隔</span>
       </div>
@@ -716,7 +757,7 @@ function renderSlotStepOverrideRows(overrideByDay) {
   slotStepOverrideRows.querySelectorAll('.slot-override-check').forEach(check => {
     check.addEventListener('change', () => {
       const row = check.closest('.slot-step-override-row');
-      row.querySelectorAll('input:not(.slot-override-check)').forEach(input => {
+      row.querySelectorAll('select, input:not(.slot-override-check)').forEach(input => {
         input.disabled = !check.checked;
       });
     });
@@ -1014,8 +1055,8 @@ if (settings6Form) {
         const check = row.querySelector('.last-order-check');
         if (!check.checked) return;
 
-        const lastOrderTime = row.querySelector('.last-order-time-input').value;
-        const closeTime = row.querySelector('.last-order-close-input').value;
+        const lastOrderTime = getTimeFromSelects(row, 'last-order-time-select');
+        const closeTime = getTimeFromSelects(row, 'last-order-close-select');
         if (lastOrderTime && closeTime) {
           lastOrderOverride[day] = { lastOrderTime: lastOrderTime, closeTime: closeTime };
         }
@@ -1027,8 +1068,8 @@ if (settings6Form) {
         const check = row.querySelector('.slot-override-check');
         if (!check.checked) return;
 
-        const startTime = row.querySelector('.slot-override-start-input').value;
-        const endTime = row.querySelector('.slot-override-end-input').value;
+        const startTime = getTimeFromSelects(row, 'slot-override-start-select');
+        const endTime = getTimeFromSelects(row, 'slot-override-end-select');
         const stepMinutes = parseInt(row.querySelector('.slot-override-minutes-input').value, 10);
         if (startTime && endTime && !isNaN(stepMinutes) && stepMinutes > 0) {
           displaySlotStepOverride[day] = { startTime: startTime, endTime: endTime, stepMinutes: stepMinutes };

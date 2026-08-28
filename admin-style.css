@@ -749,14 +749,25 @@ height: 15px;
 accent-color: var(--accent-color);
 }
 
-.last-order-row input[type="time"] {
-padding: 5px 8px;
+.time-select-pair {
+display: inline-flex;
+align-items: center;
+
+gap: 3px;
+}
+
+.time-select-pair select {
+padding: 5px 6px;
 
 border: 1px solid var(--border-color);
 
 border-radius: var(--radius-sm);
 
 font-size: 12px;
+
+background: var(--input-bg);
+
+color: var(--text-color);
 }
 
 .last-order-time-pair {
@@ -958,7 +969,6 @@ font-weight: 600;
 color: var(--sub-text-color);
 }
 
-.slot-step-override-row input[type="time"],
 .slot-step-override-row input[type="number"] {
 padding: 6px 8px;
 
