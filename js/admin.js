@@ -18,6 +18,20 @@ const loginBtn = document.getElementById('login-btn');
 const logoutBtn = document.getElementById('logout-btn');
 const welcomeMessage = document.getElementById('welcome-message');
 
+const showForgotPasswordBtn = document.getElementById('show-forgot-password-btn');
+const backToLoginBtn = document.getElementById('back-to-login-btn');
+const forgotPasswordForm = document.getElementById('forgot-password-form');
+const forgotEmailInput = document.getElementById('forgot-email');
+const forgotPasswordError = document.getElementById('forgot-password-error');
+const forgotPasswordSentMsg = document.getElementById('forgot-password-sent-msg');
+const forgotPasswordBtn = document.getElementById('forgot-password-btn');
+
+const resetPasswordForm = document.getElementById('reset-password-form');
+const resetNewPasswordInput = document.getElementById('reset-new-password');
+const resetPasswordError = document.getElementById('reset-password-error');
+const resetPasswordDoneMsg = document.getElementById('reset-password-done-msg');
+const resetPasswordBtn = document.getElementById('reset-password-btn');
+
 const reportStartDateInput = document.getElementById('report-start-date');
 const reportEndDateInput = document.getElementById('report-end-date');
 const runReportBtn = document.getElementById('run-report-btn');
@@ -1743,6 +1757,133 @@ if (logoutBtn) {
   });
 }
 
+/**
+ * ログイン画面 ⇔「パスワードを忘れた場合」画面の切り替え
+ */
+if (showForgotPasswordBtn) {
+  showForgotPasswordBtn.addEventListener('click', () => {
+    if (loginForm) loginForm.style.display = 'none';
+    if (forgotPasswordForm) forgotPasswordForm.style.display = 'block';
+    if (loginError) loginError.style.display = 'none';
+  });
+}
+
+if (backToLoginBtn) {
+  backToLoginBtn.addEventListener('click', () => {
+    if (forgotPasswordForm) forgotPasswordForm.style.display = 'none';
+    if (loginForm) loginForm.style.display = 'block';
+  });
+}
+
+if (forgotPasswordForm) {
+  forgotPasswordForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (forgotPasswordError) forgotPasswordError.style.display = 'none';
+    if (forgotPasswordSentMsg) forgotPasswordSentMsg.style.display = 'none';
+    if (forgotPasswordBtn) {
+      forgotPasswordBtn.disabled = true;
+      forgotPasswordBtn.textContent = '送信中...';
+    }
+
+    try {
+      const email = forgotEmailInput ? forgotEmailInput.value.trim() : '';
+      const response = await fetch(CONFIG.GAS_WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'requestPasswordReset', email: email })
+      });
+      const result = await response.json();
+
+      if (forgotPasswordSentMsg) {
+        forgotPasswordSentMsg.textContent = result.message || '再設定メールを送信しました。';
+        forgotPasswordSentMsg.style.display = 'block';
+      }
+      forgotPasswordForm.reset();
+    } catch (error) {
+      console.error('パスワード再設定リクエストエラー:', error);
+      if (forgotPasswordError) {
+        forgotPasswordError.textContent = '通信エラーが発生しました。時間をおいて再度お試しください。';
+        forgotPasswordError.style.display = 'block';
+      }
+    } finally {
+      if (forgotPasswordBtn) {
+        forgotPasswordBtn.disabled = false;
+        forgotPasswordBtn.textContent = '再設定メールを送る';
+      }
+    }
+  });
+}
+
+/**
+ * メール内のリンク（?resetToken=...）から開かれた場合、新しいパスワード入力画面を表示する
+ */
+let currentResetToken = null;
+
+function checkResetTokenInUrl() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tokenFromUrl = urlParams.get('resetToken');
+
+  if (tokenFromUrl) {
+    currentResetToken = tokenFromUrl;
+    if (loginForm) loginForm.style.display = 'none';
+    if (forgotPasswordForm) forgotPasswordForm.style.display = 'none';
+    if (resetPasswordForm) resetPasswordForm.style.display = 'block';
+    return true;
+  }
+  return false;
+}
+
+if (resetPasswordForm) {
+  resetPasswordForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (resetPasswordError) resetPasswordError.style.display = 'none';
+    if (resetPasswordDoneMsg) resetPasswordDoneMsg.style.display = 'none';
+    if (resetPasswordBtn) {
+      resetPasswordBtn.disabled = true;
+      resetPasswordBtn.textContent = '再設定中...';
+    }
+
+    try {
+      const newPassword = resetNewPasswordInput ? resetNewPasswordInput.value : '';
+      const response = await fetch(CONFIG.GAS_WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'resetPasswordWithToken', resetToken: currentResetToken, newPassword: newPassword })
+      });
+      const result = await response.json();
+
+      if (!result.success) throw new Error(result.message || '再設定に失敗しました。');
+
+      if (resetPasswordDoneMsg) {
+        resetPasswordDoneMsg.textContent = result.message || 'パスワードを再設定しました。';
+        resetPasswordDoneMsg.style.display = 'block';
+      }
+      resetPasswordForm.reset();
+
+      // 少し待ってから、通常のログイン画面に戻す
+      setTimeout(() => {
+        if (resetPasswordForm) resetPasswordForm.style.display = 'none';
+        if (loginForm) loginForm.style.display = 'block';
+        // URLの ?resetToken= を消しておく（リロード時に再設定画面へ戻らないように）
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }, 2000);
+    } catch (error) {
+      console.error('パスワード再設定エラー:', error);
+      if (resetPasswordError) {
+        resetPasswordError.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+        resetPasswordError.style.display = 'block';
+      }
+    } finally {
+      if (resetPasswordBtn) {
+        resetPasswordBtn.disabled = false;
+        resetPasswordBtn.textContent = 'パスワードを再設定する';
+      }
+    }
+  });
+}
+
 window.addEventListener('DOMContentLoaded', () => {
-  checkExistingSession();
+  if (!checkResetTokenInUrl()) {
+    checkExistingSession();
+  }
 });

@@ -20,8 +20,8 @@
 
     <form id="login-form">
       <div class="form-group">
-        <label for="admin-login-id">ログインID</label>
-        <input type="text" id="admin-login-id" required placeholder="ログインIDを入力してください" autocomplete="username">
+        <label for="admin-login-id">メールアドレス</label>
+        <input type="email" id="admin-login-id" required placeholder="メールアドレスを入力してください" autocomplete="username">
       </div>
       <div class="form-group">
         <label for="admin-password">パスワード</label>
@@ -29,6 +29,32 @@
       </div>
       <div id="login-error" class="login-error" style="display: none;"></div>
       <button type="submit" id="login-btn" class="btn-login">ログイン</button>
+      <button type="button" id="show-forgot-password-btn" class="btn-link-plain">パスワードを忘れた場合はこちら</button>
+    </form>
+
+    <!-- パスワード再設定：メールアドレス入力（第1段階） -->
+    <form id="forgot-password-form" style="display: none;">
+      <p class="login-subtitle">登録済みのメールアドレスに、再設定用のリンクをお送りします。</p>
+      <div class="form-group">
+        <label for="forgot-email">メールアドレス</label>
+        <input type="email" id="forgot-email" required placeholder="メールアドレスを入力してください">
+      </div>
+      <div id="forgot-password-error" class="login-error" style="display: none;"></div>
+      <div id="forgot-password-sent-msg" class="settings-saved-msg" style="display: none;"></div>
+      <button type="submit" id="forgot-password-btn" class="btn-login">再設定メールを送る</button>
+      <button type="button" id="back-to-login-btn" class="btn-link-plain">ログイン画面に戻る</button>
+    </form>
+
+    <!-- パスワード再設定：新しいパスワードの入力（第2段階、メール内リンクから遷移） -->
+    <form id="reset-password-form" style="display: none;">
+      <p class="login-subtitle">新しいパスワードを入力してください。</p>
+      <div class="form-group">
+        <label for="reset-new-password">新しいパスワード</label>
+        <input type="password" id="reset-new-password" required placeholder="新しいパスワード（4文字以上）">
+      </div>
+      <div id="reset-password-error" class="login-error" style="display: none;"></div>
+      <div id="reset-password-done-msg" class="settings-saved-msg" style="display: none;"></div>
+      <button type="submit" id="reset-password-btn" class="btn-login">パスワードを再設定する</button>
     </form>
   </div>
 </div>
@@ -509,7 +535,7 @@
         <h3 class="settings-card-title">登録済みのアカウント</h3>
         <p class="settings-card-note">自分自身のアカウントは削除できません。</p>
         <table class="report-table">
-          <thead><tr><th>ログインID</th><th>表示名</th><th></th></tr></thead>
+          <thead><tr><th>メールアドレス</th><th>表示名</th><th></th></tr></thead>
           <tbody id="accounts-tbody"></tbody>
         </table>
       </div>
@@ -520,8 +546,8 @@
         <div id="add-account-saved-msg" class="settings-saved-msg" style="display: none;">アカウントを追加しました。</div>
         <form id="add-account-form">
           <div class="form-group">
-            <label for="new-login-id">ログインID</label>
-            <input type="text" id="new-login-id" required>
+            <label for="new-login-id">メールアドレス</label>
+            <input type="email" id="new-login-id" required>
           </div>
           <div class="form-group">
             <label for="new-password">パスワード</label>
@@ -539,8 +565,8 @@
   </main>
 </div>
 
-<script src="./js/config.js?v=3.0.0"></script>
-<script src="./js/admin.js?v=3.0.0"></script>
+<script src="./js/config.js?v=3.1.0"></script>
+<script src="./js/admin.js?v=3.1.0"></script>
 
 </body>
 </html>
