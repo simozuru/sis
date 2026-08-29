@@ -100,6 +100,7 @@
             <option value="newRepeat">新規・リピート比率</option>
             <option value="frequency">来店頻度の分布</option>
             <option value="dormant">休眠顧客リスト</option>
+            <option value="cancellation">キャンセル率</option>
           </select>
         </div>
 
@@ -178,6 +179,12 @@
             <thead><tr><th>お客様名</th><th>電話番号</th><th>最終来店日</th><th>来店回数</th></tr></thead>
             <tbody id="dormant-tbody"></tbody>
           </table>
+        </div>
+
+        <div id="cancellation-report-card" class="report-card">
+          <h3 class="report-card-title">キャンセル率</h3>
+          <div id="cancellation-summary" class="designation-summary"></div>
+          <div id="cancellation-breakdown" class="designation-by-staff"></div>
         </div>
       </div>
     </section>
@@ -581,8 +588,8 @@
   </main>
 </div>
 
-<script src="./js/config.js?v=3.2.0"></script>
-<script src="./js/admin.js?v=3.2.0"></script>
+<script src="./js/config.js?v=3.3.0"></script>
+<script src="./js/admin.js?v=3.3.0"></script>
 
 </body>
 </html>

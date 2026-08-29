@@ -50,6 +50,9 @@ const timeSlotReportCard = document.getElementById('time-slot-report-card');
 const newRepeatReportCard = document.getElementById('new-repeat-report-card');
 const frequencyReportCard = document.getElementById('frequency-report-card');
 const dormantReportCard = document.getElementById('dormant-report-card');
+const cancellationReportCard = document.getElementById('cancellation-report-card');
+const cancellationSummary = document.getElementById('cancellation-summary');
+const cancellationBreakdown = document.getElementById('cancellation-breakdown');
 const dateRangeControls = document.getElementById('date-range-controls');
 const dormantControls = document.getElementById('dormant-controls');
 const dormantMonthsInput = document.getElementById('dormant-months-input');
@@ -177,7 +180,8 @@ const REPORT_CARD_MAP = {
   timeSlot: timeSlotReportCard,
   newRepeat: newRepeatReportCard,
   frequency: frequencyReportCard,
-  dormant: dormantReportCard
+  dormant: dormantReportCard,
+  cancellation: cancellationReportCard
 };
 
 
@@ -414,6 +418,11 @@ async function runReport() {
       result = await callAdminApi('getDormantCustomersReport', { monthsThreshold });
       if (!result.success) throw new Error(result.message || '集計に失敗しました。');
       renderDormantReport(result);
+
+    } else if (selected === 'cancellation') {
+      result = await callAdminApi('getCancellationRateReport', { startDate, endDate });
+      if (!result.success) throw new Error(result.message || '集計に失敗しました。');
+      renderCancellationReport(result);
     }
 
     if (reportResults) reportResults.style.display = 'block';
@@ -610,6 +619,36 @@ function renderDormantReport(data) {
   dormantTbody.innerHTML = list.map(c =>
     `<tr><td>${escapeHtmlAdmin(c.name)}</td><td>${escapeHtmlAdmin(c.tel)}</td><td>${c.lastVisitDate}</td><td>${c.visitCount}回</td></tr>`
   ).join('');
+}
+
+/**
+ * キャンセル率レポートを描画する
+ * @param {Object} data - getCancellationRateReport の戻り値
+ */
+function renderCancellationReport(data) {
+  if (cancellationSummary) {
+    cancellationSummary.innerHTML = `
+      <div class="designation-summary-item">
+        <div class="designation-summary-value">${data.cancelRate}%</div>
+        <div class="designation-summary-label">キャンセル率</div>
+      </div>
+      <div class="designation-summary-item">
+        <div class="designation-summary-value">${data.cancelCount}</div>
+        <div class="designation-summary-label">キャンセル件数</div>
+      </div>
+      <div class="designation-summary-item">
+        <div class="designation-summary-value">${data.totalCount}</div>
+        <div class="designation-summary-label">予約件数（合計）</div>
+      </div>
+    `;
+  }
+
+  if (cancellationBreakdown) {
+    cancellationBreakdown.innerHTML = `
+      <div class="designation-by-staff-row"><span>お客様によるキャンセル</span><span>${data.customerCancelCount}件</span></div>
+      <div class="designation-by-staff-row"><span>仮予約タイムアウト（自動）</span><span>${data.timeoutCount}件</span></div>
+    `;
+  }
 }
 
 /**
