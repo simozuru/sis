@@ -255,6 +255,22 @@
         </div>
 
         <div class="settings-card">
+          <h3 class="settings-card-title">キャンセル履歴の保持期間</h3>
+          <div class="form-group">
+            <p class="settings-card-note">誰が・いつ・何をキャンセルしたかの記録を、何ヶ月分残すか（-1で無期限）</p>
+            <input type="number" id="s1-cancel-history-retention" min="-1">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">カレンダー変更履歴の保持期間</h3>
+          <div class="form-group">
+            <p class="settings-card-note">Googleカレンダー上での直接編集の記録を、何ヶ月分残すか（-1で無期限）</p>
+            <input type="number" id="s1-calendar-history-retention" min="-1">
+          </div>
+        </div>
+
+        <div class="settings-card">
           <h3 class="settings-card-title">新規予約の最短受付タイミング</h3>
           <div class="form-group">
             <p class="settings-card-note">今から何分後以降の枠なら予約できるか</p>
@@ -565,8 +581,8 @@
   </main>
 </div>
 
-<script src="./js/config.js?v=3.1.1"></script>
-<script src="./js/admin.js?v=3.1.1"></script>
+<script src="./js/config.js?v=3.2.0"></script>
+<script src="./js/admin.js?v=3.2.0"></script>
 
 </body>
 </html>

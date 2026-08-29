@@ -72,6 +72,8 @@ const s1ProvisionalTargetMenus = document.getElementById('s1-provisional-target-
 const s1ProvisionalDeadline = document.getElementById('s1-provisional-deadline');
 const s1MaxCapacity = document.getElementById('s1-max-capacity');
 const s1HistoryRetention = document.getElementById('s1-history-retention');
+const s1CancelHistoryRetention = document.getElementById('s1-cancel-history-retention');
+const s1CalendarHistoryRetention = document.getElementById('s1-calendar-history-retention');
 const s1BufferMinutes = document.getElementById('s1-buffer-minutes');
 const saveSettings1Btn = document.getElementById('save-settings1-btn');
 
@@ -656,6 +658,8 @@ async function loadSettings1() {
     // 受付の基本設定
     if (s1MaxCapacity) s1MaxCapacity.value = result.maxCapacity;
     if (s1HistoryRetention) s1HistoryRetention.value = result.historyRetentionMonths;
+    if (s1CancelHistoryRetention) s1CancelHistoryRetention.value = result.cancelHistoryRetentionMonths;
+    if (s1CalendarHistoryRetention) s1CalendarHistoryRetention.value = result.calendarHistoryRetentionMonths;
     if (s1BufferMinutes) s1BufferMinutes.value = result.bufferMinutesBeforeReservation;
 
     settings1Loaded = true;
@@ -901,6 +905,8 @@ function collectSettings1FormData() {
   // 受付の基本設定
   settings.MAX_CAPACITY = parseInt(s1MaxCapacity.value, 10);
   settings.HISTORY_RETENTION_MONTHS = parseInt(s1HistoryRetention.value, 10);
+  settings.CANCEL_HISTORY_RETENTION_MONTHS = parseInt(s1CancelHistoryRetention.value, 10);
+  settings.CALENDAR_HISTORY_RETENTION_MONTHS = parseInt(s1CalendarHistoryRetention.value, 10);
   settings.BUFFER_MINUTES_BEFORE_RESERVATION = parseInt(s1BufferMinutes.value, 10);
 
   return settings;
