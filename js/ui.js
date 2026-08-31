@@ -461,7 +461,11 @@ function renderMenuUI() {
  * 「選んだメニューの合計金額と合計施術時間を表示する」設定がONの時だけ動く
  */
 function updateMenuTotalDisplay() {
-  if (!menuTotalDisplayEl || !CONFIG.SHOW_MENU_TOTAL) return;
+  if (!menuTotalDisplayEl) return;
+  if (!CONFIG.SHOW_MENU_TOTAL) {
+    menuTotalDisplayEl.style.display = 'none';
+    return;
+  }
 
   const selectedValue = getSelectedMenusValue();
   const menuNames = selectedValue ? selectedValue.split(',').map(m => m.trim()).filter(m => m) : [];
@@ -482,9 +486,15 @@ function updateMenuTotalDisplay() {
     totalPrice += Number(data.price) || 0;
   });
 
+  // 「施術時間を表示する」「金額を表示する」のチェック状況に合わせて、表示する項目を絞り込む
   const parts = [];
-  if (totalMinutes > 0) parts.push(`合計 ${totalMinutes}分`);
-  parts.push(`合計 ￥${totalPrice.toLocaleString()}`);
+  if (CONFIG.SHOW_MENU_MINUTES && totalMinutes > 0) parts.push(`合計 ${totalMinutes}分`);
+  if (CONFIG.SHOW_MENU_PRICE) parts.push(`合計 ￥${totalPrice.toLocaleString()}`);
+
+  if (parts.length === 0) {
+    menuTotalDisplayEl.style.display = 'none';
+    return;
+  }
 
   menuTotalDisplayEl.textContent = parts.join(" / ");
   menuTotalDisplayEl.style.display = 'block';
