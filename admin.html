@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIS 管理画面</title>
-  <link rel="stylesheet" href="./admin-style.css?v=2.1.0">
+  <link rel="stylesheet" href="./admin-style.css?v=2.0.0">
 </head>
 <body>
 
@@ -426,14 +426,10 @@
           <div class="form-group radio-group">
             <label><input type="radio" name="s4-no-assign-mode" value="2"> 振り分けず「指名なし専用カレンダー」にそのまま登録する（手動配置向け）</label>
           </div>
-          <div class="form-group tree-root">
-            <div class="tree-branch-item">
-              <label><input type="radio" name="s4-no-assign-mode" value="1"> 自動的に空いているスタッフに振り分ける</label>
-            </div>
-            <div class="tree-branch-item tree-child">
+          <div class="form-group radio-group tree-parent-group">
+            <label><input type="radio" name="s4-no-assign-mode" value="1"> 自動的に空いているスタッフに振り分ける</label>
+            <div class="tree-sub-options">
               <label><input type="radio" name="s4-no-assign-type" value="TYPE_B"> スタッフ登録順</label>
-            </div>
-            <div class="tree-branch-item tree-child">
               <label><input type="radio" name="s4-no-assign-type" value="TYPE_A"> 空いている人をランダムに選ぶ</label>
             </div>
           </div>

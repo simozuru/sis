@@ -954,76 +954,52 @@ height: 16px;
 accent-color: var(--accent-color);
 }
 
-.tree-root label {
-display: flex;
-align-items: center;
-
-gap: 8px;
-
-font-size: 14px;
-font-weight: 400;
-
-cursor: pointer;
-}
-
-.tree-root input[type="radio"] {
-width: 16px;
-height: 16px;
-
-accent-color: var(--accent-color);
-}
-
-/* 「自動的に空いているスタッフに振り分ける」とその子項目を、1本の幹でつなぐツリー構造 */
-.tree-root {
+/* 親の選択肢と、子項目群をつなぐ縦線（外枠の役割） */
+.tree-parent-group {
 position: relative;
-
-padding-left: 22px;
-
-display: flex;
-flex-direction: column;
-
-gap: 8px;
 }
 
-/* 幹（縦線）：一番上の項目の高さから、一番下の項目の高さまで、1本でつなぐ */
-.tree-root::before {
+.tree-parent-group > label {
+position: relative;
+}
+
+.tree-parent-group > label::after {
 content: '';
 
 position: absolute;
-left: 9px;
-top: 11px;
-bottom: 11px;
+left: 22px;
+top: 100%;
 
 width: 2px;
+height: 9px;
 
 background: var(--border-color);
 }
 
-.tree-branch-item {
+/* 上の選択肢の「子項目」であることを示す、ツリー状の連結線 */
+.tree-sub-options {
+margin-left: 22px;
+
+padding-left: 18px;
+
+border-left: 2px solid var(--border-color);
+}
+
+.tree-sub-options label {
 position: relative;
 }
 
-/* 枝（横線）：幹から、各項目のラベルへ向かって伸ばす */
-.tree-branch-item::before {
+.tree-sub-options label::before {
 content: '';
 
 position: absolute;
-left: -13px;
+left: -18px;
 top: 50%;
 
-width: 11px;
+width: 14px;
 height: 2px;
 
 background: var(--border-color);
-}
-
-.tree-branch-item.tree-child {
-margin-left: 14px;
-}
-
-.tree-branch-item.tree-child::before {
-left: -27px;
-width: 25px;
 }
 
 .slot-step-override-row {
