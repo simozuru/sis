@@ -1533,6 +1533,34 @@ width: 72px;
   color: var(--text-color);
 }
 
+.menu-note-text {
+  margin-top: 10px;
+
+  padding: 10px 12px;
+
+  background: var(--bg-color, #f7f4ef);
+  border-radius: 8px;
+
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--sub-text-color, #8a7a68);
+}
+
+.menu-total-display {
+  margin-top: 10px;
+
+  padding: 10px 14px;
+
+  background: var(--accent-color, #b58a54);
+  border-radius: 8px;
+
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+
+  text-align: right;
+}
+
 /* ==========================================================
 タイムテーブルのページ送りボタン（次/前の日程を見る）
 ========================================================== */

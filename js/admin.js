@@ -134,6 +134,8 @@ const settings5SavedMsg = document.getElementById('settings5-saved-msg');
 const settings5Form = document.getElementById('settings5-form');
 const s5ShowMenuMinutes = document.getElementById('s5-show-menu-minutes');
 const s5ShowMenuPrice = document.getElementById('s5-show-menu-price');
+const s5ShowMenuTotal = document.getElementById('s5-show-menu-total');
+const s5MenuNoteText = document.getElementById('s5-menu-note-text');
 const saveSettings5Btn = document.getElementById('save-settings5-btn');
 
 const businessHoursRows = document.getElementById('business-hours-rows');
@@ -1007,6 +1009,8 @@ async function loadSettings5() {
     setRadioValue('s5-menu-selector-type', result.menuSelectorType || 'TYPE_B');
     if (s5ShowMenuMinutes) s5ShowMenuMinutes.checked = !!result.showMenuMinutes;
     if (s5ShowMenuPrice) s5ShowMenuPrice.checked = !!result.showMenuPrice;
+    if (s5ShowMenuTotal) s5ShowMenuTotal.checked = !!result.showMenuTotal;
+    if (s5MenuNoteText) s5MenuNoteText.value = result.menuNoteText || '';
 
     settings5Loaded = true;
     if (settings5Form) settings5Form.style.display = 'block';
@@ -1047,7 +1051,9 @@ if (settings5Form) {
         MENU_MASTER: menuMaster,
         MENU_SELECTOR_TYPE: getRadioValue('s5-menu-selector-type') || 'TYPE_B',
         SHOW_MENU_MINUTES: !!s5ShowMenuMinutes.checked,
-        SHOW_MENU_PRICE: !!s5ShowMenuPrice.checked
+        SHOW_MENU_PRICE: !!s5ShowMenuPrice.checked,
+        SHOW_MENU_TOTAL: !!s5ShowMenuTotal.checked,
+        MENU_NOTE_TEXT: s5MenuNoteText.value
       };
 
       const token = sessionStorage.getItem(SESSION_TOKEN_KEY) || '';

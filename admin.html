@@ -341,6 +341,12 @@
           <div class="form-group checkbox-group">
             <label><input type="checkbox" id="s5-show-menu-minutes"> 施術時間を表示する</label>
             <label><input type="checkbox" id="s5-show-menu-price"> 金額を表示する</label>
+            <label><input type="checkbox" id="s5-show-menu-total"> 選んだメニューの合計金額と合計施術時間を表示する</label>
+          </div>
+          <div class="form-group">
+            <label for="s5-menu-note-text">施術メニューの下に表示する説明文（任意・空欄で非表示）</label>
+            <p class="settings-card-note">例：施術時間と金額は目安であり確定ではありません。施術内容によって金額と施術時間が前後します。</p>
+            <textarea id="s5-menu-note-text" rows="3" placeholder="施術時間と金額は目安であり確定ではありません。施術内容によって金額と施術時間が前後します。"></textarea>
           </div>
         </div>
 
@@ -419,11 +425,13 @@
           <h3 class="settings-card-title">指名なし予約の振り分け方法</h3>
           <div class="form-group radio-group">
             <label><input type="radio" name="s4-no-assign-mode" value="2"> 振り分けず「指名なし専用カレンダー」にそのまま登録する（手動配置向け）</label>
-            <label><input type="radio" name="s4-no-assign-mode" value="1"> 自動的に空いているスタッフに振り分ける</label>
           </div>
-          <div class="form-group radio-group tree-sub-options">
-            <label><input type="radio" name="s4-no-assign-type" value="TYPE_B"> スタッフ名の登録順</label>
-            <label><input type="radio" name="s4-no-assign-type" value="TYPE_A"> 空いている人を優先</label>
+          <div class="form-group radio-group tree-parent-group">
+            <label><input type="radio" name="s4-no-assign-mode" value="1"> 自動的に空いているスタッフに振り分ける</label>
+            <div class="tree-sub-options">
+              <label><input type="radio" name="s4-no-assign-type" value="TYPE_B"> スタッフ登録順</label>
+              <label><input type="radio" name="s4-no-assign-type" value="TYPE_A"> 空いている人をランダムに選ぶ</label>
+            </div>
           </div>
         </div>
 

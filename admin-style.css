@@ -954,6 +954,28 @@ height: 16px;
 accent-color: var(--accent-color);
 }
 
+/* 親の選択肢と、子項目群をつなぐ縦線（外枠の役割） */
+.tree-parent-group {
+position: relative;
+}
+
+.tree-parent-group > label {
+position: relative;
+}
+
+.tree-parent-group > label::after {
+content: '';
+
+position: absolute;
+left: 22px;
+top: 100%;
+
+width: 2px;
+height: 9px;
+
+background: var(--border-color);
+}
+
 /* 上の選択肢の「子項目」であることを示す、ツリー状の連結線 */
 .tree-sub-options {
 margin-left: 22px;
