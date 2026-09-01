@@ -341,7 +341,7 @@
           <div class="form-group checkbox-group">
             <label><input type="checkbox" id="s5-show-menu-minutes"> 施術時間を表示する</label>
             <label><input type="checkbox" id="s5-show-menu-price"> 金額を表示する</label>
-            <label><input type="checkbox" id="s5-show-menu-total"> チェックした項目の合計を表示する</label>
+            <label><input type="checkbox" id="s5-show-menu-total"> 選んだメニューの合計金額と合計施術時間を表示する</label>
           </div>
           <div class="form-group">
             <label for="s5-menu-note-text">施術メニューの下に表示する説明文（任意・空欄で非表示）</label>
@@ -401,9 +401,17 @@
 
         <div class="settings-card">
           <h3 class="settings-card-title">スタッフ名・カレンダーID</h3>
-          <p class="settings-card-note">スタッフを1名以上追加すると、お客様向けの選択欄が自動的に表示されます（誰も追加していない場合は表示されません）。カレンダーIDを間違えると、そのスタッフの予約が正しく登録されなくなります。コピー＆ペーストで、正確に入力してください。</p>
+          <p class="settings-card-note">スタッフを登録すると、担当スタッフを選ぶ欄に表示されます。予約画面にこの選択欄自体を表示するかどうかは、下の「スタッフ選択欄の表示」で切り替えられます。カレンダーIDを間違えると、そのスタッフの予約が正しく登録されなくなります。コピー＆ペーストで、正確に入力してください。</p>
           <div id="staff-name-rows" class="staff-name-rows"></div>
           <button type="button" id="add-staff-row-btn" class="btn-add-row">＋ スタッフを追加</button>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">スタッフ選択欄の表示</h3>
+          <p class="settings-card-note">お客様の予約画面に、担当スタッフを選ぶ欄を表示するかどうかを設定します。※スタッフが1人も登録されていない場合は、このチェックの状態に関わらず表示されません。</p>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s4-show-staff-selector"> スタッフ選択欄を表示する</label>
+          </div>
         </div>
 
         <div class="settings-card">

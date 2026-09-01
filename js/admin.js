@@ -94,6 +94,7 @@ const settings4Loading = document.getElementById('settings4-loading');
 const settings4Error = document.getElementById('settings4-error');
 const settings4SavedMsg = document.getElementById('settings4-saved-msg');
 const settings4Form = document.getElementById('settings4-form');
+const s4ShowStaffSelector = document.getElementById('s4-show-staff-selector');
 const s4AllowNoAssign = document.getElementById('s4-allow-no-assign');
 const s4NoAssignLabel = document.getElementById('s4-no-assign-label');
 const s4NoAssignCalendarId = document.getElementById('s4-no-assign-calendar-id');
@@ -1203,6 +1204,7 @@ async function loadSettings4() {
 
     renderStaffNameRows(result.staffMaster || {});
 
+    if (s4ShowStaffSelector) s4ShowStaffSelector.checked = result.showStaffSelector !== false;
     if (s4AllowNoAssign) s4AllowNoAssign.checked = !!result.allowNoAssign;
     if (s4NoAssignLabel) s4NoAssignLabel.value = result.noAssignLabel || '';
     if (s4NoAssignCalendarId) s4NoAssignCalendarId.value = result.noAssignCalendarId || '';
@@ -1246,6 +1248,7 @@ if (settings4Form) {
 
       const settings = {
         STAFF_MASTER: staffMaster,
+        SHOW_STAFF_SELECTOR: !!s4ShowStaffSelector.checked,
         ALLOW_NO_ASSIGN: !!s4AllowNoAssign.checked,
         NO_ASSIGN_LABEL: s4NoAssignLabel.value.trim() || '指名なし',
         NO_ASSIGN_CALENDAR_ID: s4NoAssignCalendarId.value.trim(),
