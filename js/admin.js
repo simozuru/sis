@@ -106,6 +106,7 @@ const settings2SavedMsg = document.getElementById('settings2-saved-msg');
 const settings2Form = document.getElementById('settings2-form');
 const s2ReminderDays = document.getElementById('s2-reminder-days');
 const s2AdminEmail = document.getElementById('s2-admin-email');
+const s2CalendarSalonName = document.getElementById('s2-calendar-salon-name');
 const s2MailHeader = document.getElementById('s2-mail-header');
 const s2MailFooter = document.getElementById('s2-mail-footer');
 const s1CancelBuffer = document.getElementById('s1-cancel-buffer');
@@ -1295,6 +1296,7 @@ async function loadSettings2() {
 
     if (s2ReminderDays) s2ReminderDays.value = result.reminderMailDaysBefore;
     if (s2AdminEmail) s2AdminEmail.value = result.adminEmail || '';
+    if (s2CalendarSalonName) s2CalendarSalonName.value = result.calendarSalonName || '';
 
     if (s2MailHeader) s2MailHeader.value = result.customerMailHeader || '';
     if (s2MailFooter) s2MailFooter.value = result.customerMailFooter || '';
@@ -1349,6 +1351,7 @@ if (settings2Form) {
       const settings = {
         REMINDER_MAIL_DAYS_BEFORE: parseInt(s2ReminderDays.value, 10),
         ADMIN_EMAIL: s2AdminEmail.value.trim(),
+        CALENDAR_SALON_NAME: s2CalendarSalonName.value.trim(),
         CUSTOMER_MAIL_HEADER: s2MailHeader.value,
         CUSTOMER_MAIL_FOOTER: s2MailFooter.value
       };
