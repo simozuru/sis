@@ -134,6 +134,29 @@ text-align: right;
 padding-top: 4px;
 }
 
+.lang-switcher {
+flex: 0 0 auto;
+
+padding-top: 4px;
+}
+
+.lang-switcher select {
+padding: 6px 10px;
+
+border: 1px solid var(--border-color);
+
+border-radius: var(--radius-sm);
+
+background-color: var(--card-bg);
+
+color: var(--text-color);
+
+font-size: 13px;
+font-weight: 600;
+
+cursor: pointer;
+}
+
 .header-contact-phone {
 display: flex;
 align-items: center;
@@ -1516,6 +1539,10 @@ max-width: none;
 
 .page-header-right {
 text-align: left;
+}
+
+.lang-switcher {
+padding-top: 0;
 }
 
 h1 {

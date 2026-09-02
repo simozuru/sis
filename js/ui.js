@@ -137,7 +137,7 @@ function applySystemSettings(settings) {
   CONFIG.HOME_PAGE_LABEL = settings.homePageLabel || null;
   if (homeBtn) {
     homeBtn.style.display = CONFIG.HOME_PAGE_URL ? 'inline' : 'none';
-    homeBtn.textContent = `⬅ ${CONFIG.HOME_PAGE_LABEL || 'トップページに戻る'}`;
+    homeBtn.textContent = `⬅ ${CONFIG.HOME_PAGE_LABEL || t('home_btn_fallback')}`;
   }
 
   CONFIG.HEADER_CONTACT_INFO = settings.headerContactInfo || null;
@@ -274,7 +274,7 @@ function renderInfoSection(infoConfig) {
 async function loadPageFragment(pageNumber) {
   if (!pageFragmentContainer || !pageFragmentContent) return;
 
-  pageFragmentContent.innerHTML = '<div class="no-data">読み込み中...</div>';
+  pageFragmentContent.innerHTML = `<div class="no-data">${t('page_loading')}</div>`;
   showSection(pageFragmentContainer);
 
   try {
@@ -284,7 +284,7 @@ async function loadPageFragment(pageNumber) {
     pageFragmentContent.innerHTML = html;
   } catch (error) {
     console.error('ページ断片の読み込みエラー:', error);
-    pageFragmentContent.innerHTML = '<div class="no-data text-danger">ページの読み込みに失敗しました。時間をおいて再度お試しください。</div>';
+    pageFragmentContent.innerHTML = `<div class="no-data text-danger">${t('err_page_load_failed')}</div>`;
   }
 }
 
@@ -342,7 +342,7 @@ function setupStaffSelector() {
   } else {
     const placeholderOpt = document.createElement('option');
     placeholderOpt.value = '';
-    placeholderOpt.textContent = '担当スタッフを選択してください';
+    placeholderOpt.textContent = t('staff_placeholder_option');
     placeholderOpt.disabled = true;
     placeholderOpt.selected = true;
     staffSelect.appendChild(placeholderOpt);
@@ -489,8 +489,8 @@ function updateMenuTotalDisplay() {
   });
 
   const parts = [];
-  if (totalMinutes > 0) parts.push(`合計 ${totalMinutes}分${hasApproxMinutes ? "～" : ""}`);
-  parts.push(`合計 ￥${totalPrice.toLocaleString()}${hasApproxPrice ? "～" : ""}`);
+  if (totalMinutes > 0) parts.push(`${t('total_minutes_prefix')}${totalMinutes}${t('unit_minutes')}${hasApproxMinutes ? t('approx_suffix') : ""}`);
+  parts.push(`${t('total_price_prefix')}${totalPrice.toLocaleString()}${hasApproxPrice ? t('approx_suffix') : ""}`);
 
   menuTotalDisplayEl.textContent = parts.join(" / ");
   menuTotalDisplayEl.style.display = 'block';
@@ -728,12 +728,12 @@ function bindTimetableCellEvents() {
       if (submitBtn) {
         submitBtn.disabled = false;
         if (isChangeMode()) {
-          submitBtn.textContent = '上記の内容で変更を確定する';
+          submitBtn.textContent = t('submit_btn_change');
         } else {
           const mode = getProvisionalWordingMode();
           submitBtn.textContent = mode === 'PROVISIONAL'
-            ? '上記の内容で仮予約を申請する'
-            : (mode === 'NEUTRAL' ? '上記の内容で予約を送信する' : '上記の内容で予約を確定する');
+            ? t('submit_btn_provisional')
+            : (mode === 'NEUTRAL' ? t('submit_btn_neutral') : t('submit_btn_confirm'));
         }
       }
     });
@@ -754,16 +754,16 @@ function bindTimetableCellEvents() {
  */
 async function handleWaitlistCellClick(dateStr, timeStr) {
   if (isChangeMode()) {
-    alert('予約の変更中は、キャンセル待ちにご登録いただけません。');
+    alert(t('err_waitlist_during_change'));
     return;
   }
 
   if (!nameInput.value || !telInput.value || !getSelectedMenusValue()) {
-    alert('お名前・お電話番号・メニューを入力してから、キャンセル待ちにご登録ください。');
+    alert(t('err_waitlist_fill_info'));
     return;
   }
 
-  const confirmMsg = `${escapeHtml(dateStr)} ${escapeHtml(timeStr)}〜 は、ただいま満席です。<br>空きが出たら、メールでお知らせしましょうか？`;
+  const confirmMsg = t('waitlist_confirm_msg', { date: escapeHtml(dateStr), time: escapeHtml(timeStr) });
   const confirmed = await showCustomConfirm(confirmMsg);
   if (!confirmed) return;
 
@@ -781,10 +781,10 @@ async function handleWaitlistCellClick(dateStr, timeStr) {
 
   try {
     const data = await submitReservationApi('registerWaitlist', payload);
-    alert(data.message || (data.success ? 'キャンセル待ちの登録が完了しました。' : '登録に失敗しました。'));
+    alert(data.message || (data.success ? t('waitlist_register_success') : t('waitlist_register_fail')));
   } catch (error) {
     console.error('キャンセル待ち登録エラー:', error);
-    alert('通信エラーが発生しました。時間をおいて再度お試しください。');
+    alert(t('err_network'));
   }
 }
 
@@ -799,7 +799,7 @@ async function updateAvailableTimes(dateOverride) {
   const menuVal = getSelectedMenusValue();
 
   if (!dateVal || !staffVal || !menuVal) {
-    alert('日付、スタッフ、メニューをすべて選択してください。');
+    alert(t('err_select_all_for_timetable'));
     return false;
   }
 
@@ -830,7 +830,7 @@ async function updateAvailableTimes(dateOverride) {
     if (selectedTimeInput) selectedTimeInput.value = '';
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = '日時を選択してください';
+      submitBtn.textContent = t('submit_btn_default');
     }
     return true;
   } catch (error) {
@@ -936,19 +936,19 @@ async function handleReservationSubmit(e) {
   const isChange = isChangeMode();
 
   const confirmMsg = isChange
-    ? '選択した新しい日時で予約を変更してもよろしいですか？'
+    ? t('confirm_change_reservation')
     : (() => {
         const mode = getProvisionalWordingMode();
-        if (mode === 'PROVISIONAL') return 'この内容で<span class="custom-confirm-highlight">仮予約</span>を申請してもよろしいですか？';
-        if (mode === 'NEUTRAL') return 'この内容で予約を送信してもよろしいですか？';
-        return 'この内容で予約を確定してもよろしいですか？';
+        if (mode === 'PROVISIONAL') return t('confirm_submit_provisional');
+        if (mode === 'NEUTRAL') return t('confirm_submit_neutral');
+        return t('confirm_submit_normal');
       })();
 
   const confirmed = await showCustomConfirm(confirmMsg);
   if (!confirmed) return;
 
   submitBtn.disabled = true;
-  submitBtn.textContent = isChange ? '予約を変更中...' : '予約を登録中...';
+  submitBtn.textContent = isChange ? t('submit_btn_sending_change') : t('submit_btn_sending_new');
 
   saveCurrentCustomerDataToCache();
 
@@ -976,18 +976,18 @@ async function handleReservationSubmit(e) {
     const data = await submitReservationApi(action, payload);
 
     if (!data.success) {
-      alert('処理に失敗しました: ' + data.message);
+      alert(t('err_process_failed_prefix') + data.message);
       return;
     }
 
     if (isChange) {
-      alert('ご予約の変更が正常に完了しました！');
+      alert(t('change_success'));
       AppState.changeModeData = null;
       renderChangeBanner(null);
     } else {
       const isProvisional = !!data.isProvisional;
-      const baseMsg = isProvisional ? 'ご予約を申請しました！' : 'ご予約が完了しました！';
-      const msg = data.resId ? `${baseMsg}\n【ご予約ID: ${data.resId}】` : baseMsg;
+      const baseMsg = isProvisional ? t('reservation_success_provisional') : t('reservation_success_normal');
+      const msg = data.resId ? `${baseMsg}\n${t('reservation_id_suffix', { resId: data.resId })}` : baseMsg;
       alert(msg);
     }
 
@@ -1007,7 +1007,7 @@ async function handleReservationSubmit(e) {
     }
   } catch (error) {
     console.error('送信エラー:', error);
-    alert('通信エラーが発生しました。');
+    alert(t('err_network_short'));
   } finally {
     submitBtn.disabled = false;
   }
@@ -1027,7 +1027,7 @@ function initializeEvents() {
   if (toStep2Btn) {
     toStep2Btn.addEventListener('click', () => {
       if (!nameInput.checkValidity() || !nameKanaInput.checkValidity() || !telInput.checkValidity() || !emailInput.checkValidity()) {
-        alert('お客様情報を正しく入力してください。');
+        alert(t('err_fill_customer_info'));
         return;
       }
       showSection(step2Container);
@@ -1037,13 +1037,13 @@ function initializeEvents() {
   if (toStep3Btn) {
     toStep3Btn.addEventListener('click', async () => {
       if (!dateInput.value || !staffSelect.value || !getSelectedMenusValue()) {
-        alert('ご来店希望日、スタッフ、メニューを選択してください。');
+        alert(t('err_select_date_staff_menu'));
         return;
       }
 
       const originalText = toStep3Btn.textContent;
       toStep3Btn.disabled = true;
-      toStep3Btn.textContent = '空き状況を読み込み中...';
+      toStep3Btn.textContent = t('loading_slots');
 
       const success = await updateAvailableTimes();
 

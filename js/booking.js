@@ -34,7 +34,7 @@ function buildReservationCardHtml(res) {
   const safeCreatedAt = escapeHtml(res.createdAt);
 
   const memoRow = res.memo
-    ? `<div class="res-row"><span class="res-label">備考・メモ</span> ${safeMemo}</div>`
+    ? `<div class="res-row"><span class="res-label">${t('res_label_memo')}</span> ${safeMemo}</div>`
     : '';
 
   // キャンセル・日時変更、それぞれの受付締切を過ぎているか判定する
@@ -42,22 +42,22 @@ function buildReservationCardHtml(res) {
   const isCancelExpired = isReservationDeadlinePassed(res.date, res.time, CONFIG.CANCEL_BUFFER_HOURS);
 
   const changeButtonHtml = isChangeExpired
-    ? `<button type="button" class="btn-change" disabled>日時変更期間を過ぎています</button>`
-    : `<button type="button" class="btn-change" data-id="${safeId}" data-date="${safeDate}" data-time="${safeTime}" data-staff="${safeStaff}" data-menu="${safeMenu}" data-memo="${safeMemo}">日時を変更する</button>`;
+    ? `<button type="button" class="btn-change" disabled>${t('btn_change_expired')}</button>`
+    : `<button type="button" class="btn-change" data-id="${safeId}" data-date="${safeDate}" data-time="${safeTime}" data-staff="${safeStaff}" data-menu="${safeMenu}" data-memo="${safeMemo}">${t('btn_change_reservation')}</button>`;
 
   const cancelButtonHtml = isCancelExpired
-    ? `<button type="button" class="btn-cancel" disabled>キャンセル期限を過ぎています</button>`
-    : `<button type="button" class="btn-cancel" data-id="${safeId}">この予約をキャンセルする</button>`;
+    ? `<button type="button" class="btn-cancel" disabled>${t('btn_cancel_expired')}</button>`
+    : `<button type="button" class="btn-cancel" data-id="${safeId}">${t('btn_cancel_reservation')}</button>`;
 
   return `
     <div class="reservation-card">
-      <div class="res-row"><span class="res-label">予約日</span> ${escapeHtml(formattedDate)}</div>
-      <div class="res-row"><span class="res-label">予約時間</span> ${escapeHtml(formattedTime)}</div>
-      <div class="res-row"><span class="res-label">メニュー</span> ${safeMenu}</div>
-      <div class="res-row"><span class="res-label">担当</span> ${safeStaff}</div>
+      <div class="res-row"><span class="res-label">${t('res_label_date')}</span> ${escapeHtml(formattedDate)}</div>
+      <div class="res-row"><span class="res-label">${t('res_label_time')}</span> ${escapeHtml(formattedTime)}</div>
+      <div class="res-row"><span class="res-label">${t('res_label_menu')}</span> ${safeMenu}</div>
+      <div class="res-row"><span class="res-label">${t('res_label_staff')}</span> ${safeStaff}</div>
       ${memoRow}
-      <div class="res-card-divider"><span class="res-label">予約ID</span> <span class="res-id-badge">${safeId}</span></div>
-      <div class="res-created-time">⏱ 受付時間：${safeCreatedAt}</div>
+      <div class="res-card-divider"><span class="res-label">${t('res_label_id')}</span> <span class="res-id-badge">${safeId}</span></div>
+      <div class="res-created-time">${t('res_created_at_prefix')}${safeCreatedAt}</div>
       <div class="btn-action-group">
         ${changeButtonHtml}
         ${cancelButtonHtml}
@@ -76,14 +76,15 @@ function buildHistoryCardHtml(item) {
   const formattedTime = formatReservationTime(item.time);
   const isCancelled = item.status === 'キャンセル済み';
   const statusClass = isCancelled ? 'history-status-cancelled' : 'history-status-visited';
+  const statusLabel = isCancelled ? t('history_status_cancelled') : t('history_status_visited');
 
   return `
     <div class="reservation-card history-card">
-      <div class="res-row"><span class="res-label">来店日</span> ${escapeHtml(formattedDate)}</div>
-      <div class="res-row"><span class="res-label">時間</span> ${escapeHtml(formattedTime)}</div>
-      <div class="res-row"><span class="res-label">メニュー</span> ${escapeHtml(item.menu)}</div>
-      <div class="res-row"><span class="res-label">担当</span> ${escapeHtml(item.staff)}</div>
-      <span class="history-status-badge ${statusClass}">${escapeHtml(item.status)}</span>
+      <div class="res-row"><span class="res-label">${t('history_label_date')}</span> ${escapeHtml(formattedDate)}</div>
+      <div class="res-row"><span class="res-label">${t('history_label_time')}</span> ${escapeHtml(formattedTime)}</div>
+      <div class="res-row"><span class="res-label">${t('res_label_menu')}</span> ${escapeHtml(item.menu)}</div>
+      <div class="res-row"><span class="res-label">${t('res_label_staff')}</span> ${escapeHtml(item.staff)}</div>
+      <span class="history-status-badge ${statusClass}">${escapeHtml(statusLabel)}</span>
     </div>
   `;
 }
@@ -99,7 +100,7 @@ async function fetchHistory() {
   const emailVal = checkEmailInput ? checkEmailInput.value.trim() : '';
   if (!telVal || !emailVal) return;
 
-  historyResultsArea.innerHTML = '<div class="no-data">来店履歴を検索しています...</div>';
+  historyResultsArea.innerHTML = `<div class="no-data">${t('searching_history')}</div>`;
 
   try {
     const result = await fetchCustomerHistoryApi(telVal, emailVal);
@@ -110,11 +111,11 @@ async function fetchHistory() {
     }
 
     if (!result.history || result.history.length === 0) {
-      historyResultsArea.innerHTML = '<h3 class="results-title">過去のご来店履歴</h3><div class="no-data">過去のご来店履歴はありません。</div>';
+      historyResultsArea.innerHTML = `<h3 class="results-title">${t('results_title_history')}</h3><div class="no-data">${t('no_history')}</div>`;
       return;
     }
 
-    let htmlContent = '<h3 class="results-title">過去のご来店履歴</h3>';
+    let htmlContent = `<h3 class="results-title">${t('results_title_history')}</h3>`;
     result.history.forEach(item => {
       htmlContent += buildHistoryCardHtml(item);
     });
@@ -122,7 +123,7 @@ async function fetchHistory() {
     historyResultsArea.innerHTML = htmlContent;
   } catch (error) {
     console.error('来店履歴検索エラー:', error);
-    historyResultsArea.innerHTML = '<div class="no-data text-danger">エラーが発生しました。時間を置いて再度お試しください。</div>';
+    historyResultsArea.innerHTML = `<div class="no-data text-danger">${t('search_error')}</div>`;
   }
 }
 
@@ -134,16 +135,16 @@ async function fetchReservations() {
   const emailVal = checkEmailInput ? checkEmailInput.value.trim() : '';
 
   if (!telVal || !emailVal) {
-    alert('電話番号とメールアドレスの両方を入力してください。');
+    alert(t('err_fill_tel_email'));
     return;
   }
 
   if (checkBtn) {
     checkBtn.disabled = true;
-    checkBtn.textContent = '検索中...';
+    checkBtn.textContent = t('btn_checking');
   }
   if (resultsArea) {
-    resultsArea.innerHTML = '<div class="no-data">予約データを検索しています...</div>';
+    resultsArea.innerHTML = `<div class="no-data">${t('searching_reservations')}</div>`;
   }
 
   saveCurrentCustomerDataToCache();
@@ -160,11 +161,11 @@ async function fetchReservations() {
     }
 
     if (!result.reservations || result.reservations.length === 0) {
-      resultsArea.innerHTML = '<div class="no-data">現在、条件に一致する今日以降のご予約はありません。</div>';
+      resultsArea.innerHTML = `<div class="no-data">${t('no_reservations')}</div>`;
       return;
     }
 
-    let htmlContent = '<h3 class="results-title">お客様のご予約状況</h3>';
+    let htmlContent = `<h3 class="results-title">${t('results_title_current')}</h3>`;
     result.reservations.forEach(res => {
       htmlContent += buildReservationCardHtml(res);
     });
@@ -172,11 +173,11 @@ async function fetchReservations() {
     resultsArea.innerHTML = htmlContent;
   } catch (error) {
     console.error('予約検索エラー:', error);
-    resultsArea.innerHTML = '<div class="no-data text-danger">エラーが発生しました。時間を置いて再度お試しください。</div>';
+    resultsArea.innerHTML = `<div class="no-data text-danger">${t('search_error')}</div>`;
   } finally {
     if (checkBtn) {
       checkBtn.disabled = false;
-      checkBtn.textContent = 'ご予約状況を確認する';
+      checkBtn.textContent = t('btn_check');
     }
   }
 }
@@ -207,12 +208,12 @@ function resetReservationSelection() {
   if (memoInput) memoInput.value = '';
 
   if (timetableContainer) {
-    timetableContainer.innerHTML = '<div class="no-data">条件に沿った空き枠を表示しています。</div>';
+    timetableContainer.innerHTML = `<div class="no-data">${t('timetable_placeholder')}</div>`;
   }
 
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.textContent = '日時を選択してください';
+    submitBtn.textContent = t('submit_btn_default');
   }
 }
 
@@ -250,7 +251,7 @@ async function startChangeMode(buttonEl) {
 
   renderChangeBanner(AppState.changeModeData);
 
-  if (submitBtn) submitBtn.textContent = '日時を選択してください';
+  if (submitBtn) submitBtn.textContent = t('submit_btn_default');
 
   showSection(step2Container);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -278,23 +279,23 @@ async function requestCancel(buttonEl) {
   const resId = buttonEl.getAttribute('data-id');
   if (!resId) return;
 
-  if (!confirm(`ご予約（ID: ${resId}）をキャンセルしてもよろしいですか？\n\n※この操作は取り消せません。`)) return;
+  if (!confirm(t('confirm_cancel_reservation', { resId: resId }))) return;
 
   if (resultsArea) {
-    resultsArea.innerHTML = '<div class="no-data">予約のキャンセル処理を行っています...</div>';
+    resultsArea.innerHTML = `<div class="no-data">${t('cancelling_in_progress')}</div>`;
   }
 
   try {
     const data = await submitReservationApi('cancel', { resId: resId });
 
     if (data.success) {
-      alert('ご予約のキャンセルが正常に完了しました。');
+      alert(t('cancel_success'));
     } else {
-      alert('キャンセルに失敗しました: ' + data.message);
+      alert(t('cancel_fail_prefix') + data.message);
     }
   } catch (error) {
     console.error('キャンセル通信エラー:', error);
-    alert('通信エラーが発生しました。時間を置いて再度お試しください。');
+    alert(t('err_network'));
   } finally {
     fetchReservations();
   }

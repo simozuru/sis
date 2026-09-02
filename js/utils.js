@@ -124,11 +124,11 @@ function buildMenuLabel(menuName, menuData) {
   const meta = [];
 
   if (CONFIG.SHOW_MENU_MINUTES && data.minutes) {
-    meta.push(`${data.minutes}分${data.minutesApprox ? "～" : ""}`);
+    meta.push(`${data.minutes}${t('unit_minutes')}${data.minutesApprox ? t('approx_suffix') : ""}`);
   }
 
   if (CONFIG.SHOW_MENU_PRICE && data.price !== undefined && data.price !== null) {
-    meta.push(`￥${Number(data.price).toLocaleString()}${data.priceApprox ? "～" : ""}`);
+    meta.push(`￥${Number(data.price).toLocaleString()}${data.priceApprox ? t('approx_suffix') : ""}`);
   }
 
   if (meta.length === 0) return safeName;
