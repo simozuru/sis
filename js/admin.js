@@ -112,6 +112,11 @@ const s2AdminEmail = document.getElementById('s2-admin-email');
 const s2CalendarSalonName = document.getElementById('s2-calendar-salon-name');
 const s2MailHeader = document.getElementById('s2-mail-header');
 const s2MailFooter = document.getElementById('s2-mail-footer');
+const s2ThankYouEnabled = document.getElementById('s2-thankyou-enabled');
+const s2ThankYouDays = document.getElementById('s2-thankyou-days');
+const s2ThankYouHeader = document.getElementById('s2-thankyou-header');
+const s2ThankYouFooter = document.getElementById('s2-thankyou-footer');
+const s2ThankYouReviewUrl = document.getElementById('s2-thankyou-review-url');
 const s1CancelBuffer = document.getElementById('s1-cancel-buffer');
 const s1ChangeBuffer = document.getElementById('s1-change-buffer');
 const s1MaxFutureDays = document.getElementById('s1-max-future-days');
@@ -1329,6 +1334,14 @@ async function loadSettings2() {
     if (s2MailHeader) s2MailHeader.value = result.customerMailHeader || '';
     if (s2MailFooter) s2MailFooter.value = result.customerMailFooter || '';
 
+    // 来店後のお礼メール（口コミ・クチコミ導線）
+    const thankYouMail = result.thankYouMail || {};
+    if (s2ThankYouEnabled) s2ThankYouEnabled.checked = !!thankYouMail.enabled;
+    if (s2ThankYouDays) s2ThankYouDays.value = thankYouMail.daysAfterVisit || '';
+    if (s2ThankYouHeader) s2ThankYouHeader.value = thankYouMail.header || '';
+    if (s2ThankYouFooter) s2ThankYouFooter.value = thankYouMail.footer || '';
+    if (s2ThankYouReviewUrl) s2ThankYouReviewUrl.value = thankYouMail.reviewUrl || '';
+
     settings2Loaded = true;
     if (settings2Form) settings2Form.style.display = 'block';
   } catch (error) {
@@ -1381,7 +1394,14 @@ if (settings2Form) {
         ADMIN_EMAIL: s2AdminEmail.value.trim(),
         CALENDAR_SALON_NAME: s2CalendarSalonName.value.trim(),
         CUSTOMER_MAIL_HEADER: s2MailHeader.value,
-        CUSTOMER_MAIL_FOOTER: s2MailFooter.value
+        CUSTOMER_MAIL_FOOTER: s2MailFooter.value,
+        THANK_YOU_MAIL: {
+          enabled: !!s2ThankYouEnabled.checked,
+          daysAfterVisit: parseInt(s2ThankYouDays.value, 10) || 0,
+          header: s2ThankYouHeader.value,
+          footer: s2ThankYouFooter.value,
+          reviewUrl: s2ThankYouReviewUrl.value.trim()
+        }
       };
 
       const token = sessionStorage.getItem(SESSION_TOKEN_KEY) || '';

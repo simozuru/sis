@@ -520,6 +520,31 @@
           </div>
         </div>
 
+        <div class="settings-card">
+          <h3 class="settings-card-title">来店後のお礼メール（口コミ・クチコミ導線）</h3>
+          <p class="settings-card-note">来店日から指定した日数後に、お客様へお礼メールを自動送信します（任意機能）。使う場合は、GASの「トリガー」に triggerThankYouMail の時間主導型トリガーを別途設定してください（1日1回程度でOKです）。</p>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s2-thankyou-enabled"> 来店後のお礼メールを送る</label>
+          </div>
+          <div class="form-group">
+            <label for="s2-thankyou-days">来店日から何日後に送るか</label>
+            <input type="number" id="s2-thankyou-days" min="1" placeholder="例：1">
+          </div>
+          <div class="form-group">
+            <label for="s2-thankyou-header">本文（書き出し）</label>
+            <textarea id="s2-thankyou-header" rows="3" placeholder="先日はご来店いただき、誠にありがとうございました。"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="s2-thankyou-footer">本文（締めくくり）</label>
+            <textarea id="s2-thankyou-footer" rows="3" placeholder="またのご来店を、スタッフ一同心よりお待ちしております。"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="s2-thankyou-review-url">Googleクチコミ投稿ページのURL</label>
+            <p class="settings-card-note">未入力の場合、クチコミのご案内自体を本文に入れません（お礼メールのみ送信されます）。</p>
+            <input type="text" id="s2-thankyou-review-url" placeholder="例：https://g.page/r/xxxxxxxx/review">
+          </div>
+        </div>
+
         <button type="submit" id="save-settings2-btn" class="btn-save-settings">保存する</button>
       </form>
     </section>
