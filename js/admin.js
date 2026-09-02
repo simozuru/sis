@@ -140,6 +140,9 @@ const s5ShowMenuMinutes = document.getElementById('s5-show-menu-minutes');
 const s5ShowMenuPrice = document.getElementById('s5-show-menu-price');
 const s5ShowMenuTotal = document.getElementById('s5-show-menu-total');
 const s5MenuNoteText = document.getElementById('s5-menu-note-text');
+const btnMenuNoteI18nToggle = document.getElementById('btn-menu-note-i18n-toggle');
+const menuNoteI18nPanel = document.getElementById('menu-note-i18n-panel');
+const menuNoteI18nRows = document.getElementById('menu-note-i18n-rows');
 const s5ProvisionalEnabled = document.getElementById('s5-provisional-enabled');
 const s5ProvisionalTargetMenus = document.getElementById('s5-provisional-target-menus');
 const s5ProvisionalDeadline = document.getElementById('s5-provisional-deadline');
@@ -848,7 +851,7 @@ function renderMenuMasterRows(menuMaster) {
 
   const entries = Object.keys(menuMaster).map(name => ({ name, ...menuMaster[name] }));
   menuMasterRows.innerHTML = '';
-  entries.forEach(entry => addMenuRow(entry.name, entry.minutes, entry.price, entry.minutesApprox, entry.priceApprox));
+  entries.forEach(entry => addMenuRow(entry.name, entry.minutes, entry.price, entry.minutesApprox, entry.priceApprox, entry.i18n || {}));
 
   if (entries.length === 0) addMenuRow('', '', '');
 }
@@ -856,8 +859,64 @@ function renderMenuMasterRows(menuMaster) {
 /**
  * メニュー行を1行追加する
  */
-function addMenuRow(name = '', minutes = '', price = '', minutesApprox = false, priceApprox = false) {
+// 多言語対応サイトの翻訳入力で使う対象言語一覧（日本語は基本言語のため対象外）
+const I18N_TARGET_LANGS = [
+  { code: 'en', label: 'English' },
+  { code: 'ko', label: '한국어' },
+  { code: 'zh-CN', label: '简体中文' },
+  { code: 'zh-TW', label: '繁體中文' },
+  { code: 'fr', label: 'Français' }
+];
+
+/**
+ * Google翻訳を、日本語原文入りで新しいタブに開くためのURLを作る
+ * @param {string} sourceText - 日本語の原文
+ * @param {string} targetLangCode - 翻訳先の言語コード
+ * @returns {string}
+ */
+function buildGoogleTranslateUrl(sourceText, targetLangCode) {
+  return `https://translate.google.com/?sl=ja&tl=${encodeURIComponent(targetLangCode)}&text=${encodeURIComponent(sourceText)}&op=translate`;
+}
+
+/**
+ * 5言語分の翻訳入力欄（ラベル・入力欄・Google翻訳リンク）のHTMLをまとめて作る
+ * @param {string} inputClass - 各入力欄に付けるclass名
+ * @param {Object} i18nValues - { en, ko, "zh-CN", "zh-TW", fr } の現在値
+ * @param {boolean} [useTextarea] - true なら複数行のtextarea、falseなら1行のinput
+ * @returns {string}
+ */
+function buildI18nPanelHtml(inputClass, i18nValues, useTextarea) {
+  const values = i18nValues || {};
+  return I18N_TARGET_LANGS.map(lang => {
+    const fieldTag = useTextarea
+      ? `<textarea class="${inputClass}" data-lang="${lang.code}" rows="2" placeholder="未入力の場合は日本語のまま表示されます">${escapeHtmlAdmin(values[lang.code] || '')}</textarea>`
+      : `<input type="text" class="${inputClass}" data-lang="${lang.code}" value="${escapeHtmlAdmin(values[lang.code] || '')}" placeholder="未入力の場合は日本語のまま表示されます">`;
+    return `
+      <div class="i18n-panel-row">
+        <span class="i18n-panel-lang-label">${lang.label}</span>
+        ${fieldTag}
+        <a href="#" target="_blank" rel="noopener" class="i18n-translate-link" data-lang="${lang.code}">Google翻訳で開く ↗</a>
+      </div>
+    `;
+  }).join('');
+}
+
+/**
+ * 翻訳パネル内の「Google翻訳で開く」リンク先を、現在の日本語原文で更新する
+ * @param {HTMLElement} panelEl - buildI18nPanelHtmlで作ったパネル要素
+ * @param {string} sourceText - 現在の日本語原文
+ */
+function refreshI18nTranslateLinks(panelEl, sourceText) {
+  panelEl.querySelectorAll('.i18n-translate-link').forEach(link => {
+    link.href = buildGoogleTranslateUrl(sourceText, link.getAttribute('data-lang'));
+  });
+}
+
+function addMenuRow(name = '', minutes = '', price = '', minutesApprox = false, priceApprox = false, i18n = {}) {
   if (!menuMasterRows) return;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'menu-master-row-wrapper';
 
   const row = document.createElement('div');
   row.className = 'menu-master-row';
@@ -873,14 +932,39 @@ function addMenuRow(name = '', minutes = '', price = '', minutesApprox = false, 
       <input type="number" class="menu-price-input" placeholder="円" min="0" value="${price}">
       <label class="menu-approx-label"><input type="checkbox" class="menu-price-approx-input" ${priceApprox ? 'checked' : ''}> ～</label>
     </div>
-    <button type="button" class="btn-remove-row col-delete" title="このメニューを削除">×</button>
+    <div class="col-actions">
+      <button type="button" class="btn-menu-i18n-toggle" title="表示名の翻訳を編集（多言語対応サイト向け）">🌐</button>
+      <button type="button" class="btn-remove-row" title="このメニューを削除">×</button>
+    </div>
   `;
-  row.querySelector('.btn-remove-row').addEventListener('click', () => row.remove());
-  menuMasterRows.appendChild(row);
+
+  const i18nPanel = document.createElement('div');
+  i18nPanel.className = 'menu-i18n-panel';
+  i18nPanel.style.display = 'none';
+  i18nPanel.innerHTML = `<p class="i18n-panel-note">メニュー名の多言語対応サイト向け表示名（未入力の言語は日本語のまま表示されます）</p>` + buildI18nPanelHtml('menu-i18n-input', i18n, false);
+
+  row.querySelector('.btn-remove-row').addEventListener('click', () => wrapper.remove());
+  row.querySelector('.btn-menu-i18n-toggle').addEventListener('click', () => {
+    const nameVal = row.querySelector('.menu-name-input').value.trim();
+    refreshI18nTranslateLinks(i18nPanel, nameVal);
+    i18nPanel.style.display = (i18nPanel.style.display === 'none') ? 'block' : 'none';
+  });
+
+  wrapper.appendChild(row);
+  wrapper.appendChild(i18nPanel);
+  menuMasterRows.appendChild(wrapper);
 }
 
 if (addMenuRowBtn) {
   addMenuRowBtn.addEventListener('click', () => addMenuRow());
+}
+
+if (btnMenuNoteI18nToggle && menuNoteI18nPanel) {
+  btnMenuNoteI18nToggle.addEventListener('click', () => {
+    const sourceText = s5MenuNoteText ? s5MenuNoteText.value.trim() : '';
+    refreshI18nTranslateLinks(menuNoteI18nPanel, sourceText);
+    menuNoteI18nPanel.style.display = (menuNoteI18nPanel.style.display === 'none') ? 'block' : 'none';
+  });
 }
 
 /**
@@ -1011,6 +1095,10 @@ async function loadSettings5() {
     if (s5ShowMenuPrice) s5ShowMenuPrice.checked = !!result.showMenuPrice;
     if (s5ShowMenuTotal) s5ShowMenuTotal.checked = !!result.showMenuTotal;
     if (s5MenuNoteText) s5MenuNoteText.value = result.menuNoteText || '';
+    if (menuNoteI18nRows) {
+      menuNoteI18nRows.innerHTML = buildI18nPanelHtml('menu-note-i18n-input', result.menuNoteTextI18n || {}, true);
+    }
+    if (menuNoteI18nPanel) menuNoteI18nPanel.style.display = 'none';
 
     // 仮予約制度
     const provisional = result.provisionalReservation || {};
@@ -1058,8 +1146,19 @@ if (settings5Form) {
         const price = parseInt(row.querySelector('.menu-price-input').value, 10);
         const minutesApprox = row.querySelector('.menu-minutes-approx-input').checked;
         const priceApprox = row.querySelector('.menu-price-approx-input').checked;
+
+        // 翻訳パネル（この行の次の兄弟要素）から、入力済みの翻訳を集める（空欄の言語は保存しない）
+        const i18nPanel = row.nextElementSibling;
+        const i18n = {};
+        if (i18nPanel) {
+          i18nPanel.querySelectorAll('.menu-i18n-input').forEach(input => {
+            const val = input.value.trim();
+            if (val) i18n[input.getAttribute('data-lang')] = val;
+          });
+        }
+
         if (name && !isNaN(minutes) && minutes > 0) {
-          menuMaster[name] = { minutes: minutes, slots: Math.ceil(minutes / 5), price: isNaN(price) ? 0 : price, minutesApprox: minutesApprox, priceApprox: priceApprox };
+          menuMaster[name] = { minutes: minutes, slots: Math.ceil(minutes / 5), price: isNaN(price) ? 0 : price, minutesApprox: minutesApprox, priceApprox: priceApprox, i18n: i18n };
         }
       });
 
@@ -1074,6 +1173,16 @@ if (settings5Form) {
         SHOW_MENU_PRICE: !!s5ShowMenuPrice.checked,
         SHOW_MENU_TOTAL: !!s5ShowMenuTotal.checked,
         MENU_NOTE_TEXT: s5MenuNoteText.value,
+        MENU_NOTE_TEXT_I18N: (() => {
+          const result = {};
+          if (menuNoteI18nRows) {
+            menuNoteI18nRows.querySelectorAll('.menu-note-i18n-input').forEach(field => {
+              const val = field.value.trim();
+              if (val) result[field.getAttribute('data-lang')] = val;
+            });
+          }
+          return result;
+        })(),
         PROVISIONAL_RESERVATION: {
           enabled: !!s5ProvisionalEnabled.checked,
           target: getRadioValue('s5-provisional-target') || 'ALL',
@@ -1473,6 +1582,28 @@ async function loadSettings3() {
 }
 
 /**
+ * 情報カード（タイトル＋説明文）用の翻訳入力欄HTMLを作る
+ * @param {Object} i18nValues - { en: {title, description}, ko: {...}, ... }
+ * @returns {string}
+ */
+function buildInfoI18nPanelHtml(i18nValues) {
+  const values = i18nValues || {};
+  return I18N_TARGET_LANGS.map(lang => {
+    const v = values[lang.code] || {};
+    return `
+      <div class="i18n-panel-row info-i18n-row">
+        <span class="i18n-panel-lang-label">${lang.label}</span>
+        <div class="info-i18n-fields">
+          <input type="text" class="info-i18n-title-input" data-lang="${lang.code}" value="${escapeHtmlAdmin(v.title || '')}" placeholder="タイトルの翻訳">
+          <input type="text" class="info-i18n-desc-input" data-lang="${lang.code}" value="${escapeHtmlAdmin(v.description || '')}" placeholder="説明文の翻訳">
+        </div>
+        <a href="#" target="_blank" rel="noopener" class="i18n-translate-link" data-lang="${lang.code}">Google翻訳で開く ↗</a>
+      </div>
+    `;
+  }).join('');
+}
+
+/**
  * 情報セクションのカード入力欄（固定4枠）を描画する
  * @param {Array} items - 既存のカード設定（0〜4件）
  */
@@ -1519,6 +1650,11 @@ function renderInfoItemRows(items) {
           <label>説明文</label>
           <input type="text" class="info-desc-input" value="${escapeHtmlAdmin(item.description || '')}" placeholder="例：サロンの詳しい情報はこちら">
         </div>
+        <button type="button" class="btn-i18n-toggle btn-info-i18n-toggle" data-slot="${i}">🌐 多言語対応サイト向けの翻訳を編集</button>
+        <div class="menu-i18n-panel info-i18n-panel" data-slot="${i}" style="display: none;">
+          <p class="i18n-panel-note">未入力の言語は、日本語のタイトル・説明文がそのまま表示されます</p>
+          ${buildInfoI18nPanelHtml(item.i18n || {})}
+        </div>
         <div class="info-item-link-type">
           <label><input type="radio" name="info-link-type-${i}" value="page" ${!isUrlType ? 'checked' : ''}> サイト内のページ（1〜4）</label>
           <label><input type="radio" name="info-link-type-${i}" value="url" ${isUrlType ? 'checked' : ''}> 外部URL</label>
@@ -1531,6 +1667,21 @@ function renderInfoItemRows(items) {
     `;
   }
   infoItemRows.innerHTML = html;
+
+  // 翻訳パネルの開閉・Google翻訳リンクの更新
+  infoItemRows.querySelectorAll('.btn-info-i18n-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const slot = btn.getAttribute('data-slot');
+      const block = infoItemRows.querySelector(`.info-item-block[data-slot="${slot}"]`);
+      const panel = infoItemRows.querySelector(`.info-i18n-panel[data-slot="${slot}"]`);
+      if (!block || !panel) return;
+
+      const titleVal = block.querySelector('.info-title-input').value.trim();
+      const descVal = block.querySelector('.info-desc-input').value.trim();
+      refreshI18nTranslateLinks(panel, `${titleVal}\n${descVal}`);
+      panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
+    });
+  });
 
   // 読み込んだアイコンの選択状態を反映する（HTML文字列にselectedを埋め込むより、後からJSで設定する方が安全）
   items.forEach((item, i) => {
@@ -1646,6 +1797,23 @@ function collectInfoItems() {
       : block.querySelector('.info-icon-select').value;
 
     const item = { icon: icon, showIcon: showIcon, title: title, description: description };
+
+    // 翻訳パネルから、入力済みの翻訳を集める（タイトル・説明文どちらか入っていればその言語を保存）
+    const panel = document.querySelector(`.info-i18n-panel[data-slot="${slot}"]`);
+    const i18n = {};
+    if (panel) {
+      I18N_TARGET_LANGS.forEach(lang => {
+        const titleInput = panel.querySelector(`.info-i18n-title-input[data-lang="${lang.code}"]`);
+        const descInput = panel.querySelector(`.info-i18n-desc-input[data-lang="${lang.code}"]`);
+        const titleVal = titleInput ? titleInput.value.trim() : '';
+        const descVal = descInput ? descInput.value.trim() : '';
+        if (titleVal || descVal) {
+          i18n[lang.code] = { title: titleVal, description: descVal };
+        }
+      });
+    }
+    item.i18n = i18n;
+
     if (linkType === 'url') {
       item.url = linkValue;
     } else {

@@ -121,6 +121,13 @@ function isReservationDeadlinePassed(dateStr, timeStr, bufferHours) {
 function buildMenuLabel(menuName, menuData) {
   const safeName = String(menuName || "");
   const data = menuData || {};
+
+  // 表示名の翻訳（i18n）が入力されていて、日本語以外が選ばれている場合は、そちらを使う
+  // 未入力・日本語選択時は、今まで通り日本語のメニュー名をそのまま使う
+  const displayName = (typeof currentLang !== 'undefined' && currentLang !== 'ja' && data.i18n && data.i18n[currentLang])
+    ? data.i18n[currentLang]
+    : safeName;
+
   const meta = [];
 
   if (CONFIG.SHOW_MENU_MINUTES && data.minutes) {
@@ -131,8 +138,8 @@ function buildMenuLabel(menuName, menuData) {
     meta.push(`￥${Number(data.price).toLocaleString()}${data.priceApprox ? t('approx_suffix') : ""}`);
   }
 
-  if (meta.length === 0) return safeName;
-  return `${safeName} (${meta.join(" / ")})`;
+  if (meta.length === 0) return displayName;
+  return `${displayName} (${meta.join(" / ")})`;
 }
 
 /**

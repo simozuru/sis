@@ -819,7 +819,7 @@ white-space: nowrap;
 
 .menu-master-header {
 display: grid;
-grid-template-columns: 1fr 190px 190px 32px;
+grid-template-columns: 1fr 190px 190px 64px;
 
 gap: 10px;
 
@@ -833,12 +833,42 @@ color: var(--sub-text-color);
 
 .menu-master-row {
 display: grid;
-grid-template-columns: 1fr 190px 190px 32px;
+grid-template-columns: 1fr 190px 190px 64px;
 align-items: center;
 
 gap: 10px;
+}
 
+.menu-master-row-wrapper {
 margin-bottom: 10px;
+
+padding-bottom: 4px;
+
+border-bottom: 1px dashed var(--border-light);
+}
+
+.menu-master-row .col-actions {
+display: flex;
+
+gap: 4px;
+}
+
+.menu-master-row .btn-menu-i18n-toggle {
+padding: 6px 8px;
+
+border: 1px solid var(--border-color);
+
+border-radius: var(--radius-sm);
+
+background-color: var(--card-bg);
+
+cursor: pointer;
+
+font-size: 14px;
+}
+
+.menu-master-row .btn-menu-i18n-toggle:hover {
+background-color: var(--bg-color);
 }
 
 .menu-master-row input {
@@ -1162,4 +1192,118 @@ align-items: center;
 gap: 6px;
 
 cursor: pointer;
+}
+
+/* ==========================================================
+多言語対応：翻訳入力パネル（メニュー名・お知らせ文などで共通利用）
+========================================================== */
+
+.menu-i18n-panel {
+margin-top: 10px;
+
+padding: 12px 14px;
+
+background-color: var(--bg-color);
+
+border: 1px solid var(--border-light);
+
+border-radius: var(--radius-md);
+}
+
+.i18n-panel-note {
+font-size: 12px;
+
+color: var(--sub-text-color);
+
+margin: 0 0 10px;
+}
+
+.i18n-panel-row {
+display: flex;
+align-items: center;
+
+gap: 8px;
+
+margin-bottom: 8px;
+}
+
+.i18n-panel-row:last-child {
+margin-bottom: 0;
+}
+
+.i18n-panel-lang-label {
+flex: 0 0 90px;
+
+font-size: 13px;
+font-weight: 600;
+
+color: var(--primary-color);
+}
+
+.i18n-panel-row input,
+.i18n-panel-row textarea {
+flex: 1 1 auto;
+
+min-width: 0;
+
+padding: 7px 9px;
+
+border: 1px solid var(--border-color);
+
+border-radius: var(--radius-sm);
+
+font-size: 13px;
+
+font-family: inherit;
+}
+
+.i18n-translate-link {
+flex: 0 0 auto;
+
+font-size: 12px;
+
+color: var(--accent-dark);
+
+text-decoration: none;
+
+white-space: nowrap;
+}
+
+.info-i18n-fields {
+display: flex;
+flex-direction: column;
+
+gap: 4px;
+
+flex: 1 1 auto;
+
+min-width: 0;
+}
+
+.info-i18n-fields input {
+width: 100%;
+}
+
+.i18n-translate-link:hover {
+text-decoration: underline;
+}
+
+.btn-i18n-toggle {
+margin-top: 8px;
+
+padding: 7px 12px;
+
+border: 1px solid var(--border-color);
+
+border-radius: var(--radius-sm);
+
+background-color: var(--card-bg);
+
+cursor: pointer;
+
+font-size: 13px;
+}
+
+.btn-i18n-toggle:hover {
+background-color: var(--bg-color);
 }

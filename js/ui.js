@@ -184,6 +184,7 @@ function applySystemSettings(settings) {
   CONFIG.SHOW_MENU_PRICE = settings.showMenuPrice;
   CONFIG.SHOW_MENU_TOTAL = settings.showMenuTotal;
   CONFIG.MENU_NOTE_TEXT = settings.menuNoteText || "";
+  CONFIG.MENU_NOTE_TEXT_I18N = settings.menuNoteTextI18n || {};
   CONFIG.MENU_MASTER = settings.menuMaster || {};
 }
 
@@ -208,6 +209,16 @@ function _buildInfoCardIconContent(item) {
   }
 
   return INFO_CARD_ICONS[iconValue] || INFO_CARD_ICONS.store;
+}
+
+/**
+ * 言語が切り替えられた時に呼ばれる（i18n.jsのsetLanguageから呼び出される）
+ * data-i18n属性が付いた要素は自動で切り替わるが、JavaScriptで動的に組み立てている表示
+ * （メニュー名・注意文など）は、ここで明示的に再描画する
+ */
+function onLanguageChanged() {
+  if (typeof renderMenuUI === 'function') renderMenuUI();
+  if (typeof renderInfoSection === 'function' && CONFIG.INFO_SECTION) renderInfoSection(CONFIG.INFO_SECTION);
 }
 
 function renderInfoSection(infoConfig) {
@@ -245,11 +256,16 @@ function renderInfoSection(infoConfig) {
     const hrefAttr = isInternalPage ? '#' : escapeHtml(item.url || '#');
     const pageAttr = isInternalPage ? ` data-page="${escapeHtml(String(item.page))}"` : '';
 
+    // 翻訳（i18n）が入力されていて、日本語以外が選ばれている場合は、そちらを使う
+    const i18nItem = (currentLang !== 'ja' && item.i18n && item.i18n[currentLang]) ? item.i18n[currentLang] : {};
+    const displayTitle = i18nItem.title || item.title || '';
+    const displayDescription = i18nItem.description || item.description || '';
+
     html += `
       <a class="info-card" href="${hrefAttr}"${pageAttr}>
         <div class="info-card-icon">${iconContent}</div>
-        <div class="info-card-title"${titleStyle ? ` style="${titleStyle}"` : ''}>${escapeHtml(item.title || '')}</div>
-        <div class="info-card-description">${escapeHtml(item.description || '')}</div>
+        <div class="info-card-title"${titleStyle ? ` style="${titleStyle}"` : ''}>${escapeHtml(displayTitle)}</div>
+        <div class="info-card-description">${escapeHtml(displayDescription)}</div>
       </a>
     `;
   });
@@ -393,7 +409,7 @@ function renderMenuUI() {
   const menuNames = Object.keys(menuMaster);
 
   if (menuNames.length === 0) {
-    menuContainer.innerHTML = '<div class="note">メニューを読み込んでいます...</div>';
+    menuContainer.innerHTML = `<div class="note">${t('menu_loading')}</div>`;
     return;
   }
 
@@ -401,7 +417,7 @@ function renderMenuUI() {
 
   if (isMenuPulldownType()) {
     html += '<select id="menu-select" class="form-select menu-select-box">';
-    html += '<option value="" disabled selected>メニューを選択してください</option>';
+    html += `<option value="" disabled selected>${t('menu_select_placeholder')}</option>`;
 
     menuNames.forEach(menuName => {
       const label = buildMenuLabel(menuName, menuMaster[menuName]);
@@ -427,9 +443,10 @@ function renderMenuUI() {
 
   menuContainer.innerHTML = html;
 
-  // 施術メニューの下に表示する、任意の説明文
+  // 施術メニューの下に表示する、任意の説明文（多言語対応。翻訳が入力されていなければ日本語のまま）
   if (menuNoteTextEl) {
-    const noteText = CONFIG.MENU_NOTE_TEXT || "";
+    const i18nNote = (currentLang !== 'ja' && CONFIG.MENU_NOTE_TEXT_I18N) ? CONFIG.MENU_NOTE_TEXT_I18N[currentLang] : "";
+    const noteText = i18nNote || CONFIG.MENU_NOTE_TEXT || "";
     if (noteText) {
       menuNoteTextEl.textContent = noteText;
       menuNoteTextEl.style.display = 'block';
