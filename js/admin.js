@@ -70,12 +70,6 @@ const settings1Error = document.getElementById('settings1-error');
 const settings1SavedMsg = document.getElementById('settings1-saved-msg');
 const settings1Form = document.getElementById('settings1-form');
 const s1SlotStepMinutes = document.getElementById('s1-slot-step-minutes');
-const s1ProvisionalEnabled = document.getElementById('s1-provisional-enabled');
-const s1ProvisionalTargetMenus = document.getElementById('s1-provisional-target-menus');
-const s1ProvisionalDeadline = document.getElementById('s1-provisional-deadline');
-const s1WaitlistEnabled = document.getElementById('s1-waitlist-enabled');
-const s1WaitlistInterval = document.getElementById('s1-waitlist-interval');
-const s1WaitlistDeadline = document.getElementById('s1-waitlist-deadline');
 const s1MaxCapacity = document.getElementById('s1-max-capacity');
 const s1HistoryRetention = document.getElementById('s1-history-retention');
 const s1CancelHistoryRetention = document.getElementById('s1-cancel-history-retention');
@@ -146,6 +140,12 @@ const s5ShowMenuMinutes = document.getElementById('s5-show-menu-minutes');
 const s5ShowMenuPrice = document.getElementById('s5-show-menu-price');
 const s5ShowMenuTotal = document.getElementById('s5-show-menu-total');
 const s5MenuNoteText = document.getElementById('s5-menu-note-text');
+const s5ProvisionalEnabled = document.getElementById('s5-provisional-enabled');
+const s5ProvisionalTargetMenus = document.getElementById('s5-provisional-target-menus');
+const s5ProvisionalDeadline = document.getElementById('s5-provisional-deadline');
+const s5WaitlistEnabled = document.getElementById('s5-waitlist-enabled');
+const s5WaitlistInterval = document.getElementById('s5-waitlist-interval');
+const s5WaitlistDeadline = document.getElementById('s5-waitlist-deadline');
 const saveSettings5Btn = document.getElementById('save-settings5-btn');
 
 const businessHoursRows = document.getElementById('business-hours-rows');
@@ -690,20 +690,6 @@ async function loadSettings1() {
     baseSlotMinutesForConversion = result.baseSlotMinutes || 5;
     if (s1SlotStepMinutes) s1SlotStepMinutes.value = result.displaySlotStepMinutes || 30;
 
-    // 仮予約制度
-    const provisional = result.provisionalReservation || {};
-    if (s1ProvisionalEnabled) s1ProvisionalEnabled.checked = !!provisional.enabled;
-    setRadioValue('s1-provisional-target', provisional.target || 'ALL');
-    if (s1ProvisionalTargetMenus) s1ProvisionalTargetMenus.value = (provisional.targetMenus || []).join(',');
-    if (s1ProvisionalDeadline) s1ProvisionalDeadline.value = provisional.confirmDeadlineHours || 12;
-    setRadioValue('s1-provisional-auto-action', provisional.autoAction || 'NONE');
-
-    // キャンセル待ち機能（空欄のままにしたいので、値が無い時は空文字にする）
-    const waitlist = result.waitlist || {};
-    if (s1WaitlistEnabled) s1WaitlistEnabled.checked = !!waitlist.enabled;
-    if (s1WaitlistInterval) s1WaitlistInterval.value = (waitlist.notifyIntervalMinutes === "" || waitlist.notifyIntervalMinutes === null || typeof waitlist.notifyIntervalMinutes === 'undefined') ? '' : waitlist.notifyIntervalMinutes;
-    if (s1WaitlistDeadline) s1WaitlistDeadline.value = (waitlist.notifyDeadlineMinutes === "" || waitlist.notifyDeadlineMinutes === null || typeof waitlist.notifyDeadlineMinutes === 'undefined') ? '' : waitlist.notifyDeadlineMinutes;
-
     // キャンセル・変更の受付締切
     if (s1CancelBuffer) s1CancelBuffer.value = result.cancelBufferHours;
     if (s1ChangeBuffer) s1ChangeBuffer.value = result.changeBufferHours;
@@ -949,25 +935,6 @@ function collectSettings1FormData() {
     settings.DISPLAY_SLOT_STEP = Math.round(stepMinutes / baseSlotMinutesForConversion);
   }
 
-  // 仮予約制度
-  const targetMenus = s1ProvisionalTargetMenus.value.split(',').map(m => m.trim()).filter(m => m.length > 0);
-  settings.PROVISIONAL_RESERVATION = {
-    enabled: !!s1ProvisionalEnabled.checked,
-    target: getRadioValue('s1-provisional-target') || 'ALL',
-    targetMenus: targetMenus,
-    confirmDeadlineHours: parseInt(s1ProvisionalDeadline.value, 10) || 12,
-    autoAction: getRadioValue('s1-provisional-auto-action') || 'NONE'
-  };
-
-  // キャンセル待ち機能（空欄のまま保存したいので、数値に変換できない場合は空文字のまま保存する）
-  const waitlistInterval = s1WaitlistInterval.value.trim();
-  const waitlistDeadline = s1WaitlistDeadline.value.trim();
-  settings.WAITLIST = {
-    enabled: !!s1WaitlistEnabled.checked,
-    notifyIntervalMinutes: waitlistInterval === '' ? '' : parseInt(waitlistInterval, 10),
-    notifyDeadlineMinutes: waitlistDeadline === '' ? '' : parseInt(waitlistDeadline, 10)
-  };
-
   // キャンセル・変更の受付締切
   settings.CANCEL_BUFFER_HOURS_BEFORE_RESERVATION = parseInt(s1CancelBuffer.value, 10);
   settings.CHANGE_BUFFER_HOURS_BEFORE_RESERVATION = parseInt(s1ChangeBuffer.value, 10);
@@ -1045,6 +1012,20 @@ async function loadSettings5() {
     if (s5ShowMenuTotal) s5ShowMenuTotal.checked = !!result.showMenuTotal;
     if (s5MenuNoteText) s5MenuNoteText.value = result.menuNoteText || '';
 
+    // 仮予約制度
+    const provisional = result.provisionalReservation || {};
+    if (s5ProvisionalEnabled) s5ProvisionalEnabled.checked = !!provisional.enabled;
+    setRadioValue('s5-provisional-target', provisional.target || 'ALL');
+    if (s5ProvisionalTargetMenus) s5ProvisionalTargetMenus.value = (provisional.targetMenus || []).join(',');
+    if (s5ProvisionalDeadline) s5ProvisionalDeadline.value = provisional.confirmDeadlineHours || 12;
+    setRadioValue('s5-provisional-auto-action', provisional.autoAction || 'NONE');
+
+    // キャンセル待ち機能（空欄のままにしたいので、値が無い時は空文字にする）
+    const waitlist = result.waitlist || {};
+    if (s5WaitlistEnabled) s5WaitlistEnabled.checked = !!waitlist.enabled;
+    if (s5WaitlistInterval) s5WaitlistInterval.value = (waitlist.notifyIntervalMinutes === "" || waitlist.notifyIntervalMinutes === null || typeof waitlist.notifyIntervalMinutes === 'undefined') ? '' : waitlist.notifyIntervalMinutes;
+    if (s5WaitlistDeadline) s5WaitlistDeadline.value = (waitlist.notifyDeadlineMinutes === "" || waitlist.notifyDeadlineMinutes === null || typeof waitlist.notifyDeadlineMinutes === 'undefined') ? '' : waitlist.notifyDeadlineMinutes;
+
     settings5Loaded = true;
     if (settings5Form) settings5Form.style.display = 'block';
   } catch (error) {
@@ -1082,13 +1063,29 @@ if (settings5Form) {
         }
       });
 
+      const targetMenus = s5ProvisionalTargetMenus.value.split(',').map(m => m.trim()).filter(m => m.length > 0);
+      const waitlistInterval = s5WaitlistInterval.value.trim();
+      const waitlistDeadline = s5WaitlistDeadline.value.trim();
+
       const settings = {
         MENU_MASTER: menuMaster,
         MENU_SELECTOR_TYPE: getRadioValue('s5-menu-selector-type') || 'TYPE_B',
         SHOW_MENU_MINUTES: !!s5ShowMenuMinutes.checked,
         SHOW_MENU_PRICE: !!s5ShowMenuPrice.checked,
         SHOW_MENU_TOTAL: !!s5ShowMenuTotal.checked,
-        MENU_NOTE_TEXT: s5MenuNoteText.value
+        MENU_NOTE_TEXT: s5MenuNoteText.value,
+        PROVISIONAL_RESERVATION: {
+          enabled: !!s5ProvisionalEnabled.checked,
+          target: getRadioValue('s5-provisional-target') || 'ALL',
+          targetMenus: targetMenus,
+          confirmDeadlineHours: parseInt(s5ProvisionalDeadline.value, 10) || 12,
+          autoAction: getRadioValue('s5-provisional-auto-action') || 'NONE'
+        },
+        WAITLIST: {
+          enabled: !!s5WaitlistEnabled.checked,
+          notifyIntervalMinutes: waitlistInterval === '' ? '' : parseInt(waitlistInterval, 10),
+          notifyDeadlineMinutes: waitlistDeadline === '' ? '' : parseInt(waitlistDeadline, 10)
+        }
       };
 
       const token = sessionStorage.getItem(SESSION_TOKEN_KEY) || '';

@@ -285,48 +285,6 @@
           </div>
         </div>
 
-        <div class="settings-card">
-          <h3 class="settings-card-title">仮予約制度</h3>
-          <div class="form-group checkbox-group">
-            <label><input type="checkbox" id="s1-provisional-enabled"> 仮予約制度を使う</label>
-          </div>
-          <div class="form-group radio-group">
-            <label><input type="radio" name="s1-provisional-target" value="ALL"> 全員を仮予約対象にする</label>
-            <label><input type="radio" name="s1-provisional-target" value="NEW_ONLY"> 新規のお客様だけ対象にする</label>
-            <label><input type="radio" name="s1-provisional-target" value="MENU_ONLY"> 特定のメニューだけ対象にする</label>
-          </div>
-          <div class="form-group">
-            <label for="s1-provisional-target-menus">対象メニュー（「特定のメニューだけ」を選んだ時のみ有効。カンマ区切りで複数指定可）</label>
-            <input type="text" id="s1-provisional-target-menus" placeholder="例：ヘアブリーチ,縮毛矯正">
-          </div>
-          <div class="form-group">
-            <label for="s1-provisional-deadline">確認期限（受付から何時間以内に確定するか）</label>
-            <input type="number" id="s1-provisional-deadline" min="1">
-          </div>
-          <div class="form-group radio-group">
-            <label><input type="radio" name="s1-provisional-auto-action" value="NONE"> 自動処理なし（手動で確認・キャンセル）</label>
-            <label><input type="radio" name="s1-provisional-auto-action" value="AUTO_CANCEL"> 期限を過ぎたら自動キャンセル</label>
-            <label><input type="radio" name="s1-provisional-auto-action" value="AUTO_CONFIRM"> 期限を過ぎたら自動的に本予約として確定</label>
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <h3 class="settings-card-title">キャンセル待ち機能</h3>
-          <div class="form-group checkbox-group">
-            <label><input type="checkbox" id="s1-waitlist-enabled"> キャンセル待ち機能を使う</label>
-          </div>
-          <div class="form-group">
-            <label for="s1-waitlist-interval">次の対象者へ案内を回すまでの待ち時間（分）</label>
-            <p class="settings-card-note">空欄：空きが出た時、対象者（施術時間的にその枠に入れる人）全員に同時に通知する（早い者勝ち）。数値を入れると、登録順に1人ずつ通知し、その分数だけ反応がなければ自動的に次の対象者へ回す（順番案内モードを使う場合、GASの「トリガー」に triggerWaitlistTimeoutCheck の時間主導型トリガーを別途設定してください）。</p>
-            <input type="number" id="s1-waitlist-interval" min="1" placeholder="空欄でOK">
-          </div>
-          <div class="form-group">
-            <label for="s1-waitlist-deadline">通知の締切（来店の何分前を過ぎたら通知しないか）</label>
-            <p class="settings-card-note">空欄：制限なし（何分前でも通知する）。数値を入れると、空きが出た時点で来店時刻までの残りがその分数を切っていた場合、誰にも通知しない。</p>
-            <input type="number" id="s1-waitlist-deadline" min="1" placeholder="空欄でOK">
-          </div>
-        </div>
-
         <button type="submit" id="save-settings1-btn" class="btn-save-settings">保存する</button>
       </form>
     </section>
@@ -371,6 +329,48 @@
             <label for="s5-menu-note-text">施術メニューの下に表示する説明文（任意・空欄で非表示）</label>
             <p class="settings-card-note">例：施術時間と金額は目安であり確定ではありません。施術内容によって金額と施術時間が前後します。</p>
             <textarea id="s5-menu-note-text" rows="3" placeholder="施術時間と金額は目安であり確定ではありません。施術内容によって金額と施術時間が前後します。"></textarea>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">仮予約制度</h3>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s5-provisional-enabled"> 仮予約制度を使う</label>
+          </div>
+          <div class="form-group radio-group">
+            <label><input type="radio" name="s5-provisional-target" value="ALL"> 全員を仮予約対象にする</label>
+            <label><input type="radio" name="s5-provisional-target" value="NEW_ONLY"> 新規のお客様だけ対象にする</label>
+            <label><input type="radio" name="s5-provisional-target" value="MENU_ONLY"> 特定のメニューだけ対象にする</label>
+          </div>
+          <div class="form-group">
+            <label for="s5-provisional-target-menus">対象メニュー（「特定のメニューだけ」を選んだ時のみ有効。カンマ区切りで複数指定可）</label>
+            <input type="text" id="s5-provisional-target-menus" placeholder="例：ヘアブリーチ,縮毛矯正">
+          </div>
+          <div class="form-group">
+            <label for="s5-provisional-deadline">確認期限（受付から何時間以内に確定するか）</label>
+            <input type="number" id="s5-provisional-deadline" min="1">
+          </div>
+          <div class="form-group radio-group">
+            <label><input type="radio" name="s5-provisional-auto-action" value="NONE"> 自動処理なし（手動で確認・キャンセル）</label>
+            <label><input type="radio" name="s5-provisional-auto-action" value="AUTO_CANCEL"> 期限を過ぎたら自動キャンセル</label>
+            <label><input type="radio" name="s5-provisional-auto-action" value="AUTO_CONFIRM"> 期限を過ぎたら自動的に本予約として確定</label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">キャンセル待ち機能</h3>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s5-waitlist-enabled"> キャンセル待ち機能を使う</label>
+          </div>
+          <div class="form-group">
+            <label for="s5-waitlist-interval">次の対象者へ案内を回すまでの待ち時間（分）</label>
+            <p class="settings-card-note">空欄：空きが出た時、対象者（施術時間的にその枠に入れる人）全員に同時に通知する（早い者勝ち）。数値を入れると、登録順に1人ずつ通知し、その分数だけ反応がなければ自動的に次の対象者へ回す（順番案内モードを使う場合、GASの「トリガー」に triggerWaitlistTimeoutCheck の時間主導型トリガーを別途設定してください）。</p>
+            <input type="number" id="s5-waitlist-interval" min="1" placeholder="空欄でOK">
+          </div>
+          <div class="form-group">
+            <label for="s5-waitlist-deadline">通知の締切（来店の何分前を過ぎたら通知しないか）</label>
+            <p class="settings-card-note">空欄：制限なし（何分前でも通知する）。数値を入れると、空きが出た時点で来店時刻までの残りがその分数を切っていた場合、誰にも通知しない。</p>
+            <input type="number" id="s5-waitlist-deadline" min="1" placeholder="空欄でOK">
           </div>
         </div>
 
@@ -522,7 +522,7 @@
 
         <div class="settings-card">
           <h3 class="settings-card-title">来店後のお礼メール（口コミ・クチコミ導線）</h3>
-          <p class="settings-card-note">来店日から指定した日数後に、お客様へお礼メールを自動送信します（任意機能）。使う場合は、GASの「トリガー」に triggerThankYouMail の時間主導型トリガーを別途設定してください（1日1回程度でOKです）。</p>
+          <p class="settings-card-note">任意で来店日から指定した日数後に、お客様へお礼メールを自動送信します。Googleクチコミ投稿ページのURLを記載する事で口コミへのご案内ができます。</p>
           <div class="form-group checkbox-group">
             <label><input type="checkbox" id="s2-thankyou-enabled"> 来店後のお礼メールを送る</label>
           </div>
