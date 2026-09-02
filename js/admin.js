@@ -73,6 +73,9 @@ const s1SlotStepMinutes = document.getElementById('s1-slot-step-minutes');
 const s1ProvisionalEnabled = document.getElementById('s1-provisional-enabled');
 const s1ProvisionalTargetMenus = document.getElementById('s1-provisional-target-menus');
 const s1ProvisionalDeadline = document.getElementById('s1-provisional-deadline');
+const s1WaitlistEnabled = document.getElementById('s1-waitlist-enabled');
+const s1WaitlistInterval = document.getElementById('s1-waitlist-interval');
+const s1WaitlistDeadline = document.getElementById('s1-waitlist-deadline');
 const s1MaxCapacity = document.getElementById('s1-max-capacity');
 const s1HistoryRetention = document.getElementById('s1-history-retention');
 const s1CancelHistoryRetention = document.getElementById('s1-cancel-history-retention');
@@ -690,6 +693,12 @@ async function loadSettings1() {
     if (s1ProvisionalDeadline) s1ProvisionalDeadline.value = provisional.confirmDeadlineHours || 12;
     setRadioValue('s1-provisional-auto-action', provisional.autoAction || 'NONE');
 
+    // キャンセル待ち機能（空欄のままにしたいので、値が無い時は空文字にする）
+    const waitlist = result.waitlist || {};
+    if (s1WaitlistEnabled) s1WaitlistEnabled.checked = !!waitlist.enabled;
+    if (s1WaitlistInterval) s1WaitlistInterval.value = (waitlist.notifyIntervalMinutes === "" || waitlist.notifyIntervalMinutes === null || typeof waitlist.notifyIntervalMinutes === 'undefined') ? '' : waitlist.notifyIntervalMinutes;
+    if (s1WaitlistDeadline) s1WaitlistDeadline.value = (waitlist.notifyDeadlineMinutes === "" || waitlist.notifyDeadlineMinutes === null || typeof waitlist.notifyDeadlineMinutes === 'undefined') ? '' : waitlist.notifyDeadlineMinutes;
+
     // キャンセル・変更の受付締切
     if (s1CancelBuffer) s1CancelBuffer.value = result.cancelBufferHours;
     if (s1ChangeBuffer) s1ChangeBuffer.value = result.changeBufferHours;
@@ -935,6 +944,15 @@ function collectSettings1FormData() {
     targetMenus: targetMenus,
     confirmDeadlineHours: parseInt(s1ProvisionalDeadline.value, 10) || 12,
     autoAction: getRadioValue('s1-provisional-auto-action') || 'NONE'
+  };
+
+  // キャンセル待ち機能（空欄のまま保存したいので、数値に変換できない場合は空文字のまま保存する）
+  const waitlistInterval = s1WaitlistInterval.value.trim();
+  const waitlistDeadline = s1WaitlistDeadline.value.trim();
+  settings.WAITLIST = {
+    enabled: !!s1WaitlistEnabled.checked,
+    notifyIntervalMinutes: waitlistInterval === '' ? '' : parseInt(waitlistInterval, 10),
+    notifyDeadlineMinutes: waitlistDeadline === '' ? '' : parseInt(waitlistDeadline, 10)
   };
 
   // キャンセル・変更の受付締切
