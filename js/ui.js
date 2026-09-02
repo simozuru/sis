@@ -687,6 +687,9 @@ function renderTimetable(multiDayStatuses) {
 
       if (status === '○') {
         html += `<td class="slot-cell slot-available" data-date="${escapeHtml(dStr)}" data-time="${escapeHtml(timeStr)}">◎</td>`;
+      } else if (status === '－') {
+        // 満席ではなく「そもそも受付していない時間」（受付締切超過・営業時間外など）。キャンセル待ちの対象にはしない
+        html += '<td class="slot-cell slot-closed"></td>';
       } else if (CONFIG.WAITLIST_ENABLED) {
         html += `<td class="slot-cell slot-unavailable slot-waitlist" data-date="${escapeHtml(dStr)}" data-time="${escapeHtml(timeStr)}" title="キャンセル待ちに登録する">△</td>`;
       } else {
