@@ -475,17 +475,21 @@ function updateMenuTotalDisplay() {
   const menuMaster = CONFIG.MENU_MASTER || {};
   let totalMinutes = 0;
   let totalPrice = 0;
+  let hasApproxMinutes = false;
+  let hasApproxPrice = false;
 
   menuNames.forEach(name => {
     const data = menuMaster[name];
     if (!data) return;
     totalMinutes += Number(data.minutes) || 0;
     totalPrice += Number(data.price) || 0;
+    if (data.minutesApprox) hasApproxMinutes = true;
+    if (data.priceApprox) hasApproxPrice = true;
   });
 
   const parts = [];
-  if (totalMinutes > 0) parts.push(`合計 ${totalMinutes}分`);
-  parts.push(`合計 ￥${totalPrice.toLocaleString()}`);
+  if (totalMinutes > 0) parts.push(`合計 ${hasApproxMinutes ? "～" : ""}${totalMinutes}分`);
+  parts.push(`合計 ${hasApproxPrice ? "～" : ""}￥${totalPrice.toLocaleString()}`);
 
   menuTotalDisplayEl.textContent = parts.join(" / ");
   menuTotalDisplayEl.style.display = 'block';

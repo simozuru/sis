@@ -717,6 +717,7 @@ line-height: 1.6;
 .menu-master-row,
 .staff-name-row {
 display: flex;
+flex-wrap: wrap;
 align-items: center;
 
 gap: 10px;
@@ -834,6 +835,28 @@ flex: 1 1 auto;
 .menu-master-row .menu-minutes-input,
 .menu-master-row .menu-price-input {
 width: 90px;
+}
+
+.menu-master-row .menu-approx-label {
+display: inline-flex;
+align-items: center;
+
+gap: 4px;
+
+font-size: 12px;
+
+color: var(--sub-text-color);
+
+white-space: nowrap;
+
+cursor: pointer;
+}
+
+.menu-master-row .menu-approx-label input[type="checkbox"] {
+width: 15px;
+height: 15px;
+
+accent-color: var(--accent-color);
 }
 
 .staff-name-row input {

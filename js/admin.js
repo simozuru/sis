@@ -857,7 +857,7 @@ function renderMenuMasterRows(menuMaster) {
 
   const entries = Object.keys(menuMaster).map(name => ({ name, ...menuMaster[name] }));
   menuMasterRows.innerHTML = '';
-  entries.forEach(entry => addMenuRow(entry.name, entry.minutes, entry.price));
+  entries.forEach(entry => addMenuRow(entry.name, entry.minutes, entry.price, entry.minutesApprox, entry.priceApprox));
 
   if (entries.length === 0) addMenuRow('', '', '');
 }
@@ -865,7 +865,7 @@ function renderMenuMasterRows(menuMaster) {
 /**
  * メニュー行を1行追加する
  */
-function addMenuRow(name = '', minutes = '', price = '') {
+function addMenuRow(name = '', minutes = '', price = '', minutesApprox = false, priceApprox = false) {
   if (!menuMasterRows) return;
 
   const row = document.createElement('div');
@@ -873,7 +873,9 @@ function addMenuRow(name = '', minutes = '', price = '') {
   row.innerHTML = `
     <input type="text" class="menu-name-input" placeholder="メニュー名（例：カット）" value="${escapeHtmlAdmin(name)}">
     <input type="number" class="menu-minutes-input" placeholder="分" min="5" step="5" value="${minutes}">
+    <label class="menu-approx-label"><input type="checkbox" class="menu-minutes-approx-input" ${minutesApprox ? 'checked' : ''}> ～目安</label>
     <input type="number" class="menu-price-input" placeholder="円" min="0" value="${price}">
+    <label class="menu-approx-label"><input type="checkbox" class="menu-price-approx-input" ${priceApprox ? 'checked' : ''}> ～目安</label>
     <button type="button" class="btn-remove-row" title="このメニューを削除">×</button>
   `;
   row.querySelector('.btn-remove-row').addEventListener('click', () => row.remove());
@@ -1062,8 +1064,10 @@ if (settings5Form) {
         const name = row.querySelector('.menu-name-input').value.trim();
         const minutes = parseInt(row.querySelector('.menu-minutes-input').value, 10);
         const price = parseInt(row.querySelector('.menu-price-input').value, 10);
+        const minutesApprox = row.querySelector('.menu-minutes-approx-input').checked;
+        const priceApprox = row.querySelector('.menu-price-approx-input').checked;
         if (name && !isNaN(minutes) && minutes > 0) {
-          menuMaster[name] = { minutes: minutes, slots: Math.ceil(minutes / 5), price: isNaN(price) ? 0 : price };
+          menuMaster[name] = { minutes: minutes, slots: Math.ceil(minutes / 5), price: isNaN(price) ? 0 : price, minutesApprox: minutesApprox, priceApprox: priceApprox };
         }
       });
 
