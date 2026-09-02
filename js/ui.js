@@ -174,6 +174,7 @@ function applySystemSettings(settings) {
     if (branding.titleFontFamily) mainTitle.style.fontFamily = branding.titleFontFamily;
   }
   CONFIG.SHOW_STAFF_SELECTOR = settings.showStaffSelector;
+  CONFIG.WAITLIST_ENABLED = !!settings.waitlistEnabled;
   CONFIG.ALLOW_NO_ASSIGN = settings.allowNoAssign;
   CONFIG.NO_ASSIGN_LABEL = settings.noAssignLabel;
   CONFIG.STAFF_LIST = Array.isArray(settings.staffList) ? settings.staffList : [];
@@ -686,6 +687,8 @@ function renderTimetable(multiDayStatuses) {
 
       if (status === '○') {
         html += `<td class="slot-cell slot-available" data-date="${escapeHtml(dStr)}" data-time="${escapeHtml(timeStr)}">◎</td>`;
+      } else if (CONFIG.WAITLIST_ENABLED) {
+        html += `<td class="slot-cell slot-unavailable slot-waitlist" data-date="${escapeHtml(dStr)}" data-time="${escapeHtml(timeStr)}" title="キャンセル待ちに登録する">△</td>`;
       } else {
         html += '<td class="slot-cell slot-unavailable">×</td>';
       }
@@ -727,6 +730,54 @@ function bindTimetableCellEvents() {
       }
     });
   });
+
+  document.querySelectorAll('.slot-waitlist').forEach(cell => {
+    cell.addEventListener('click', (e) => {
+      const target = e.currentTarget;
+      handleWaitlistCellClick(target.getAttribute('data-date'), target.getAttribute('data-time'));
+    });
+  });
+}
+
+/**
+ * 満席（△）の枠がクリックされた時：入力済みの内容でキャンセル待ちに登録する
+ * @param {string} dateStr
+ * @param {string} timeStr
+ */
+async function handleWaitlistCellClick(dateStr, timeStr) {
+  if (isChangeMode()) {
+    alert('予約の変更中は、キャンセル待ちにご登録いただけません。');
+    return;
+  }
+
+  if (!nameInput.value || !telInput.value || !getSelectedMenusValue()) {
+    alert('お名前・お電話番号・メニューを入力してから、キャンセル待ちにご登録ください。');
+    return;
+  }
+
+  const confirmMsg = `${escapeHtml(dateStr)} ${escapeHtml(timeStr)}〜 は、ただいま満席です。<br>空きが出たら、メールでお知らせしましょうか？`;
+  const confirmed = await showCustomConfirm(confirmMsg);
+  if (!confirmed) return;
+
+  const payload = {
+    date: dateStr,
+    time: timeStr,
+    staff: staffSelect.value,
+    menu: getSelectedMenusValue(),
+    name: nameInput.value,
+    name_kana: nameKanaInput.value,
+    tel: telInput.value,
+    email: emailInput.value,
+    memo: memoInput.value
+  };
+
+  try {
+    const data = await submitReservationApi('registerWaitlist', payload);
+    alert(data.message || (data.success ? 'キャンセル待ちの登録が完了しました。' : '登録に失敗しました。'));
+  } catch (error) {
+    console.error('キャンセル待ち登録エラー:', error);
+    alert('通信エラーが発生しました。時間をおいて再度お試しください。');
+  }
 }
 
 /**
