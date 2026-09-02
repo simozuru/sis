@@ -124,11 +124,11 @@ function buildMenuLabel(menuName, menuData) {
   const meta = [];
 
   if (CONFIG.SHOW_MENU_MINUTES && data.minutes) {
-    meta.push(`${data.minutesApprox ? "～" : ""}${data.minutes}分`);
+    meta.push(`${data.minutes}分${data.minutesApprox ? "～" : ""}`);
   }
 
   if (CONFIG.SHOW_MENU_PRICE && data.price !== undefined && data.price !== null) {
-    meta.push(`${data.priceApprox ? "～" : ""}￥${Number(data.price).toLocaleString()}`);
+    meta.push(`￥${Number(data.price).toLocaleString()}${data.priceApprox ? "～" : ""}`);
   }
 
   if (meta.length === 0) return safeName;

@@ -488,8 +488,8 @@ function updateMenuTotalDisplay() {
   });
 
   const parts = [];
-  if (totalMinutes > 0) parts.push(`合計 ${hasApproxMinutes ? "～" : ""}${totalMinutes}分`);
-  parts.push(`合計 ${hasApproxPrice ? "～" : ""}￥${totalPrice.toLocaleString()}`);
+  if (totalMinutes > 0) parts.push(`合計 ${totalMinutes}分${hasApproxMinutes ? "～" : ""}`);
+  parts.push(`合計 ￥${totalPrice.toLocaleString()}${hasApproxPrice ? "～" : ""}`);
 
   menuTotalDisplayEl.textContent = parts.join(" / ");
   menuTotalDisplayEl.style.display = 'block';

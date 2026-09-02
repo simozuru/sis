@@ -871,12 +871,18 @@ function addMenuRow(name = '', minutes = '', price = '', minutesApprox = false, 
   const row = document.createElement('div');
   row.className = 'menu-master-row';
   row.innerHTML = `
-    <input type="text" class="menu-name-input" placeholder="メニュー名（例：カット）" value="${escapeHtmlAdmin(name)}">
-    <input type="number" class="menu-minutes-input" placeholder="分" min="5" step="5" value="${minutes}">
-    <label class="menu-approx-label"><input type="checkbox" class="menu-minutes-approx-input" ${minutesApprox ? 'checked' : ''}> ～目安</label>
-    <input type="number" class="menu-price-input" placeholder="円" min="0" value="${price}">
-    <label class="menu-approx-label"><input type="checkbox" class="menu-price-approx-input" ${priceApprox ? 'checked' : ''}> ～目安</label>
-    <button type="button" class="btn-remove-row" title="このメニューを削除">×</button>
+    <input type="text" class="menu-name-input col-name" placeholder="メニュー名（例：カット）" value="${escapeHtmlAdmin(name)}">
+    <div class="col-minutes menu-field-group">
+      <input type="number" class="menu-minutes-input" placeholder="分" min="5" step="5" value="${minutes}">
+      <span class="menu-field-unit">分</span>
+      <label class="menu-approx-label"><input type="checkbox" class="menu-minutes-approx-input" ${minutesApprox ? 'checked' : ''}> ～</label>
+    </div>
+    <div class="col-price menu-field-group">
+      <span class="menu-field-unit">￥</span>
+      <input type="number" class="menu-price-input" placeholder="円" min="0" value="${price}">
+      <label class="menu-approx-label"><input type="checkbox" class="menu-price-approx-input" ${priceApprox ? 'checked' : ''}> ～</label>
+    </div>
+    <button type="button" class="btn-remove-row col-delete" title="このメニューを削除">×</button>
   `;
   row.querySelector('.btn-remove-row').addEventListener('click', () => row.remove());
   menuMasterRows.appendChild(row);

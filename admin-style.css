@@ -714,7 +714,6 @@ line-height: 1.6;
 }
 
 .business-hours-row,
-.menu-master-row,
 .staff-name-row {
 display: flex;
 flex-wrap: wrap;
@@ -818,6 +817,30 @@ gap: 6px;
 white-space: nowrap;
 }
 
+.menu-master-header {
+display: grid;
+grid-template-columns: 1fr 190px 190px 32px;
+
+gap: 10px;
+
+padding: 0 2px 6px;
+
+font-size: 12px;
+font-weight: 600;
+
+color: var(--sub-text-color);
+}
+
+.menu-master-row {
+display: grid;
+grid-template-columns: 1fr 190px 190px 32px;
+align-items: center;
+
+gap: 10px;
+
+margin-bottom: 10px;
+}
+
 .menu-master-row input {
 padding: 8px 10px;
 
@@ -828,13 +851,30 @@ border-radius: var(--radius-sm);
 font-size: 14px;
 }
 
-.menu-master-row .menu-name-input {
-flex: 1 1 auto;
+.menu-master-row .col-name {
+width: 100%;
+}
+
+.menu-master-row .menu-field-group {
+display: flex;
+align-items: center;
+
+gap: 6px;
 }
 
 .menu-master-row .menu-minutes-input,
 .menu-master-row .menu-price-input {
-width: 90px;
+width: 70px;
+
+flex: 1 1 auto;
+
+min-width: 0;
+}
+
+.menu-master-row .menu-field-unit {
+font-size: 13px;
+
+color: var(--sub-text-color);
 }
 
 .menu-master-row .menu-approx-label {
