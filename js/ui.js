@@ -1097,6 +1097,20 @@ function initializeEvents() {
     checkBtn.addEventListener('click', fetchReservations);
   }
 
+  document.querySelectorAll('.mypage-tab-btn').forEach(tabBtn => {
+    tabBtn.addEventListener('click', () => {
+      document.querySelectorAll('.mypage-tab-btn').forEach(b => b.classList.remove('active'));
+      tabBtn.classList.add('active');
+
+      document.querySelectorAll('.mypage-tab-panel').forEach(panel => {
+        panel.style.display = 'none';
+      });
+
+      const target = document.getElementById(tabBtn.getAttribute('data-target'));
+      if (target) target.style.display = 'block';
+    });
+  });
+
   if (cancelChangeBtn) {
     cancelChangeBtn.addEventListener('click', abortChangeMode);
   }

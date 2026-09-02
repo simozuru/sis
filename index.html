@@ -64,7 +64,10 @@
     <div id="step-1-container" class="step-section">
       <div class="check-link-area">
         <button type="button" id="home-btn" class="btn-link" style="display: none;">⬅ トップページに戻る</button>
-        <button type="button" id="go-to-check-btn" class="btn-link">➔ すでに予約をお持ちの方（確認・キャンセル）はこちら</button>
+        <div class="check-link-cta">
+          <button type="button" id="go-to-check-btn" class="btn-link">➔ マイページ</button>
+          <div class="check-link-note">予約の確認と過去の予約履歴が見れます</div>
+        </div>
       </div>
 
       <div class="form-group form-group-icon">
@@ -125,7 +128,10 @@
          ========================================== -->
     <div id="step-2-container" class="step-section" style="display: none;">
       <div class="check-link-area">
-        <button type="button" id="go-to-check-btn-step2" class="btn-link">➔ すでに予約をお持ちの方（確認・キャンセル）はこちら</button>
+        <div class="check-link-cta">
+          <button type="button" id="go-to-check-btn-step2" class="btn-link">➔ マイページ</button>
+          <div class="check-link-note">予約の確認と過去の予約履歴が見れます</div>
+        </div>
       </div>
 
       <div class="form-group form-group-icon">
@@ -221,12 +227,17 @@
     </div>
 
     <hr class="section-divider">
-    <div id="check-results-area">
+
+    <div class="mypage-tabs">
+      <button type="button" class="mypage-tab-btn active" id="mypage-tab-current" data-target="check-results-area">現在の予約</button>
+      <button type="button" class="mypage-tab-btn" id="mypage-tab-history" data-target="history-results-area">過去の履歴</button>
+    </div>
+
+    <div id="check-results-area" class="mypage-tab-panel">
       <div class="no-data">情報を入力して確認ボタンを押してください。</div>
     </div>
 
-    <hr class="section-divider">
-    <div id="history-results-area"></div>
+    <div id="history-results-area" class="mypage-tab-panel" style="display: none;"></div>
   </div>
 
   <!-- ==========================================
