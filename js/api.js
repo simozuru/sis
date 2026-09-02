@@ -87,3 +87,21 @@ async function fetchCustomerReservationsApi(tel, email) {
     return { success: false, message: error.toString() };
   }
 }
+
+/**
+ * 4.5. 過去の来店履歴 取得 API
+ * @param {string} tel - 電話番号
+ * @param {string} email - メールアドレス
+ * @returns {Promise<Object>} 該当する来店履歴リスト（来店済み・キャンセル済みの両方）
+ */
+async function fetchCustomerHistoryApi(tel, email) {
+  try {
+    const url = `${CONFIG.GAS_WEB_APP_URL}?method=getCustomerHistory&tel=${encodeURIComponent(tel)}&email=${encodeURIComponent(email)}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("来店履歴の取得に失敗しました");
+    return await response.json();
+  } catch (error) {
+    console.error("fetchCustomerHistoryApi エラー:", error);
+    return { success: false, message: error.toString() };
+  }
+}

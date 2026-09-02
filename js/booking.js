@@ -67,6 +67,66 @@ function buildReservationCardHtml(res) {
 }
 
 /**
+ * 過去の来店履歴、1件分のカードHTMLを作る（閲覧専用。ボタンなし）
+ * @param {Object} item - { date, time, menu, staff, status }
+ * @returns {string} カードのHTML
+ */
+function buildHistoryCardHtml(item) {
+  const formattedDate = formatJapaneseDate(item.date);
+  const formattedTime = formatReservationTime(item.time);
+  const isCancelled = item.status === 'キャンセル済み';
+  const statusClass = isCancelled ? 'history-status-cancelled' : 'history-status-visited';
+
+  return `
+    <div class="reservation-card history-card">
+      <div class="res-row"><span class="res-label">来店日</span> ${escapeHtml(formattedDate)}</div>
+      <div class="res-row"><span class="res-label">時間</span> ${escapeHtml(formattedTime)}</div>
+      <div class="res-row"><span class="res-label">メニュー</span> ${escapeHtml(item.menu)}</div>
+      <div class="res-row"><span class="res-label">担当</span> ${escapeHtml(item.staff)}</div>
+      <span class="history-status-badge ${statusClass}">${escapeHtml(item.status)}</span>
+    </div>
+  `;
+}
+
+/**
+ * 電話番号とメールアドレスから、過去の来店履歴を検索して一覧表示する
+ * （現在の予約検索(fetchReservations)と同じ入力欄を使い、同時に呼ばれる）
+ */
+async function fetchHistory() {
+  if (!historyResultsArea) return;
+
+  const telVal = checkTelInput ? checkTelInput.value.trim() : '';
+  const emailVal = checkEmailInput ? checkEmailInput.value.trim() : '';
+  if (!telVal || !emailVal) return;
+
+  historyResultsArea.innerHTML = '<div class="no-data">来店履歴を検索しています...</div>';
+
+  try {
+    const result = await fetchCustomerHistoryApi(telVal, emailVal);
+
+    if (!result.success) {
+      historyResultsArea.innerHTML = `<div class="no-data text-danger">${escapeHtml(result.message)}</div>`;
+      return;
+    }
+
+    if (!result.history || result.history.length === 0) {
+      historyResultsArea.innerHTML = '<h3 class="results-title">過去のご来店履歴</h3><div class="no-data">過去のご来店履歴はありません。</div>';
+      return;
+    }
+
+    let htmlContent = '<h3 class="results-title">過去のご来店履歴</h3>';
+    result.history.forEach(item => {
+      htmlContent += buildHistoryCardHtml(item);
+    });
+
+    historyResultsArea.innerHTML = htmlContent;
+  } catch (error) {
+    console.error('来店履歴検索エラー:', error);
+    historyResultsArea.innerHTML = '<div class="no-data text-danger">エラーが発生しました。時間を置いて再度お試しください。</div>';
+  }
+}
+
+/**
  * 電話番号とメールアドレスから予約を検索して一覧表示する
  */
 async function fetchReservations() {
@@ -87,6 +147,9 @@ async function fetchReservations() {
   }
 
   saveCurrentCustomerDataToCache();
+
+  // 過去の来店履歴は、現在の予約検索と同時に（並行して）取得する
+  fetchHistory();
 
   try {
     const result = await fetchCustomerReservationsApi(telVal, emailVal);

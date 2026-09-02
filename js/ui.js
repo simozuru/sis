@@ -73,6 +73,7 @@ const step2Container = document.getElementById('step-2-container');
 const step3Container = document.getElementById('step-3-container');
 const checkTabContainer = document.getElementById('check-tab-container');
 const resultsArea = document.getElementById('check-results-area');
+const historyResultsArea = document.getElementById('history-results-area');
 const pageFragmentContainer = document.getElementById('page-fragment-container');
 const pageFragmentContent = document.getElementById('page-fragment-content');
 const backToReservationBtn = document.getElementById('back-to-reservation-btn');
