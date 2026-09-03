@@ -106,6 +106,7 @@ const I18N_STRINGS = {
     btn_checking: "検索中...",
     tab_current: "現在の予約",
     tab_history: "過去の履歴",
+    tab_waitlist: "キャンセル待ち",
     check_placeholder: "情報を入力して確認ボタンを押してください。",
     btn_back_to_form: "⬅ 予約フォームに戻る",
 
@@ -174,6 +175,15 @@ const I18N_STRINGS = {
     history_label_time: "時間",
     history_status_visited: "来店済み",
     history_status_cancelled: "キャンセル済み",
+
+    searching_waitlist: "キャンセル待ちを検索しています...",
+    no_waitlist: "現在、キャンセル待ちの登録はありません。",
+    results_title_waitlist: "キャンセル待ちの登録状況",
+    waitlist_label_date: "希望日",
+    waitlist_label_time: "希望時間",
+    waitlist_status_waiting: "待機中",
+    waitlist_status_notifying: "案内中",
+    waitlist_status_notified: "案内済み",
 
     // メニュー表示（分・料金の単位）
     unit_minutes: "分",
@@ -253,6 +263,7 @@ const I18N_STRINGS = {
     btn_checking: "Searching...",
     tab_current: "Current reservations",
     tab_history: "Past history",
+    tab_waitlist: "Waitlist",
     check_placeholder: "Please enter your details and press the search button.",
     btn_back_to_form: "⬅ Back to reservation form",
 
@@ -314,6 +325,15 @@ const I18N_STRINGS = {
     history_label_time: "Time",
     history_status_visited: "Visited",
     history_status_cancelled: "Cancelled",
+
+    searching_waitlist: "Searching your waitlist entries...",
+    no_waitlist: "You have no waitlist entries at this time.",
+    results_title_waitlist: "Your waitlist status",
+    waitlist_label_date: "Requested date",
+    waitlist_label_time: "Requested time",
+    waitlist_status_waiting: "Waiting",
+    waitlist_status_notifying: "Being notified",
+    waitlist_status_notified: "Notified",
 
     unit_minutes: " min",
     approx_suffix: "~",
@@ -392,6 +412,7 @@ const I18N_STRINGS = {
     btn_checking: "검색 중...",
     tab_current: "현재 예약",
     tab_history: "이용 내역",
+    tab_waitlist: "취소 대기",
     check_placeholder: "정보를 입력하시고 확인 버튼을 눌러주세요.",
     btn_back_to_form: "⬅ 예약 화면으로 돌아가기",
 
@@ -453,6 +474,15 @@ const I18N_STRINGS = {
     history_label_time: "시간",
     history_status_visited: "방문 완료",
     history_status_cancelled: "취소됨",
+
+    searching_waitlist: "취소 대기 등록 내역을 검색하고 있습니다...",
+    no_waitlist: "현재 등록된 취소 대기 내역이 없습니다.",
+    results_title_waitlist: "취소 대기 등록 현황",
+    waitlist_label_date: "희망일",
+    waitlist_label_time: "희망 시간",
+    waitlist_status_waiting: "대기 중",
+    waitlist_status_notifying: "안내 중",
+    waitlist_status_notified: "안내 완료",
 
     unit_minutes: "분",
     approx_suffix: "~",
@@ -531,6 +561,7 @@ const I18N_STRINGS = {
     btn_checking: "查询中...",
     tab_current: "当前预约",
     tab_history: "过往记录",
+    tab_waitlist: "候补等待",
     check_placeholder: "请输入信息后点击查询按钮。",
     btn_back_to_form: "⬅ 返回预约表单",
 
@@ -592,6 +623,15 @@ const I18N_STRINGS = {
     history_label_time: "时间",
     history_status_visited: "已到店",
     history_status_cancelled: "已取消",
+
+    searching_waitlist: "正在查询候补等待登记...",
+    no_waitlist: "目前没有候补等待登记。",
+    results_title_waitlist: "候补等待登记情况",
+    waitlist_label_date: "希望日期",
+    waitlist_label_time: "希望时间",
+    waitlist_status_waiting: "等待中",
+    waitlist_status_notifying: "通知中",
+    waitlist_status_notified: "已通知",
 
     unit_minutes: "分钟",
     approx_suffix: "～",
@@ -670,6 +710,7 @@ const I18N_STRINGS = {
     btn_checking: "查詢中...",
     tab_current: "目前預約",
     tab_history: "過往紀錄",
+    tab_waitlist: "候補等待",
     check_placeholder: "請輸入資訊後點擊查詢按鈕。",
     btn_back_to_form: "⬅ 返回預約表單",
 
@@ -731,6 +772,15 @@ const I18N_STRINGS = {
     history_label_time: "時間",
     history_status_visited: "已到店",
     history_status_cancelled: "已取消",
+
+    searching_waitlist: "正在查詢候補等待登記...",
+    no_waitlist: "目前沒有候補等待登記。",
+    results_title_waitlist: "候補等待登記情況",
+    waitlist_label_date: "希望日期",
+    waitlist_label_time: "希望時間",
+    waitlist_status_waiting: "等待中",
+    waitlist_status_notifying: "通知中",
+    waitlist_status_notified: "已通知",
 
     unit_minutes: "分鐘",
     approx_suffix: "～",
@@ -809,6 +859,7 @@ const I18N_STRINGS = {
     btn_checking: "Recherche en cours...",
     tab_current: "Réservations actuelles",
     tab_history: "Historique",
+    tab_waitlist: "Liste d'attente",
     check_placeholder: "Veuillez saisir vos informations puis cliquer sur le bouton de recherche.",
     btn_back_to_form: "⬅ Retour au formulaire de réservation",
 
@@ -870,6 +921,15 @@ const I18N_STRINGS = {
     history_label_time: "Heure",
     history_status_visited: "Visité",
     history_status_cancelled: "Annulé",
+
+    searching_waitlist: "Recherche de vos inscriptions en liste d'attente...",
+    no_waitlist: "Vous n'avez aucune inscription en liste d'attente pour le moment.",
+    results_title_waitlist: "Votre liste d'attente",
+    waitlist_label_date: "Date souhaitée",
+    waitlist_label_time: "Heure souhaitée",
+    waitlist_status_waiting: "En attente",
+    waitlist_status_notifying: "Notification en cours",
+    waitlist_status_notified: "Notifié(e)",
 
     unit_minutes: " min",
     approx_suffix: "~",

@@ -128,6 +128,74 @@ async function fetchHistory() {
 }
 
 /**
+ * キャンセル待ちの登録、1件分のカードHTMLを作る（閲覧専用。ボタンなし）
+ * @param {Object} item - { date, time, menu, staff, status }
+ * @returns {string} カードのHTML
+ */
+function buildWaitlistCardHtml(item) {
+  const formattedDate = formatJapaneseDate(item.date);
+  const formattedTime = formatReservationTime(item.time);
+
+  let statusClass = 'history-status-visited';
+  let statusLabel = t('waitlist_status_waiting');
+  if (item.status === '案内中') {
+    statusClass = 'history-status-visited';
+    statusLabel = t('waitlist_status_notifying');
+  } else if (item.status === '案内済み') {
+    statusClass = 'history-status-cancelled';
+    statusLabel = t('waitlist_status_notified');
+  }
+
+  return `
+    <div class="reservation-card history-card">
+      <div class="res-row"><span class="res-label">${t('waitlist_label_date')}</span> ${escapeHtml(formattedDate)}</div>
+      <div class="res-row"><span class="res-label">${t('waitlist_label_time')}</span> ${escapeHtml(formattedTime)}</div>
+      <div class="res-row"><span class="res-label">${t('res_label_menu')}</span> ${escapeHtml(item.menu)}</div>
+      <div class="res-row"><span class="res-label">${t('res_label_staff')}</span> ${escapeHtml(item.staff)}</div>
+      <span class="history-status-badge ${statusClass}">${escapeHtml(statusLabel)}</span>
+    </div>
+  `;
+}
+
+/**
+ * 電話番号とメールアドレスから、キャンセル待ちの登録一覧を検索して表示する
+ * （現在の予約検索(fetchReservations)と同時に呼ばれる）
+ */
+async function fetchWaitlist() {
+  if (!waitlistResultsArea) return;
+
+  const telVal = checkTelInput ? checkTelInput.value.trim() : '';
+  const emailVal = checkEmailInput ? checkEmailInput.value.trim() : '';
+  if (!telVal || !emailVal) return;
+
+  waitlistResultsArea.innerHTML = `<div class="no-data">${t('searching_waitlist')}</div>`;
+
+  try {
+    const result = await fetchCustomerWaitlistApi(telVal, emailVal);
+
+    if (!result.success) {
+      waitlistResultsArea.innerHTML = `<div class="no-data text-danger">${escapeHtml(result.message)}</div>`;
+      return;
+    }
+
+    if (!result.waitlist || result.waitlist.length === 0) {
+      waitlistResultsArea.innerHTML = `<h3 class="results-title">${t('results_title_waitlist')}</h3><div class="no-data">${t('no_waitlist')}</div>`;
+      return;
+    }
+
+    let htmlContent = `<h3 class="results-title">${t('results_title_waitlist')}</h3>`;
+    result.waitlist.forEach(item => {
+      htmlContent += buildWaitlistCardHtml(item);
+    });
+
+    waitlistResultsArea.innerHTML = htmlContent;
+  } catch (error) {
+    console.error('キャンセル待ち検索エラー:', error);
+    waitlistResultsArea.innerHTML = `<div class="no-data text-danger">${t('search_error')}</div>`;
+  }
+}
+
+/**
  * 電話番号とメールアドレスから予約を検索して一覧表示する
  */
 async function fetchReservations() {
@@ -149,8 +217,9 @@ async function fetchReservations() {
 
   saveCurrentCustomerDataToCache();
 
-  // 過去の来店履歴は、現在の予約検索と同時に（並行して）取得する
+  // 過去の来店履歴・キャンセル待ちの登録状況は、現在の予約検索と同時に（並行して）取得する
   fetchHistory();
+  fetchWaitlist();
 
   try {
     const result = await fetchCustomerReservationsApi(telVal, emailVal);

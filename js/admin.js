@@ -118,6 +118,11 @@ const s1DisplayDays = document.getElementById('s1-display-days');
 const saveSettings2Btn = document.getElementById('save-settings2-btn');
 let settings3Loaded = false;
 let accountsLoaded = false;
+let waitlistLoaded = false;
+const waitlistLoading = document.getElementById('waitlist-loading');
+const waitlistError = document.getElementById('waitlist-error');
+const waitlistTbody = document.getElementById('waitlist-tbody');
+const waitlistNoData = document.getElementById('waitlist-no-data');
 
 const accountsLoading = document.getElementById('accounts-loading');
 const accountsError = document.getElementById('accounts-error');
@@ -313,8 +318,55 @@ if (tabButtons) {
       if (targetTab === 'accounts' && !accountsLoaded) {
         loadAccounts();
       }
+      if (targetTab === 'waitlist' && !waitlistLoaded) {
+        loadWaitlist();
+      }
     });
   });
+}
+
+/**
+ * 「キャンセル待ち」タブの一覧を読み込んで表示する
+ */
+async function loadWaitlist() {
+  if (waitlistLoading) waitlistLoading.style.display = 'block';
+  if (waitlistError) waitlistError.style.display = 'none';
+  if (waitlistNoData) waitlistNoData.style.display = 'none';
+
+  try {
+    const result = await callAdminApi('getWaitlistList');
+    if (!result.success) throw new Error(result.message || 'キャンセル待ち一覧の取得に失敗しました。');
+
+    const list = result.waitlist || [];
+
+    if (list.length === 0) {
+      if (waitlistTbody) waitlistTbody.innerHTML = '';
+      if (waitlistNoData) waitlistNoData.style.display = 'block';
+    } else if (waitlistTbody) {
+      waitlistTbody.innerHTML = list.map(item => `
+        <tr>
+          <td>${escapeHtmlAdmin(item.registeredAt)}</td>
+          <td>${escapeHtmlAdmin(item.date)} ${escapeHtmlAdmin(item.time)}</td>
+          <td>${escapeHtmlAdmin(item.staff)}</td>
+          <td>${escapeHtmlAdmin(item.menu)}</td>
+          <td>${escapeHtmlAdmin(item.name)}</td>
+          <td>${escapeHtmlAdmin(item.tel)}</td>
+          <td>${escapeHtmlAdmin(item.email)}</td>
+          <td>${escapeHtmlAdmin(item.status)}</td>
+        </tr>
+      `).join('');
+    }
+
+    waitlistLoaded = true;
+  } catch (error) {
+    console.error('キャンセル待ち一覧の取得エラー:', error);
+    if (waitlistError) {
+      waitlistError.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+      waitlistError.style.display = 'block';
+    }
+  } finally {
+    if (waitlistLoading) waitlistLoading.style.display = 'none';
+  }
 }
 
 /**

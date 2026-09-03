@@ -74,6 +74,7 @@
       <button type="button" class="tab-btn" data-tab="settings2">メール関係</button>
       <button type="button" class="tab-btn" data-tab="settings3">レイアウト関係</button>
       <button type="button" class="tab-btn" data-tab="accounts">アカウント管理</button>
+      <button type="button" class="tab-btn" data-tab="waitlist">キャンセル待ち</button>
     </nav>
     <div class="header-right">
       <span id="welcome-message" class="welcome-message"></span>
@@ -660,6 +661,34 @@
           </div>
           <button type="submit" id="add-account-btn" class="btn-save-settings">追加する</button>
         </form>
+      </div>
+    </section>
+
+    <section id="tab-waitlist" class="tab-page" style="display: none;">
+      <h2 class="section-title">キャンセル待ち</h2>
+
+      <div id="waitlist-loading" class="settings-loading">読み込み中...</div>
+      <div id="waitlist-error" class="report-error" style="display: none;"></div>
+
+      <div class="settings-card">
+        <h3 class="settings-card-title">登録されているキャンセル待ち</h3>
+        <p class="settings-card-note">登録日時の新しい順に表示しています。「案内済み」は、対象者への通知が済んだ登録です。設定のON/OFFや通知方法は「メニュー関係」タブから変更できます。</p>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>登録日時</th>
+              <th>希望日時</th>
+              <th>スタッフ</th>
+              <th>メニュー</th>
+              <th>お客様名</th>
+              <th>電話番号</th>
+              <th>メール</th>
+              <th>ステータス</th>
+            </tr>
+          </thead>
+          <tbody id="waitlist-tbody"></tbody>
+        </table>
+        <div id="waitlist-no-data" class="settings-loading" style="display: none;">現在、キャンセル待ちの登録はありません。</div>
       </div>
     </section>
 

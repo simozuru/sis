@@ -105,3 +105,21 @@ async function fetchCustomerHistoryApi(tel, email) {
     return { success: false, message: error.toString() };
   }
 }
+
+/**
+ * 4.6. キャンセル待ち一覧 取得 API
+ * @param {string} tel - 電話番号
+ * @param {string} email - メールアドレス
+ * @returns {Promise<Object>} 該当するキャンセル待ちの登録一覧
+ */
+async function fetchCustomerWaitlistApi(tel, email) {
+  try {
+    const url = `${CONFIG.GAS_WEB_APP_URL}?method=getCustomerWaitlist&tel=${encodeURIComponent(tel)}&email=${encodeURIComponent(email)}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("キャンセル待ち一覧の取得に失敗しました");
+    return await response.json();
+  } catch (error) {
+    console.error("fetchCustomerWaitlistApi エラー:", error);
+    return { success: false, message: error.toString() };
+  }
+}
