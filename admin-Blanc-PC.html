@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIS 管理画面</title>
+  <link rel="stylesheet" href="./admin-style.css?v=2.0.0">
+</head>
+<body>
+
+<div id="gas-config-bridge" style="display: none;"></div>
+
+<!-- ==========================================
+     ログイン画面
+     ========================================== -->
+<div id="login-container" class="login-container">
+  <div class="login-box">
+    <h1 class="login-title">SIS 管理画面</h1>
+    <p class="login-subtitle">スタッフ専用ページです</p>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="admin-login-id">メールアドレス</label>
+        <input type="text" id="admin-login-id" required placeholder="メールアドレスを入力してください" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="admin-password">パスワード</label>
+        <input type="password" id="admin-password" required placeholder="パスワードを入力してください" autocomplete="current-password">
+      </div>
+      <div id="login-error" class="login-error" style="display: none;"></div>
+      <button type="submit" id="login-btn" class="btn-login">ログイン</button>
+      <button type="button" id="show-forgot-password-btn" class="btn-link-plain">パスワードを忘れた場合はこちら</button>
+    </form>
+
+    <!-- パスワード再設定：メールアドレス入力（第1段階） -->
+    <form id="forgot-password-form" style="display: none;">
+      <p class="login-subtitle">登録済みのメールアドレスに、再設定用のリンクをお送りします。</p>
+      <div class="form-group">
+        <label for="forgot-email">メールアドレス</label>
+        <input type="email" id="forgot-email" required placeholder="メールアドレスを入力してください">
+      </div>
+      <div id="forgot-password-error" class="login-error" style="display: none;"></div>
+      <div id="forgot-password-sent-msg" class="settings-saved-msg" style="display: none;"></div>
+      <button type="submit" id="forgot-password-btn" class="btn-login">再設定メールを送る</button>
+      <button type="button" id="back-to-login-btn" class="btn-link-plain">ログイン画面に戻る</button>
+    </form>
+
+    <!-- パスワード再設定：新しいパスワードの入力（第2段階、メール内リンクから遷移） -->
+    <form id="reset-password-form" style="display: none;">
+      <p class="login-subtitle">新しいパスワードを入力してください。</p>
+      <div class="form-group">
+        <label for="reset-new-password">新しいパスワード</label>
+        <input type="password" id="reset-new-password" required placeholder="新しいパスワード（4文字以上）">
+      </div>
+      <div id="reset-password-error" class="login-error" style="display: none;"></div>
+      <div id="reset-password-done-msg" class="settings-saved-msg" style="display: none;"></div>
+      <button type="submit" id="reset-password-btn" class="btn-login">パスワードを再設定する</button>
+    </form>
+  </div>
+</div>
+
+<!-- ==========================================
+     管理画面本体（ログイン後に表示）
+     ========================================== -->
+<div id="dashboard-container" class="dashboard-container" style="display: none;">
+  <header class="dashboard-header">
+    <h1 class="dashboard-title">SIS 管理画面</h1>
+    <nav class="dashboard-tabs">
+      <button type="button" class="tab-btn active" data-tab="report">レポート</button>
+      <button type="button" class="tab-btn" data-tab="settings1">基本設定</button>
+      <button type="button" class="tab-btn" data-tab="settings5">メニュー関係</button>
+      <button type="button" class="tab-btn" data-tab="settings6">営業時間</button>
+      <button type="button" class="tab-btn" data-tab="settings4">スタッフ関係</button>
+      <button type="button" class="tab-btn" data-tab="settings2">メール関係</button>
+      <button type="button" class="tab-btn" data-tab="settings3">レイアウト関係</button>
+      <button type="button" class="tab-btn" data-tab="accounts">アカウント管理</button>
+    </nav>
+    <div class="header-right">
+      <span id="welcome-message" class="welcome-message"></span>
+      <button type="button" id="logout-btn" class="btn-logout">ログアウト</button>
+    </div>
+  </header>
+
+  <main class="dashboard-main">
+
+    <!-- ==========================================
+         タブ①：レポート
+         ========================================== -->
+    <section id="tab-report" class="tab-page report-section">
+      <h2 class="section-title">レポート</h2>
+
+      <div class="report-controls">
+        <div class="report-control-group">
+          <label for="report-type-select">表示する集計</label>
+          <select id="report-type-select">
+            <option value="designation">指名率</option>
+            <option value="menuCount">メニュー実績</option>
+            <option value="menuRate">メニュー率</option>
+            <option value="timeSlot">曜日・時間帯の傾向</option>
+            <option value="newRepeat">新規・リピート比率</option>
+            <option value="frequency">来店頻度の分布</option>
+            <option value="dormant">休眠顧客リスト</option>
+            <option value="cancellation">キャンセル率</option>
+          </select>
+        </div>
+
+        <!-- 「休眠顧客リスト」以外は、この期間指定を使う -->
+        <div id="date-range-controls" class="date-range-controls">
+          <div class="report-control-group">
+            <label for="report-start-date">開始日</label>
+            <input type="date" id="report-start-date">
+          </div>
+          <div class="report-control-group">
+            <label for="report-end-date">終了日</label>
+            <input type="date" id="report-end-date">
+          </div>
+          <div class="report-quick-buttons">
+            <button type="button" class="btn-quick-range" data-range="thisWeek">今週</button>
+            <button type="button" class="btn-quick-range" data-range="thisMonth">今月</button>
+            <button type="button" class="btn-quick-range" data-range="lastMonth">先月</button>
+          </div>
+        </div>
+
+        <!-- 「休眠顧客リスト」だけ、この月数指定を使う -->
+        <div id="dormant-controls" class="dormant-controls" style="display: none;">
+          <div class="report-control-group">
+            <label for="dormant-months-input">最終来店から何ヶ月以上</label>
+            <input type="number" id="dormant-months-input" min="1" value="3">
+          </div>
+        </div>
+
+        <button type="button" id="run-report-btn" class="btn-run-report">集計する</button>
+      </div>
+
+      <div id="report-error" class="report-error" style="display: none;"></div>
+
+      <div id="report-results" style="display: none;">
+        <div id="designation-report-card" class="report-card">
+          <h3 class="report-card-title">指名率</h3>
+          <div id="designation-summary" class="designation-summary"></div>
+          <div id="designation-by-staff" class="designation-by-staff"></div>
+        </div>
+
+        <div id="menu-count-report-card" class="report-card">
+          <h3 class="report-card-title">メニュー実績</h3>
+          <table class="report-table">
+            <thead><tr><th>メニュー</th><th>件数</th></tr></thead>
+            <tbody id="menu-performance-tbody"></tbody>
+          </table>
+        </div>
+
+        <div id="menu-rate-report-card" class="report-card">
+          <h3 class="report-card-title">メニュー率</h3>
+          <table class="report-table">
+            <thead><tr><th>メニュー</th><th>割合</th></tr></thead>
+            <tbody id="menu-rate-tbody"></tbody>
+          </table>
+        </div>
+
+        <div id="time-slot-report-card" class="report-card">
+          <h3 class="report-card-title">曜日・時間帯の傾向</h3>
+          <div id="time-slot-table-wrap" class="time-slot-table-wrap"></div>
+        </div>
+
+        <div id="new-repeat-report-card" class="report-card">
+          <h3 class="report-card-title">新規・リピート比率</h3>
+          <div id="new-repeat-summary" class="designation-summary"></div>
+        </div>
+
+        <div id="frequency-report-card" class="report-card">
+          <h3 class="report-card-title">来店頻度の分布</h3>
+          <div id="frequency-summary" class="designation-summary"></div>
+        </div>
+
+        <div id="dormant-report-card" class="report-card">
+          <h3 class="report-card-title">休眠顧客リスト</h3>
+          <p id="dormant-count-label" class="dormant-count-label"></p>
+          <table class="report-table">
+            <thead><tr><th>お客様名</th><th>電話番号</th><th>最終来店日</th><th>来店回数</th></tr></thead>
+            <tbody id="dormant-tbody"></tbody>
+          </table>
+        </div>
+
+        <div id="cancellation-report-card" class="report-card">
+          <h3 class="report-card-title">キャンセル率</h3>
+          <div id="cancellation-summary" class="designation-summary"></div>
+          <div id="cancellation-breakdown" class="designation-by-staff"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         タブ②：基本設定
+         ========================================== -->
+    <section id="tab-settings1" class="tab-page" style="display: none;">
+      <h2 class="section-title">基本設定</h2>
+
+      <div id="settings1-loading" class="settings-loading">読み込み中...</div>
+      <div id="settings1-error" class="report-error" style="display: none;"></div>
+      <div id="settings1-saved-msg" class="settings-saved-msg" style="display: none;">保存しました。</div>
+
+      <form id="settings1-form" style="display: none;">
+
+        <div class="settings-card">
+          <div class="form-group">
+            <label for="s1-slot-step-minutes">予約時間の間隔（分）</label>
+            <p class="settings-card-note">お客様が選択できる予約時間の間隔です。「30」に設定すると、9:00、9:30、10:00…のように30分単位で選択できます。</p>
+            <input type="number" id="s1-slot-step-minutes" min="5" step="5">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">予約可能な期間</h3>
+          <div class="form-group">
+            <p class="settings-card-note">何日先まで予約できるか？</p>
+            <input type="number" id="s1-max-future-days" min="1">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">表示する日数</h3>
+          <div class="form-group">
+            <p class="settings-card-note">お客様のタイムテーブルに、一度に何日分の空き状況を表示するかです。「1週間分」に設定すると、7日分まとめて確認しながら選べます。</p>
+            <select id="s1-display-days">
+              <option value="1">1日分</option>
+              <option value="3">3日分</option>
+              <option value="7">1週間分</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">キャンセルの受付締切</h3>
+          <div class="form-group">
+            <p class="settings-card-note">キャンセルは、来店の何時間前まで受け付けるか？</p>
+            <input type="number" id="s1-cancel-buffer" min="0">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">変更の受付締切</h3>
+          <div class="form-group">
+            <p class="settings-card-note">日時変更は、来店の何時間前まで受け付けるか？</p>
+            <input type="number" id="s1-change-buffer" min="0">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">同時受付上限</h3>
+          <div class="form-group">
+            <p class="settings-card-note">同じ時間帯に、全体で何件まで受け付けるか</p>
+            <input type="number" id="s1-max-capacity" min="1">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">予約履歴の保持期間</h3>
+          <div class="form-group">
+            <p class="settings-card-note">何ヶ月分の予約履歴をデータで残すか（-1で無期限）</p>
+            <input type="number" id="s1-history-retention" min="-1">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">キャンセル履歴の保持期間</h3>
+          <div class="form-group">
+            <p class="settings-card-note">誰が・いつ・何をキャンセルしたかの記録を、何ヶ月分残すか（-1で無期限）</p>
+            <input type="number" id="s1-cancel-history-retention" min="-1">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">カレンダー変更履歴の保持期間</h3>
+          <div class="form-group">
+            <p class="settings-card-note">Googleカレンダー上での直接編集の記録を、何ヶ月分残すか（-1で無期限）</p>
+            <input type="number" id="s1-calendar-history-retention" min="-1">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">新規予約の最短受付タイミング</h3>
+          <div class="form-group">
+            <p class="settings-card-note">今から何分後以降の枠なら予約できるか</p>
+            <input type="number" id="s1-buffer-minutes" min="0">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">仮予約制度</h3>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s1-provisional-enabled"> 仮予約制度を使う</label>
+          </div>
+          <div class="form-group radio-group">
+            <label><input type="radio" name="s1-provisional-target" value="ALL"> 全員を仮予約対象にする</label>
+            <label><input type="radio" name="s1-provisional-target" value="NEW_ONLY"> 新規のお客様だけ対象にする</label>
+            <label><input type="radio" name="s1-provisional-target" value="MENU_ONLY"> 特定のメニューだけ対象にする</label>
+          </div>
+          <div class="form-group">
+            <label for="s1-provisional-target-menus">対象メニュー（「特定のメニューだけ」を選んだ時のみ有効。カンマ区切りで複数指定可）</label>
+            <input type="text" id="s1-provisional-target-menus" placeholder="例：ヘアブリーチ,縮毛矯正">
+          </div>
+          <div class="form-group">
+            <label for="s1-provisional-deadline">確認期限（受付から何時間以内に確定するか）</label>
+            <input type="number" id="s1-provisional-deadline" min="1">
+          </div>
+          <div class="form-group radio-group">
+            <label><input type="radio" name="s1-provisional-auto-action" value="NONE"> 自動処理なし（手動で確認・キャンセル）</label>
+            <label><input type="radio" name="s1-provisional-auto-action" value="AUTO_CANCEL"> 期限を過ぎたら自動キャンセル</label>
+            <label><input type="radio" name="s1-provisional-auto-action" value="AUTO_CONFIRM"> 期限を過ぎたら自動的に本予約として確定</label>
+          </div>
+        </div>
+
+        <button type="submit" id="save-settings1-btn" class="btn-save-settings">保存する</button>
+      </form>
+    </section>
+
+    <!-- ==========================================
+         タブ：メニュー関係
+         ========================================== -->
+    <section id="tab-settings5" class="tab-page" style="display: none;">
+      <h2 class="section-title">メニュー関係</h2>
+
+      <div id="settings5-loading" class="settings-loading">読み込み中...</div>
+      <div id="settings5-error" class="report-error" style="display: none;"></div>
+      <div id="settings5-saved-msg" class="settings-saved-msg" style="display: none;">保存しました。</div>
+
+      <form id="settings5-form" style="display: none;">
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">メニュー・料金</h3>
+          <div id="menu-master-rows" class="menu-master-rows"></div>
+          <button type="button" id="add-menu-row-btn" class="btn-add-row">＋ メニューを追加</button>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">メニューの選び方</h3>
+          <div class="form-group radio-group">
+            <label><input type="radio" name="s5-menu-selector-type" value="TYPE_B"> チェックボックス式（複数選択できる）</label>
+            <label><input type="radio" name="s5-menu-selector-type" value="TYPE_A"> プルダウン式（1つだけ選ぶ）</label>
+          </div>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s5-show-menu-minutes"> 施術時間を表示する</label>
+            <label><input type="checkbox" id="s5-show-menu-price"> 金額を表示する</label>
+            <label><input type="checkbox" id="s5-show-menu-total"> 選んだメニューの合計金額と合計施術時間を表示する</label>
+          </div>
+          <div class="form-group">
+            <label for="s5-menu-note-text">施術メニューの下に表示する説明文（任意・空欄で非表示）</label>
+            <p class="settings-card-note">例：施術時間と金額は目安であり確定ではありません。施術内容によって金額と施術時間が前後します。</p>
+            <textarea id="s5-menu-note-text" rows="3" placeholder="施術時間と金額は目安であり確定ではありません。施術内容によって金額と施術時間が前後します。"></textarea>
+          </div>
+        </div>
+
+        <button type="submit" id="save-settings5-btn" class="btn-save-settings">保存する</button>
+      </form>
+    </section>
+
+    <!-- ==========================================
+         タブ：営業時間
+         ========================================== -->
+    <section id="tab-settings6" class="tab-page" style="display: none;">
+      <h2 class="section-title">営業時間</h2>
+
+      <div id="settings6-loading" class="settings-loading">読み込み中...</div>
+      <div id="settings6-error" class="report-error" style="display: none;"></div>
+      <div id="settings6-saved-msg" class="settings-saved-msg" style="display: none;">保存しました。</div>
+
+      <form id="settings6-form" style="display: none;">
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">営業時間</h3>
+          <p class="settings-card-note">通常の予約時間とは別に最終受付時間を設定できます。<br>
+          最終受付は、終了時刻を越さない範囲で予約できます。<br><br>
+          例えば、最終受付を18:00、終了時刻を20:00にすると、<br>
+          施術時間が２時間までのメニューは18:00まで予約受け付け可能。<br>
+          施術時間が３時間のメニューの場合は20:00が上限なので最終受付が17：00になります。</p>
+          <div id="business-hours-rows" class="business-hours-rows"></div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">指定時間、予約間隔の設定</h3>
+          <p class="settings-card-note">通常の予約時間の間隔とは別に、指定した時間帯の予約間隔を設定できます。<br>
+          例えば「9:00〜12:00を60分間隔」にすると、その時間帯は9:00、10:00、11:00…のように予約時間を制限できます。</p>
+          <div id="slot-step-override-rows" class="slot-step-override-rows"></div>
+        </div>
+
+        <button type="submit" id="save-settings6-btn" class="btn-save-settings">保存する</button>
+      </form>
+    </section>
+
+    <!-- ==========================================
+         タブ③：設定1（スタッフ・カレンダーID・担当スタッフの選択）
+         ========================================== -->
+    <section id="tab-settings4" class="tab-page" style="display: none;">
+      <h2 class="section-title">スタッフ関係</h2>
+
+      <div id="settings4-loading" class="settings-loading">読み込み中...</div>
+      <div id="settings4-error" class="report-error" style="display: none;"></div>
+      <div id="settings4-saved-msg" class="settings-saved-msg" style="display: none;">保存しました。</div>
+
+      <form id="settings4-form" style="display: none;">
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">スタッフ名・カレンダーID</h3>
+          <p class="settings-card-note">スタッフを登録すると、担当スタッフを選ぶ欄に表示されます。予約画面にこの選択欄自体を表示するかどうかは、下の「スタッフ選択欄の表示」で切り替えられます。カレンダーIDを間違えると、そのスタッフの予約が正しく登録されなくなります。コピー＆ペーストで、正確に入力してください。</p>
+          <div id="staff-name-rows" class="staff-name-rows"></div>
+          <button type="button" id="add-staff-row-btn" class="btn-add-row">＋ スタッフを追加</button>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">スタッフ選択欄の表示</h3>
+          <p class="settings-card-note">お客様の予約画面に、担当スタッフを選ぶ欄を表示するかどうかを設定します。※スタッフが1人も登録されていない場合は、このチェックの状態に関わらず表示されません。</p>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s4-show-staff-selector"> スタッフ選択欄を表示する</label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">指名なし予約</h3>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s4-allow-no-assign"> スタッフ選択肢に「指名なし」を表示する</label>
+          </div>
+          <div class="form-group">
+            <label for="s4-no-assign-label">表示名（未入力の場合「指名なし」のまま）</label>
+            <input type="text" id="s4-no-assign-label" placeholder="指名なし">
+          </div>
+          <div class="form-group">
+            <label for="s4-no-assign-calendar-id">カレンダーID</label>
+            <input type="text" id="s4-no-assign-calendar-id" placeholder="カレンダーID（xxxx@group.calendar.google.com）">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">指名なし予約の振り分け方法</h3>
+          <div class="form-group radio-group">
+            <label><input type="radio" name="s4-no-assign-mode" value="2"> 振り分けず「指名なし専用カレンダー」にそのまま登録する（手動配置向け）</label>
+          </div>
+          <div class="form-group radio-group tree-parent-group">
+            <label><input type="radio" name="s4-no-assign-mode" value="1"> 自動的に空いているスタッフに振り分ける</label>
+            <div class="tree-sub-options">
+              <label><input type="radio" name="s4-no-assign-type" value="TYPE_B"> スタッフ登録順</label>
+              <label><input type="radio" name="s4-no-assign-type" value="TYPE_A"> 空いている人をランダムに選ぶ</label>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" id="save-settings4-btn" class="btn-save-settings">保存する</button>
+      </form>
+    </section>
+
+    <!-- ==========================================
+         タブ④：設定2
+         ========================================== -->
+    <section id="tab-settings2" class="tab-page" style="display: none;">
+      <h2 class="section-title">メール関係</h2>
+
+      <div id="settings2-loading" class="settings-loading">読み込み中...</div>
+      <div id="settings2-error" class="report-error" style="display: none;"></div>
+      <div id="settings2-saved-msg" class="settings-saved-msg" style="display: none;">保存しました。</div>
+
+      <form id="settings2-form" style="display: none;">
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">予約前日メールの送信タイミング</h3>
+          <div class="form-group">
+            <p class="settings-card-note">何日前に送るか（0で送信しない）</p>
+            <input type="number" id="s2-reminder-days" min="0">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">管理者への通知メール宛先</h3>
+          <div class="form-group">
+            <p class="settings-card-note">新規予約などの通知を受け取るメールアドレス</p>
+            <input type="text" id="s2-admin-email" placeholder="例：owner@example.com">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">サロン名（Googleカレンダー・メール件名で使用）</h3>
+          <div class="form-group">
+            <p class="settings-card-note">お客様がGoogleカレンダーに追加した際の予定名（例：カット（○○サロン））と、予約確定・仮予約メールの件名（例：【○○サロン、ご予約を承りました】）に使われます。未入力の場合は、それぞれ「サロン予約」「当サロン」と表示されます。</p>
+            <input type="text" id="s2-calendar-salon-name" placeholder="例：○○サロン">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">予約確定メール：ヘッダー・フッター文言</h3>
+          <p class="settings-card-note">「ご予約内容」の部分（日時・メニューなど）は固定表示で、編集できません。</p>
+          <div class="form-group">
+            <label for="s2-mail-header">ヘッダー（本文の冒頭に入る文章）</label>
+            <textarea id="s2-mail-header" rows="4" placeholder="この度はご予約いただきありがとうございます。"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="s2-mail-footer">フッター（本文の末尾に入る文章）</label>
+            <textarea id="s2-mail-footer" rows="4" placeholder="またのご来店をお待ちしております。"></textarea>
+          </div>
+        </div>
+
+        <button type="submit" id="save-settings2-btn" class="btn-save-settings">保存する</button>
+      </form>
+    </section>
+
+    <!-- ==========================================
+         タブ④：設定3
+         ========================================== -->
+    <section id="tab-settings3" class="tab-page" style="display: none;">
+      <h2 class="section-title">レイアウト関係</h2>
+
+      <div id="settings3-loading" class="settings-loading">読み込み中...</div>
+      <div id="settings3-error" class="report-error" style="display: none;"></div>
+      <div id="settings3-saved-msg" class="settings-saved-msg" style="display: none;">保存しました。</div>
+
+      <form id="settings3-form" style="display: none;">
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">左上部、店名・ロゴ</h3>
+          <div class="form-group">
+            <label for="s3-shop-name">店舗名（未入力「SIS Web Reservation」が表示）</label>
+            <input type="text" id="s3-shop-name" placeholder="例：美容室〇〇">
+          </div>
+          <div class="form-group">
+            <label for="s3-logo-url">ロゴ画像のURL（未入力表示なし）</label>
+            <input type="text" id="s3-logo-url" placeholder="https://example.com/logo.png">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">右上部、情報（未入力表示なし）</h3>
+          <div class="form-group">
+            <label for="s3-contact-phone">１段目</label>
+            <input type="text" id="s3-contact-phone" placeholder="例：電話番号 〇〇〇-〇〇〇〇ー〇〇〇〇">
+          </div>
+          <div class="form-group">
+            <label for="s3-contact-hours">２段目</label>
+            <input type="text" id="s3-contact-hours" placeholder="例：受付時間am9:00~pm6:00">
+          </div>
+          <div class="form-group">
+            <label for="s3-contact-closed">３段目</label>
+            <input type="text" id="s3-contact-closed" placeholder="例：定休日：月曜日">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">トップページに戻るボタン</h3>
+          <div class="form-group">
+            <label for="s3-home-url">リンク先URL（空欄にするとボタン自体が非表示になります）</label>
+            <input type="text" id="s3-home-url" placeholder="https://example.com">
+          </div>
+          <div class="form-group">
+            <label for="s3-home-label">ボタンの文言</label>
+            <input type="text" id="s3-home-label" placeholder="トップページに戻る">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">情報セクション（トップ下部の案内リンク集）</h3>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s3-info-enabled"> 表示する</label>
+          </div>
+          <div class="form-group">
+            <label for="s3-info-heading">見出し文言（空欄で「Information」）</label>
+            <input type="text" id="s3-info-heading" placeholder="Information">
+          </div>
+
+          <div id="info-item-rows"></div>
+        </div>
+
+        <button type="submit" id="save-settings3-btn" class="btn-save-settings">保存する</button>
+      </form>
+    </section>
+
+    <!-- ==========================================
+         タブ：アカウント管理
+         ========================================== -->
+    <section id="tab-accounts" class="tab-page" style="display: none;">
+      <h2 class="section-title">アカウント管理</h2>
+
+      <div id="accounts-loading" class="settings-loading">読み込み中...</div>
+      <div id="accounts-error" class="report-error" style="display: none;"></div>
+
+      <div class="settings-card">
+        <h3 class="settings-card-title">登録済みのアカウント</h3>
+        <p class="settings-card-note">自分自身のアカウントは削除できません。</p>
+        <table class="report-table">
+          <thead><tr><th>メールアドレス</th><th>表示名</th><th></th></tr></thead>
+          <tbody id="accounts-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="settings-card">
+        <h3 class="settings-card-title">新しいアカウントを追加</h3>
+        <div id="add-account-error" class="report-error" style="display: none;"></div>
+        <div id="add-account-saved-msg" class="settings-saved-msg" style="display: none;">アカウントを追加しました。</div>
+        <form id="add-account-form">
+          <div class="form-group">
+            <label for="new-login-id">メールアドレス</label>
+            <input type="email" id="new-login-id" required>
+          </div>
+          <div class="form-group">
+            <label for="new-password">パスワード</label>
+            <input type="password" id="new-password" required>
+          </div>
+          <div class="form-group">
+            <label for="new-display-name">表示名</label>
+            <input type="text" id="new-display-name" placeholder="例：下鶴">
+          </div>
+          <button type="submit" id="add-account-btn" class="btn-save-settings">追加する</button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="./js/config.js?v=3.3.0"></script>
+<script src="./js/admin.js?v=3.3.0"></script>
+
+</body>
+</html>

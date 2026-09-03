@@ -73,7 +73,6 @@ const step2Container = document.getElementById('step-2-container');
 const step3Container = document.getElementById('step-3-container');
 const checkTabContainer = document.getElementById('check-tab-container');
 const resultsArea = document.getElementById('check-results-area');
-const historyResultsArea = document.getElementById('history-results-area');
 const pageFragmentContainer = document.getElementById('page-fragment-container');
 const pageFragmentContent = document.getElementById('page-fragment-content');
 const backToReservationBtn = document.getElementById('back-to-reservation-btn');
@@ -137,7 +136,7 @@ function applySystemSettings(settings) {
   CONFIG.HOME_PAGE_LABEL = settings.homePageLabel || null;
   if (homeBtn) {
     homeBtn.style.display = CONFIG.HOME_PAGE_URL ? 'inline' : 'none';
-    homeBtn.textContent = `⬅ ${CONFIG.HOME_PAGE_LABEL || t('home_btn_fallback')}`;
+    homeBtn.textContent = `⬅ ${CONFIG.HOME_PAGE_LABEL || 'トップページに戻る'}`;
   }
 
   CONFIG.HEADER_CONTACT_INFO = settings.headerContactInfo || null;
@@ -175,7 +174,6 @@ function applySystemSettings(settings) {
     if (branding.titleFontFamily) mainTitle.style.fontFamily = branding.titleFontFamily;
   }
   CONFIG.SHOW_STAFF_SELECTOR = settings.showStaffSelector;
-  CONFIG.WAITLIST_ENABLED = !!settings.waitlistEnabled;
   CONFIG.ALLOW_NO_ASSIGN = settings.allowNoAssign;
   CONFIG.NO_ASSIGN_LABEL = settings.noAssignLabel;
   CONFIG.STAFF_LIST = Array.isArray(settings.staffList) ? settings.staffList : [];
@@ -184,7 +182,6 @@ function applySystemSettings(settings) {
   CONFIG.SHOW_MENU_PRICE = settings.showMenuPrice;
   CONFIG.SHOW_MENU_TOTAL = settings.showMenuTotal;
   CONFIG.MENU_NOTE_TEXT = settings.menuNoteText || "";
-  CONFIG.MENU_NOTE_TEXT_I18N = settings.menuNoteTextI18n || {};
   CONFIG.MENU_MASTER = settings.menuMaster || {};
 }
 
@@ -209,16 +206,6 @@ function _buildInfoCardIconContent(item) {
   }
 
   return INFO_CARD_ICONS[iconValue] || INFO_CARD_ICONS.store;
-}
-
-/**
- * 言語が切り替えられた時に呼ばれる（i18n.jsのsetLanguageから呼び出される）
- * data-i18n属性が付いた要素は自動で切り替わるが、JavaScriptで動的に組み立てている表示
- * （メニュー名・注意文など）は、ここで明示的に再描画する
- */
-function onLanguageChanged() {
-  if (typeof renderMenuUI === 'function') renderMenuUI();
-  if (typeof renderInfoSection === 'function' && CONFIG.INFO_SECTION) renderInfoSection(CONFIG.INFO_SECTION);
 }
 
 function renderInfoSection(infoConfig) {
@@ -256,16 +243,11 @@ function renderInfoSection(infoConfig) {
     const hrefAttr = isInternalPage ? '#' : escapeHtml(item.url || '#');
     const pageAttr = isInternalPage ? ` data-page="${escapeHtml(String(item.page))}"` : '';
 
-    // 翻訳（i18n）が入力されていて、日本語以外が選ばれている場合は、そちらを使う
-    const i18nItem = (currentLang !== 'ja' && item.i18n && item.i18n[currentLang]) ? item.i18n[currentLang] : {};
-    const displayTitle = i18nItem.title || item.title || '';
-    const displayDescription = i18nItem.description || item.description || '';
-
     html += `
       <a class="info-card" href="${hrefAttr}"${pageAttr}>
         <div class="info-card-icon">${iconContent}</div>
-        <div class="info-card-title"${titleStyle ? ` style="${titleStyle}"` : ''}>${escapeHtml(displayTitle)}</div>
-        <div class="info-card-description">${escapeHtml(displayDescription)}</div>
+        <div class="info-card-title"${titleStyle ? ` style="${titleStyle}"` : ''}>${escapeHtml(item.title || '')}</div>
+        <div class="info-card-description">${escapeHtml(item.description || '')}</div>
       </a>
     `;
   });
@@ -290,7 +272,7 @@ function renderInfoSection(infoConfig) {
 async function loadPageFragment(pageNumber) {
   if (!pageFragmentContainer || !pageFragmentContent) return;
 
-  pageFragmentContent.innerHTML = `<div class="no-data">${t('page_loading')}</div>`;
+  pageFragmentContent.innerHTML = '<div class="no-data">読み込み中...</div>';
   showSection(pageFragmentContainer);
 
   try {
@@ -300,7 +282,7 @@ async function loadPageFragment(pageNumber) {
     pageFragmentContent.innerHTML = html;
   } catch (error) {
     console.error('ページ断片の読み込みエラー:', error);
-    pageFragmentContent.innerHTML = `<div class="no-data text-danger">${t('err_page_load_failed')}</div>`;
+    pageFragmentContent.innerHTML = '<div class="no-data text-danger">ページの読み込みに失敗しました。時間をおいて再度お試しください。</div>';
   }
 }
 
@@ -358,7 +340,7 @@ function setupStaffSelector() {
   } else {
     const placeholderOpt = document.createElement('option');
     placeholderOpt.value = '';
-    placeholderOpt.textContent = t('staff_placeholder_option');
+    placeholderOpt.textContent = '担当スタッフを選択してください';
     placeholderOpt.disabled = true;
     placeholderOpt.selected = true;
     staffSelect.appendChild(placeholderOpt);
@@ -409,7 +391,7 @@ function renderMenuUI() {
   const menuNames = Object.keys(menuMaster);
 
   if (menuNames.length === 0) {
-    menuContainer.innerHTML = `<div class="note">${t('menu_loading')}</div>`;
+    menuContainer.innerHTML = '<div class="note">メニューを読み込んでいます...</div>';
     return;
   }
 
@@ -417,7 +399,7 @@ function renderMenuUI() {
 
   if (isMenuPulldownType()) {
     html += '<select id="menu-select" class="form-select menu-select-box">';
-    html += `<option value="" disabled selected>${t('menu_select_placeholder')}</option>`;
+    html += '<option value="" disabled selected>メニューを選択してください</option>';
 
     menuNames.forEach(menuName => {
       const label = buildMenuLabel(menuName, menuMaster[menuName]);
@@ -443,10 +425,9 @@ function renderMenuUI() {
 
   menuContainer.innerHTML = html;
 
-  // 施術メニューの下に表示する、任意の説明文（多言語対応。翻訳が入力されていなければ日本語のまま）
+  // 施術メニューの下に表示する、任意の説明文
   if (menuNoteTextEl) {
-    const i18nNote = (currentLang !== 'ja' && CONFIG.MENU_NOTE_TEXT_I18N) ? CONFIG.MENU_NOTE_TEXT_I18N[currentLang] : "";
-    const noteText = i18nNote || CONFIG.MENU_NOTE_TEXT || "";
+    const noteText = CONFIG.MENU_NOTE_TEXT || "";
     if (noteText) {
       menuNoteTextEl.textContent = noteText;
       menuNoteTextEl.style.display = 'block';
@@ -493,21 +474,17 @@ function updateMenuTotalDisplay() {
   const menuMaster = CONFIG.MENU_MASTER || {};
   let totalMinutes = 0;
   let totalPrice = 0;
-  let hasApproxMinutes = false;
-  let hasApproxPrice = false;
 
   menuNames.forEach(name => {
     const data = menuMaster[name];
     if (!data) return;
     totalMinutes += Number(data.minutes) || 0;
     totalPrice += Number(data.price) || 0;
-    if (data.minutesApprox) hasApproxMinutes = true;
-    if (data.priceApprox) hasApproxPrice = true;
   });
 
   const parts = [];
-  if (totalMinutes > 0) parts.push(`${t('total_minutes_prefix')}${totalMinutes}${t('unit_minutes')}${hasApproxMinutes ? t('approx_suffix') : ""}`);
-  parts.push(`${t('total_price_prefix')}${totalPrice.toLocaleString()}${hasApproxPrice ? t('approx_suffix') : ""}`);
+  if (totalMinutes > 0) parts.push(`合計 ${totalMinutes}分`);
+  parts.push(`合計 ￥${totalPrice.toLocaleString()}`);
 
   menuTotalDisplayEl.textContent = parts.join(" / ");
   menuTotalDisplayEl.style.display = 'block';
@@ -709,11 +686,6 @@ function renderTimetable(multiDayStatuses) {
 
       if (status === '○') {
         html += `<td class="slot-cell slot-available" data-date="${escapeHtml(dStr)}" data-time="${escapeHtml(timeStr)}">◎</td>`;
-      } else if (status === '－') {
-        // 満席ではなく「そもそも受付していない時間」（受付締切超過・営業時間外など）。キャンセル待ちの対象にはしない
-        html += '<td class="slot-cell slot-closed"></td>';
-      } else if (CONFIG.WAITLIST_ENABLED) {
-        html += `<td class="slot-cell slot-unavailable slot-waitlist" data-date="${escapeHtml(dStr)}" data-time="${escapeHtml(timeStr)}" title="キャンセル待ちに登録する">△</td>`;
       } else {
         html += '<td class="slot-cell slot-unavailable">×</td>';
       }
@@ -745,66 +717,16 @@ function bindTimetableCellEvents() {
       if (submitBtn) {
         submitBtn.disabled = false;
         if (isChangeMode()) {
-          submitBtn.textContent = (getChangeProvisionalWordingMode() === 'PROVISIONAL')
-            ? t('submit_btn_change_provisional')
-            : t('submit_btn_change');
+          submitBtn.textContent = '上記の内容で変更を確定する';
         } else {
           const mode = getProvisionalWordingMode();
           submitBtn.textContent = mode === 'PROVISIONAL'
-            ? t('submit_btn_provisional')
-            : (mode === 'NEUTRAL' ? t('submit_btn_neutral') : t('submit_btn_confirm'));
+            ? '上記の内容で仮予約を申請する'
+            : (mode === 'NEUTRAL' ? '上記の内容で予約を送信する' : '上記の内容で予約を確定する');
         }
       }
     });
   });
-
-  document.querySelectorAll('.slot-waitlist').forEach(cell => {
-    cell.addEventListener('click', (e) => {
-      const target = e.currentTarget;
-      handleWaitlistCellClick(target.getAttribute('data-date'), target.getAttribute('data-time'));
-    });
-  });
-}
-
-/**
- * 満席（△）の枠がクリックされた時：入力済みの内容でキャンセル待ちに登録する
- * @param {string} dateStr
- * @param {string} timeStr
- */
-async function handleWaitlistCellClick(dateStr, timeStr) {
-  if (isChangeMode()) {
-    alert(t('err_waitlist_during_change'));
-    return;
-  }
-
-  if (!nameInput.value || !telInput.value || !getSelectedMenusValue()) {
-    alert(t('err_waitlist_fill_info'));
-    return;
-  }
-
-  const confirmMsg = t('waitlist_confirm_msg', { date: escapeHtml(dateStr), time: escapeHtml(timeStr) });
-  const confirmed = await showCustomConfirm(confirmMsg);
-  if (!confirmed) return;
-
-  const payload = {
-    date: dateStr,
-    time: timeStr,
-    staff: staffSelect.value,
-    menu: getSelectedMenusValue(),
-    name: nameInput.value,
-    name_kana: nameKanaInput.value,
-    tel: telInput.value,
-    email: emailInput.value,
-    memo: memoInput.value
-  };
-
-  try {
-    const data = await submitReservationApi('registerWaitlist', payload);
-    alert(data.message || (data.success ? t('waitlist_register_success') : t('waitlist_register_fail')));
-  } catch (error) {
-    console.error('キャンセル待ち登録エラー:', error);
-    alert(t('err_network'));
-  }
 }
 
 /**
@@ -818,7 +740,7 @@ async function updateAvailableTimes(dateOverride) {
   const menuVal = getSelectedMenusValue();
 
   if (!dateVal || !staffVal || !menuVal) {
-    alert(t('err_select_all_for_timetable'));
+    alert('日付、スタッフ、メニューをすべて選択してください。');
     return false;
   }
 
@@ -849,7 +771,7 @@ async function updateAvailableTimes(dateOverride) {
     if (selectedTimeInput) selectedTimeInput.value = '';
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = t('submit_btn_default');
+      submitBtn.textContent = '日時を選択してください';
     }
     return true;
   } catch (error) {
@@ -901,24 +823,6 @@ async function goToPrevTimetablePage() {
  * お客様向けの文言をどのパターンにすべきか判定する
  * @returns {string} "PROVISIONAL"（仮予約の文言）/ "NEUTRAL"（中立的な文言）/ "NORMAL"（通常予約の文言）
  */
-/**
- * 予約変更時、変更後の内容が「仮予約」になる見込みかどうかを判定する（表示文言の切り替え用）
- * バックエンド（Reservation.gs の _determineProvisionalStatus）と同じ考え方に合わせている：
- * 「特定メニューのみ対象」の設定の時だけ、選んだメニューで再判定する。
- * 「全員」「新規のみ」対象の設定は、変更操作では現状（確定済みかどうか）が維持されるだけなので、
- * フロントからは判断できず、通常の変更文言のままにする
- * @returns {string} "PROVISIONAL"（仮予約になる文言）/ "NORMAL"（通常の変更文言）
- */
-function getChangeProvisionalWordingMode() {
-  if (!CONFIG.PROVISIONAL_RESERVATION_ENABLED || CONFIG.PROVISIONAL_RESERVATION_TARGET !== 'MENU_ONLY') {
-    return 'NORMAL';
-  }
-  const selectedMenuVal = getSelectedMenusValue();
-  const selectedMenuList = String(selectedMenuVal || '').split(',').map(m => m.trim());
-  const isMatch = selectedMenuList.some(m => (CONFIG.PROVISIONAL_RESERVATION_TARGET_MENUS || []).includes(m));
-  return isMatch ? 'PROVISIONAL' : 'NORMAL';
-}
-
 function getProvisionalWordingMode() {
   if (!CONFIG.PROVISIONAL_RESERVATION_ENABLED) return 'NORMAL';
 
@@ -973,19 +877,19 @@ async function handleReservationSubmit(e) {
   const isChange = isChangeMode();
 
   const confirmMsg = isChange
-    ? (getChangeProvisionalWordingMode() === 'PROVISIONAL' ? t('confirm_change_provisional') : t('confirm_change_reservation'))
+    ? '選択した新しい日時で予約を変更してもよろしいですか？'
     : (() => {
         const mode = getProvisionalWordingMode();
-        if (mode === 'PROVISIONAL') return t('confirm_submit_provisional');
-        if (mode === 'NEUTRAL') return t('confirm_submit_neutral');
-        return t('confirm_submit_normal');
+        if (mode === 'PROVISIONAL') return 'この内容で<span class="custom-confirm-highlight">仮予約</span>を申請してもよろしいですか？';
+        if (mode === 'NEUTRAL') return 'この内容で予約を送信してもよろしいですか？';
+        return 'この内容で予約を確定してもよろしいですか？';
       })();
 
   const confirmed = await showCustomConfirm(confirmMsg);
   if (!confirmed) return;
 
   submitBtn.disabled = true;
-  submitBtn.textContent = isChange ? t('submit_btn_sending_change') : t('submit_btn_sending_new');
+  submitBtn.textContent = isChange ? '予約を変更中...' : '予約を登録中...';
 
   saveCurrentCustomerDataToCache();
 
@@ -1013,19 +917,18 @@ async function handleReservationSubmit(e) {
     const data = await submitReservationApi(action, payload);
 
     if (!data.success) {
-      alert(t('err_process_failed_prefix') + data.message);
+      alert('処理に失敗しました: ' + data.message);
       return;
     }
 
     if (isChange) {
-      const isProvisional = !!data.isProvisional;
-      alert(isProvisional ? t('change_success_provisional') : t('change_success'));
+      alert('ご予約の変更が正常に完了しました！');
       AppState.changeModeData = null;
       renderChangeBanner(null);
     } else {
       const isProvisional = !!data.isProvisional;
-      const baseMsg = isProvisional ? t('reservation_success_provisional') : t('reservation_success_normal');
-      const msg = data.resId ? `${baseMsg}\n${t('reservation_id_suffix', { resId: data.resId })}` : baseMsg;
+      const baseMsg = isProvisional ? 'ご予約を申請しました！' : 'ご予約が完了しました！';
+      const msg = data.resId ? `${baseMsg}\n【ご予約ID: ${data.resId}】` : baseMsg;
       alert(msg);
     }
 
@@ -1045,7 +948,7 @@ async function handleReservationSubmit(e) {
     }
   } catch (error) {
     console.error('送信エラー:', error);
-    alert(t('err_network_short'));
+    alert('通信エラーが発生しました。');
   } finally {
     submitBtn.disabled = false;
   }
@@ -1065,7 +968,7 @@ function initializeEvents() {
   if (toStep2Btn) {
     toStep2Btn.addEventListener('click', () => {
       if (!nameInput.checkValidity() || !nameKanaInput.checkValidity() || !telInput.checkValidity() || !emailInput.checkValidity()) {
-        alert(t('err_fill_customer_info'));
+        alert('お客様情報を正しく入力してください。');
         return;
       }
       showSection(step2Container);
@@ -1075,13 +978,13 @@ function initializeEvents() {
   if (toStep3Btn) {
     toStep3Btn.addEventListener('click', async () => {
       if (!dateInput.value || !staffSelect.value || !getSelectedMenusValue()) {
-        alert(t('err_select_date_staff_menu'));
+        alert('ご来店希望日、スタッフ、メニューを選択してください。');
         return;
       }
 
       const originalText = toStep3Btn.textContent;
       toStep3Btn.disabled = true;
-      toStep3Btn.textContent = t('loading_slots');
+      toStep3Btn.textContent = '空き状況を読み込み中...';
 
       const success = await updateAvailableTimes();
 
@@ -1134,20 +1037,6 @@ function initializeEvents() {
   if (checkBtn) {
     checkBtn.addEventListener('click', fetchReservations);
   }
-
-  document.querySelectorAll('.mypage-tab-btn').forEach(tabBtn => {
-    tabBtn.addEventListener('click', () => {
-      document.querySelectorAll('.mypage-tab-btn').forEach(b => b.classList.remove('active'));
-      tabBtn.classList.add('active');
-
-      document.querySelectorAll('.mypage-tab-panel').forEach(panel => {
-        panel.style.display = 'none';
-      });
-
-      const target = document.getElementById(tabBtn.getAttribute('data-target'));
-      if (target) target.style.display = 'block';
-    });
-  });
 
   if (cancelChangeBtn) {
     cancelChangeBtn.addEventListener('click', abortChangeMode);
