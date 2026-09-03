@@ -318,7 +318,7 @@ if (tabButtons) {
       if (targetTab === 'accounts' && !accountsLoaded) {
         loadAccounts();
       }
-      if (targetTab === 'waitlist' && !waitlistLoaded) {
+      if (targetTab === 'waitlist') {
         loadWaitlist();
       }
     });
@@ -368,6 +368,14 @@ async function loadWaitlist() {
     if (waitlistLoading) waitlistLoading.style.display = 'none';
   }
 }
+
+// 「キャンセル待ち」タブを開いている間だけ、30秒ごとに自動で最新の状態に更新する
+setInterval(() => {
+  const waitlistTabPage = document.getElementById('tab-waitlist');
+  if (waitlistTabPage && waitlistTabPage.style.display === 'block') {
+    loadWaitlist();
+  }
+}, 30000);
 
 /**
  * Dateオブジェクトを "yyyy-MM-dd" 形式の文字列に変換する
