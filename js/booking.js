@@ -43,7 +43,7 @@ function buildReservationCardHtml(res) {
 
   const changeButtonHtml = isChangeExpired
     ? `<button type="button" class="btn-change" disabled>${t('btn_change_expired')}</button>`
-    : `<button type="button" class="btn-change" data-id="${safeId}" data-date="${safeDate}" data-time="${safeTime}" data-staff="${safeStaff}" data-menu="${safeMenu}" data-memo="${safeMemo}">${t('btn_change_reservation')}</button>`;
+    : `<button type="button" class="btn-change" data-id="${safeId}" data-date="${safeDate}" data-time="${safeTime}" data-staff="${safeStaff}" data-menu="${safeMenu}" data-memo="${safeMemo}" data-provisional-status="${escapeHtml(res.provisionalStatus || '')}">${t('btn_change_reservation')}</button>`;
 
   const cancelButtonHtml = isCancelExpired
     ? `<button type="button" class="btn-cancel" disabled>${t('btn_cancel_expired')}</button>`
@@ -230,7 +230,8 @@ async function startChangeMode(buttonEl) {
     oldDate: buttonEl.getAttribute('data-date') || '',
     oldTime: buttonEl.getAttribute('data-time') || '',
     oldStaff: staffVal,
-    oldMenu: buttonEl.getAttribute('data-menu') || ''
+    oldMenu: buttonEl.getAttribute('data-menu') || '',
+    oldProvisionalStatus: buttonEl.getAttribute('data-provisional-status') || ''
   };
 
   // 設定は保持済みのため通信は発生しない

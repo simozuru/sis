@@ -903,20 +903,23 @@ async function goToPrevTimetablePage() {
  */
 /**
  * 予約変更時、変更後の内容が「仮予約」になる見込みかどうかを判定する（表示文言の切り替え用）
- * バックエンド（Reservation.gs の _determineProvisionalStatus）と同じ考え方に合わせている：
- * 「特定メニューのみ対象」の設定の時だけ、選んだメニューで再判定する。
- * 「全員」「新規のみ」対象の設定は、変更操作では現状（確定済みかどうか）が維持されるだけなので、
- * フロントからは判断できず、通常の変更文言のままにする
+ * バックエンド（Reservation.gs の _determineProvisionalStatus）と完全に同じ考え方：
+ * ・「特定メニューのみ対象」の設定の時は、選んだメニューで判定する
+ * ・「全員」「新規のみ」対象の設定は、メニューに関係なく、変更前の状態（確認待ちだったかどうか）がそのまま維持される
  * @returns {string} "PROVISIONAL"（仮予約になる文言）/ "NORMAL"（通常の変更文言）
  */
 function getChangeProvisionalWordingMode() {
-  if (!CONFIG.PROVISIONAL_RESERVATION_ENABLED || CONFIG.PROVISIONAL_RESERVATION_TARGET !== 'MENU_ONLY') {
-    return 'NORMAL';
+  if (!CONFIG.PROVISIONAL_RESERVATION_ENABLED) return 'NORMAL';
+
+  if (CONFIG.PROVISIONAL_RESERVATION_TARGET === 'MENU_ONLY') {
+    const selectedMenuVal = getSelectedMenusValue();
+    const selectedMenuList = String(selectedMenuVal || '').split(',').map(m => m.trim());
+    const qualifiesNow = selectedMenuList.some(m => (CONFIG.PROVISIONAL_RESERVATION_TARGET_MENUS || []).includes(m));
+    return qualifiesNow ? 'PROVISIONAL' : 'NORMAL';
   }
-  const selectedMenuVal = getSelectedMenusValue();
-  const selectedMenuList = String(selectedMenuVal || '').split(',').map(m => m.trim());
-  const isMatch = selectedMenuList.some(m => (CONFIG.PROVISIONAL_RESERVATION_TARGET_MENUS || []).includes(m));
-  return isMatch ? 'PROVISIONAL' : 'NORMAL';
+
+  const wasPending = !!(AppState.changeModeData && AppState.changeModeData.oldProvisionalStatus === '確認待ち');
+  return wasPending ? 'PROVISIONAL' : 'NORMAL';
 }
 
 function getProvisionalWordingMode() {
