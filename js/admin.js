@@ -75,6 +75,7 @@ const s1HistoryRetention = document.getElementById('s1-history-retention');
 const s1CancelHistoryRetention = document.getElementById('s1-cancel-history-retention');
 const s1CalendarHistoryRetention = document.getElementById('s1-calendar-history-retention');
 const s1SettingsHistoryRetention = document.getElementById('s1-settings-history-retention');
+const s1WaitlistRetention = document.getElementById('s1-waitlist-retention');
 const s1CalendarSyncEnabled = document.getElementById('s1-calendar-sync-enabled');
 const s1BufferMinutes = document.getElementById('s1-buffer-minutes');
 const saveSettings1Btn = document.getElementById('save-settings1-btn');
@@ -770,6 +771,7 @@ async function loadSettings1() {
     if (s1CancelHistoryRetention) s1CancelHistoryRetention.value = result.cancelHistoryRetentionMonths;
     if (s1CalendarHistoryRetention) s1CalendarHistoryRetention.value = result.calendarHistoryRetentionMonths;
     if (s1SettingsHistoryRetention) s1SettingsHistoryRetention.value = result.settingsHistoryRetentionMonths;
+    if (s1WaitlistRetention) s1WaitlistRetention.value = result.waitlistRetentionMonths;
     if (s1CalendarSyncEnabled) s1CalendarSyncEnabled.checked = !!result.calendarSyncEnabled;
     if (s1BufferMinutes) s1BufferMinutes.value = result.bufferMinutesBeforeReservation;
 
@@ -1098,6 +1100,7 @@ function collectSettings1FormData() {
   settings.CANCEL_HISTORY_RETENTION_MONTHS = parseInt(s1CancelHistoryRetention.value, 10);
   settings.CALENDAR_HISTORY_RETENTION_MONTHS = parseInt(s1CalendarHistoryRetention.value, 10);
   settings.SETTINGS_HISTORY_RETENTION_MONTHS = parseInt(s1SettingsHistoryRetention.value, 10);
+  settings.WAITLIST_RETENTION_MONTHS = parseInt(s1WaitlistRetention.value, 10);
   settings.CALENDAR_SYNC_ENABLED = !!s1CalendarSyncEnabled.checked;
   settings.BUFFER_MINUTES_BEFORE_RESERVATION = parseInt(s1BufferMinutes.value, 10);
 
