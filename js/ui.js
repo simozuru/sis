@@ -802,6 +802,13 @@ async function handleWaitlistCellClick(dateStr, timeStr) {
   try {
     const data = await submitReservationApi('registerWaitlist', payload);
     alert(data.message || (data.success ? t('waitlist_register_success') : t('waitlist_register_fail')));
+
+    if (data.success) {
+      saveCurrentCustomerDataToCache();
+      resetReservationSelection();
+      applyCachedCustomerDataToForm();
+      showSection(step1Container);
+    }
   } catch (error) {
     console.error('キャンセル待ち登録エラー:', error);
     alert(t('err_network'));
