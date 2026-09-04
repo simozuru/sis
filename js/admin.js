@@ -71,11 +71,6 @@ const settings1SavedMsg = document.getElementById('settings1-saved-msg');
 const settings1Form = document.getElementById('settings1-form');
 const s1SlotStepMinutes = document.getElementById('s1-slot-step-minutes');
 const s1MaxCapacity = document.getElementById('s1-max-capacity');
-const s1HistoryRetention = document.getElementById('s1-history-retention');
-const s1CancelHistoryRetention = document.getElementById('s1-cancel-history-retention');
-const s1CalendarHistoryRetention = document.getElementById('s1-calendar-history-retention');
-const s1SettingsHistoryRetention = document.getElementById('s1-settings-history-retention');
-const s1WaitlistRetention = document.getElementById('s1-waitlist-retention');
 const s1CalendarSyncEnabled = document.getElementById('s1-calendar-sync-enabled');
 const s1BufferMinutes = document.getElementById('s1-buffer-minutes');
 const saveSettings1Btn = document.getElementById('save-settings1-btn');
@@ -122,6 +117,17 @@ const saveSettings2Btn = document.getElementById('save-settings2-btn');
 let settings3Loaded = false;
 let accountsLoaded = false;
 let waitlistLoaded = false;
+let retentionLoaded = false;
+const retentionLoading = document.getElementById('retention-loading');
+const retentionError = document.getElementById('retention-error');
+const retentionSavedMsg = document.getElementById('retention-saved-msg');
+const retentionForm = document.getElementById('retention-form');
+const saveRetentionBtn = document.getElementById('save-retention-btn');
+const retHistoryRetention = document.getElementById('ret-history-retention');
+const retCancelHistoryRetention = document.getElementById('ret-cancel-history-retention');
+const retCalendarHistoryRetention = document.getElementById('ret-calendar-history-retention');
+const retSettingsHistoryRetention = document.getElementById('ret-settings-history-retention');
+const retWaitlistRetention = document.getElementById('ret-waitlist-retention');
 const waitlistLoading = document.getElementById('waitlist-loading');
 const waitlistError = document.getElementById('waitlist-error');
 const waitlistTbody = document.getElementById('waitlist-tbody');
@@ -325,6 +331,9 @@ if (tabButtons) {
       if (targetTab === 'waitlist') {
         loadWaitlist();
       }
+      if (targetTab === 'retention' && !retentionLoaded) {
+        loadRetentionSettings();
+      }
     });
   });
 }
@@ -380,6 +389,82 @@ setInterval(() => {
     loadWaitlist();
   }
 }, 30000);
+
+/**
+ * 「保存期間」タブの読み込み（settings1と同じgetSettingsPage1のデータを再利用する）
+ */
+async function loadRetentionSettings() {
+  if (retentionLoading) retentionLoading.style.display = 'block';
+  if (retentionError) retentionError.style.display = 'none';
+  if (retentionForm) retentionForm.style.display = 'none';
+
+  try {
+    const result = await callAdminApi('getSettingsPage1');
+    if (!result.success) throw new Error(result.message || '設定の取得に失敗しました。');
+
+    if (retHistoryRetention) retHistoryRetention.value = result.historyRetentionMonths;
+    if (retCancelHistoryRetention) retCancelHistoryRetention.value = result.cancelHistoryRetentionMonths;
+    if (retCalendarHistoryRetention) retCalendarHistoryRetention.value = result.calendarHistoryRetentionMonths;
+    if (retSettingsHistoryRetention) retSettingsHistoryRetention.value = result.settingsHistoryRetentionMonths;
+    if (retWaitlistRetention) retWaitlistRetention.value = result.waitlistRetentionMonths;
+
+    retentionLoaded = true;
+    if (retentionForm) retentionForm.style.display = 'block';
+  } catch (error) {
+    console.error('保存期間の取得エラー:', error);
+    if (retentionError) {
+      retentionError.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+      retentionError.style.display = 'block';
+    }
+  } finally {
+    if (retentionLoading) retentionLoading.style.display = 'none';
+  }
+}
+
+if (retentionForm) {
+  retentionForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (retentionError) retentionError.style.display = 'none';
+    if (retentionSavedMsg) retentionSavedMsg.style.display = 'none';
+    if (saveRetentionBtn) {
+      saveRetentionBtn.disabled = true;
+      saveRetentionBtn.textContent = '保存中...';
+    }
+
+    try {
+      const settings = {
+        HISTORY_RETENTION_MONTHS: parseInt(retHistoryRetention.value, 10),
+        CANCEL_HISTORY_RETENTION_MONTHS: parseInt(retCancelHistoryRetention.value, 10),
+        CALENDAR_HISTORY_RETENTION_MONTHS: parseInt(retCalendarHistoryRetention.value, 10),
+        SETTINGS_HISTORY_RETENTION_MONTHS: parseInt(retSettingsHistoryRetention.value, 10),
+        WAITLIST_RETENTION_MONTHS: parseInt(retWaitlistRetention.value, 10)
+      };
+
+      const token = sessionStorage.getItem(SESSION_TOKEN_KEY) || '';
+      const response = await fetch(CONFIG.GAS_WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'saveSettings', settings: JSON.stringify(settings), token: token })
+      });
+      const result = await response.json();
+
+      if (!result.success) throw new Error(result.message || '保存に失敗しました。');
+
+      if (retentionSavedMsg) retentionSavedMsg.style.display = 'block';
+    } catch (error) {
+      console.error('保存期間の保存エラー:', error);
+      if (retentionError) {
+        retentionError.textContent = error.message || '通信エラーが発生しました。時間をおいて再度お試しください。';
+        retentionError.style.display = 'block';
+      }
+    } finally {
+      if (saveRetentionBtn) {
+        saveRetentionBtn.disabled = false;
+        saveRetentionBtn.textContent = '保存する';
+      }
+    }
+  });
+}
 
 /**
  * Dateオブジェクトを "yyyy-MM-dd" 形式の文字列に変換する
@@ -767,11 +852,6 @@ async function loadSettings1() {
 
     // 受付の基本設定
     if (s1MaxCapacity) s1MaxCapacity.value = result.maxCapacity;
-    if (s1HistoryRetention) s1HistoryRetention.value = result.historyRetentionMonths;
-    if (s1CancelHistoryRetention) s1CancelHistoryRetention.value = result.cancelHistoryRetentionMonths;
-    if (s1CalendarHistoryRetention) s1CalendarHistoryRetention.value = result.calendarHistoryRetentionMonths;
-    if (s1SettingsHistoryRetention) s1SettingsHistoryRetention.value = result.settingsHistoryRetentionMonths;
-    if (s1WaitlistRetention) s1WaitlistRetention.value = result.waitlistRetentionMonths;
     if (s1CalendarSyncEnabled) s1CalendarSyncEnabled.checked = !!result.calendarSyncEnabled;
     if (s1BufferMinutes) s1BufferMinutes.value = result.bufferMinutesBeforeReservation;
 
@@ -1096,11 +1176,6 @@ function collectSettings1FormData() {
 
   // 受付の基本設定
   settings.MAX_CAPACITY = parseInt(s1MaxCapacity.value, 10);
-  settings.HISTORY_RETENTION_MONTHS = parseInt(s1HistoryRetention.value, 10);
-  settings.CANCEL_HISTORY_RETENTION_MONTHS = parseInt(s1CancelHistoryRetention.value, 10);
-  settings.CALENDAR_HISTORY_RETENTION_MONTHS = parseInt(s1CalendarHistoryRetention.value, 10);
-  settings.SETTINGS_HISTORY_RETENTION_MONTHS = parseInt(s1SettingsHistoryRetention.value, 10);
-  settings.WAITLIST_RETENTION_MONTHS = parseInt(s1WaitlistRetention.value, 10);
   settings.CALENDAR_SYNC_ENABLED = !!s1CalendarSyncEnabled.checked;
   settings.BUFFER_MINUTES_BEFORE_RESERVATION = parseInt(s1BufferMinutes.value, 10);
 
