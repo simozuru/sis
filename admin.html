@@ -220,6 +220,14 @@
         </div>
 
         <div class="settings-card">
+          <h3 class="settings-card-title">新規予約の最短受付タイミング</h3>
+          <div class="form-group">
+            <p class="settings-card-note">今から何分後以降の枠なら予約できるか</p>
+            <input type="number" id="s1-buffer-minutes" min="0">
+          </div>
+        </div>
+
+        <div class="settings-card">
           <h3 class="settings-card-title">表示する日数</h3>
           <div class="form-group">
             <p class="settings-card-note">お客様のタイムテーブルに、一度に何日分の空き状況を表示するかです。「1週間分」に設定すると、7日分まとめて確認しながら選べます。</p>
@@ -228,6 +236,14 @@
               <option value="3">3日分</option>
               <option value="7">1週間分</option>
             </select>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">同時受付上限</h3>
+          <div class="form-group">
+            <p class="settings-card-note">同じ時間帯に、全体で何件まで受け付けるか</p>
+            <input type="number" id="s1-max-capacity" min="1">
           </div>
         </div>
 
@@ -248,26 +264,10 @@
         </div>
 
         <div class="settings-card">
-          <h3 class="settings-card-title">同時受付上限</h3>
-          <div class="form-group">
-            <p class="settings-card-note">同じ時間帯に、全体で何件まで受け付けるか</p>
-            <input type="number" id="s1-max-capacity" min="1">
-          </div>
-        </div>
-
-        <div class="settings-card">
           <h3 class="settings-card-title">Googleカレンダーの直接編集の検知</h3>
           <p class="settings-card-note">Googleカレンダー上で予約をドラッグ移動するなど、直接編集した内容を自動検知してスプレッドシートに反映する機能です（1時間ごとに巡回チェックします）。</p>
           <div class="form-group checkbox-group">
             <label><input type="checkbox" id="s1-calendar-sync-enabled"> 直接編集の検知を使う</label>
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <h3 class="settings-card-title">新規予約の最短受付タイミング</h3>
-          <div class="form-group">
-            <p class="settings-card-note">今から何分後以降の枠なら予約できるか</p>
-            <input type="number" id="s1-buffer-minutes" min="0">
           </div>
         </div>
 
