@@ -163,6 +163,8 @@ const settings6Error = document.getElementById('settings6-error');
 const settings6SavedMsg = document.getElementById('settings6-saved-msg');
 const settings6Form = document.getElementById('settings6-form');
 const saveSettings6Btn = document.getElementById('save-settings6-btn');
+const s6HolidayCalendarId = document.getElementById('s6-holiday-calendar-id');
+const s6CalendarSyncEnabled = document.getElementById('s6-calendar-sync-enabled');
 
 const settings3Loading = document.getElementById('settings3-loading');
 const settings3Error = document.getElementById('settings3-error');const settings3SavedMsg = document.getElementById('settings3-saved-msg');
@@ -1296,6 +1298,8 @@ async function loadSettings6() {
 
     renderBusinessHoursRows(result.business || {}, result.lastOrderOverride || {});
     renderSlotStepOverrideRows(result.displaySlotStepOverride || {});
+    if (s6HolidayCalendarId) s6HolidayCalendarId.value = result.holidayCalendarId || '';
+    if (s6CalendarSyncEnabled) s6CalendarSyncEnabled.checked = !!result.calendarSyncEnabled;
 
     settings6Loaded = true;
     if (settings6Form) settings6Form.style.display = 'block';
@@ -1362,7 +1366,9 @@ if (settings6Form) {
       const settings = {
         BUSINESS: business,
         LAST_ORDER_OVERRIDE: lastOrderOverride,
-        DISPLAY_SLOT_STEP_OVERRIDE: displaySlotStepOverride
+        DISPLAY_SLOT_STEP_OVERRIDE: displaySlotStepOverride,
+        HOLIDAY_CALENDAR_ID: s6HolidayCalendarId.value.trim(),
+        CALENDAR_SYNC_ENABLED: !!s6CalendarSyncEnabled.checked
       };
 
       const token = sessionStorage.getItem(SESSION_TOKEN_KEY) || '';
