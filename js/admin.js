@@ -74,6 +74,8 @@ const s1MaxCapacity = document.getElementById('s1-max-capacity');
 const s1HistoryRetention = document.getElementById('s1-history-retention');
 const s1CancelHistoryRetention = document.getElementById('s1-cancel-history-retention');
 const s1CalendarHistoryRetention = document.getElementById('s1-calendar-history-retention');
+const s1SettingsHistoryRetention = document.getElementById('s1-settings-history-retention');
+const s1CalendarSyncEnabled = document.getElementById('s1-calendar-sync-enabled');
 const s1BufferMinutes = document.getElementById('s1-buffer-minutes');
 const saveSettings1Btn = document.getElementById('save-settings1-btn');
 
@@ -164,7 +166,6 @@ const settings6SavedMsg = document.getElementById('settings6-saved-msg');
 const settings6Form = document.getElementById('settings6-form');
 const saveSettings6Btn = document.getElementById('save-settings6-btn');
 const s6HolidayCalendarId = document.getElementById('s6-holiday-calendar-id');
-const s6CalendarSyncEnabled = document.getElementById('s6-calendar-sync-enabled');
 
 const settings3Loading = document.getElementById('settings3-loading');
 const settings3Error = document.getElementById('settings3-error');const settings3SavedMsg = document.getElementById('settings3-saved-msg');
@@ -768,6 +769,8 @@ async function loadSettings1() {
     if (s1HistoryRetention) s1HistoryRetention.value = result.historyRetentionMonths;
     if (s1CancelHistoryRetention) s1CancelHistoryRetention.value = result.cancelHistoryRetentionMonths;
     if (s1CalendarHistoryRetention) s1CalendarHistoryRetention.value = result.calendarHistoryRetentionMonths;
+    if (s1SettingsHistoryRetention) s1SettingsHistoryRetention.value = result.settingsHistoryRetentionMonths;
+    if (s1CalendarSyncEnabled) s1CalendarSyncEnabled.checked = !!result.calendarSyncEnabled;
     if (s1BufferMinutes) s1BufferMinutes.value = result.bufferMinutesBeforeReservation;
 
     settings1Loaded = true;
@@ -1094,6 +1097,8 @@ function collectSettings1FormData() {
   settings.HISTORY_RETENTION_MONTHS = parseInt(s1HistoryRetention.value, 10);
   settings.CANCEL_HISTORY_RETENTION_MONTHS = parseInt(s1CancelHistoryRetention.value, 10);
   settings.CALENDAR_HISTORY_RETENTION_MONTHS = parseInt(s1CalendarHistoryRetention.value, 10);
+  settings.SETTINGS_HISTORY_RETENTION_MONTHS = parseInt(s1SettingsHistoryRetention.value, 10);
+  settings.CALENDAR_SYNC_ENABLED = !!s1CalendarSyncEnabled.checked;
   settings.BUFFER_MINUTES_BEFORE_RESERVATION = parseInt(s1BufferMinutes.value, 10);
 
   return settings;
@@ -1299,7 +1304,6 @@ async function loadSettings6() {
     renderBusinessHoursRows(result.business || {}, result.lastOrderOverride || {});
     renderSlotStepOverrideRows(result.displaySlotStepOverride || {});
     if (s6HolidayCalendarId) s6HolidayCalendarId.value = result.holidayCalendarId || '';
-    if (s6CalendarSyncEnabled) s6CalendarSyncEnabled.checked = !!result.calendarSyncEnabled;
 
     settings6Loaded = true;
     if (settings6Form) settings6Form.style.display = 'block';
@@ -1367,8 +1371,7 @@ if (settings6Form) {
         BUSINESS: business,
         LAST_ORDER_OVERRIDE: lastOrderOverride,
         DISPLAY_SLOT_STEP_OVERRIDE: displaySlotStepOverride,
-        HOLIDAY_CALENDAR_ID: s6HolidayCalendarId.value.trim(),
-        CALENDAR_SYNC_ENABLED: !!s6CalendarSyncEnabled.checked
+        HOLIDAY_CALENDAR_ID: s6HolidayCalendarId.value.trim()
       };
 
       const token = sessionStorage.getItem(SESSION_TOKEN_KEY) || '';

@@ -279,6 +279,22 @@
         </div>
 
         <div class="settings-card">
+          <h3 class="settings-card-title">設定変更履歴の保持期間</h3>
+          <div class="form-group">
+            <p class="settings-card-note">管理画面から「誰が・いつ・何を変更したか」の記録を、何ヶ月分残すか（-1で無期限）</p>
+            <input type="number" id="s1-settings-history-retention" min="-1">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">Googleカレンダーの直接編集の検知</h3>
+          <p class="settings-card-note">Googleカレンダー上で予約をドラッグ移動するなど、直接編集した内容を自動検知してスプレッドシートに反映する機能です（1時間ごとに巡回チェックします）。</p>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" id="s1-calendar-sync-enabled"> 直接編集の検知を使う</label>
+          </div>
+        </div>
+
+        <div class="settings-card">
           <h3 class="settings-card-title">新規予約の最短受付タイミング</h3>
           <div class="form-group">
             <p class="settings-card-note">今から何分後以降の枠なら予約できるか</p>
@@ -414,19 +430,11 @@
         </div>
 
         <div class="settings-card">
-          <h3 class="settings-card-title">祝日カレンダー</h3>
-          <p class="settings-card-note">定休日とは別に、祝日カレンダー（Googleカレンダー）を指定して休業日として扱うことができます。空欄の場合は使いません。</p>
+          <h3 class="settings-card-title">定休日カレンダー</h3>
+          <p class="settings-card-note">Googleカレンダーで決めた定休日を表示します。空欄の場合は使いません。</p>
           <div class="form-group">
-            <label for="s6-holiday-calendar-id">祝日カレンダーID</label>
+            <label for="s6-holiday-calendar-id">定休日カレンダーID</label>
             <input type="text" id="s6-holiday-calendar-id" placeholder="カレンダーID（xxxx@group.calendar.google.com）">
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <h3 class="settings-card-title">Googleカレンダーの直接編集の検知</h3>
-          <p class="settings-card-note">Googleカレンダー上で予約をドラッグ移動するなど、直接編集した内容を自動検知してスプレッドシートに反映する機能です（1時間ごとに巡回チェックします）。</p>
-          <div class="form-group checkbox-group">
-            <label><input type="checkbox" id="s6-calendar-sync-enabled"> 直接編集の検知を使う</label>
           </div>
         </div>
 
