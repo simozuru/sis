@@ -69,12 +69,13 @@
       <button type="button" class="tab-btn active" data-tab="report">レポート</button>
       <button type="button" class="tab-btn" data-tab="waitlist">キャンセル待ち</button>
       <button type="button" class="tab-btn" data-tab="settings1">基本設定</button>
-      <button type="button" class="tab-btn" data-tab="settings5">メニュー関係</button>
+      <button type="button" class="tab-btn" data-tab="retention">保存期間</button>
+      <button type="button" class="tab-btn" data-tab="settings5">メニュー</button>
       <button type="button" class="tab-btn" data-tab="settings6">営業時間</button>
-      <button type="button" class="tab-btn" data-tab="settings4">スタッフ関係</button>
-      <button type="button" class="tab-btn" data-tab="settings2">メール関係</button>
-      <button type="button" class="tab-btn" data-tab="settings3">レイアウト関係</button>
-      <button type="button" class="tab-btn" data-tab="accounts">アカウント管理</button>
+      <button type="button" class="tab-btn" data-tab="settings4">スタッフ</button>
+      <button type="button" class="tab-btn" data-tab="settings2">メール</button>
+      <button type="button" class="tab-btn" data-tab="settings3">レイアウト</button>
+      <button type="button" class="tab-btn" data-tab="accounts">アカウント</button>
     </nav>
     <div class="header-right">
       <span id="welcome-message" class="welcome-message"></span>
@@ -255,46 +256,6 @@
         </div>
 
         <div class="settings-card">
-          <h3 class="settings-card-title">予約履歴の保持期間</h3>
-          <div class="form-group">
-            <p class="settings-card-note">何ヶ月分の予約履歴をデータで残すか（-1で無期限）</p>
-            <input type="number" id="s1-history-retention" min="-1">
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <h3 class="settings-card-title">キャンセル履歴の保持期間</h3>
-          <div class="form-group">
-            <p class="settings-card-note">誰が・いつ・何をキャンセルしたかの記録を、何ヶ月分残すか（-1で無期限）</p>
-            <input type="number" id="s1-cancel-history-retention" min="-1">
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <h3 class="settings-card-title">カレンダー変更履歴の保持期間</h3>
-          <div class="form-group">
-            <p class="settings-card-note">Googleカレンダー上での直接編集の記録を、何ヶ月分残すか（-1で無期限）</p>
-            <input type="number" id="s1-calendar-history-retention" min="-1">
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <h3 class="settings-card-title">設定変更履歴の保持期間</h3>
-          <div class="form-group">
-            <p class="settings-card-note">管理画面から「誰が・いつ・何を変更したか」の記録を、何ヶ月分残すか（-1で無期限）</p>
-            <input type="number" id="s1-settings-history-retention" min="-1">
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <h3 class="settings-card-title">キャンセル待ちの保持期間</h3>
-          <div class="form-group">
-            <p class="settings-card-note">登録日時から数えて、キャンセル待ちのデータを何ヶ月分残すか（-1で無期限）</p>
-            <input type="number" id="s1-waitlist-retention" min="-1">
-          </div>
-        </div>
-
-        <div class="settings-card">
           <h3 class="settings-card-title">Googleカレンダーの直接編集の検知</h3>
           <p class="settings-card-note">Googleカレンダー上で予約をドラッグ移動するなど、直接編集した内容を自動検知してスプレッドシートに反映する機能です（1時間ごとに巡回チェックします）。</p>
           <div class="form-group checkbox-group">
@@ -318,7 +279,7 @@
          タブ：メニュー関係
          ========================================== -->
     <section id="tab-settings5" class="tab-page" style="display: none;">
-      <h2 class="section-title">メニュー関係</h2>
+      <h2 class="section-title">メニュー</h2>
 
       <div id="settings5-loading" class="settings-loading">読み込み中...</div>
       <div id="settings5-error" class="report-error" style="display: none;"></div>
@@ -454,7 +415,7 @@
          タブ③：設定1（スタッフ・カレンダーID・担当スタッフの選択）
          ========================================== -->
     <section id="tab-settings4" class="tab-page" style="display: none;">
-      <h2 class="section-title">スタッフ関係</h2>
+      <h2 class="section-title">スタッフ</h2>
 
       <div id="settings4-loading" class="settings-loading">読み込み中...</div>
       <div id="settings4-error" class="report-error" style="display: none;"></div>
@@ -514,7 +475,7 @@
          タブ④：設定2
          ========================================== -->
     <section id="tab-settings2" class="tab-page" style="display: none;">
-      <h2 class="section-title">メール関係</h2>
+      <h2 class="section-title">メール</h2>
 
       <div id="settings2-loading" class="settings-loading">読み込み中...</div>
       <div id="settings2-error" class="report-error" style="display: none;"></div>
@@ -592,7 +553,7 @@
          タブ④：設定3
          ========================================== -->
     <section id="tab-settings3" class="tab-page" style="display: none;">
-      <h2 class="section-title">レイアウト関係</h2>
+      <h2 class="section-title">レイアウト</h2>
 
       <div id="settings3-loading" class="settings-loading">読み込み中...</div>
       <div id="settings3-error" class="report-error" style="display: none;"></div>
@@ -661,7 +622,7 @@
          タブ：アカウント管理
          ========================================== -->
     <section id="tab-accounts" class="tab-page" style="display: none;">
-      <h2 class="section-title">アカウント管理</h2>
+      <h2 class="section-title">アカウント</h2>
 
       <div id="accounts-loading" class="settings-loading">読み込み中...</div>
       <div id="accounts-error" class="report-error" style="display: none;"></div>
@@ -695,6 +656,59 @@
           <button type="submit" id="add-account-btn" class="btn-save-settings">追加する</button>
         </form>
       </div>
+    </section>
+
+    <section id="tab-retention" class="tab-page" style="display: none;">
+      <h2 class="section-title">保存期間</h2>
+
+      <div id="retention-loading" class="settings-loading">読み込み中...</div>
+      <div id="retention-error" class="report-error" style="display: none;"></div>
+      <div id="retention-saved-msg" class="settings-saved-msg" style="display: none;">保存しました。</div>
+
+      <form id="retention-form" style="display: none;">
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">予約履歴の保持期間</h3>
+          <div class="form-group">
+            <p class="settings-card-note">何ヶ月分の予約履歴をデータで残すか（-1で無期限）</p>
+            <input type="number" id="ret-history-retention" min="-1">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">キャンセル履歴の保持期間</h3>
+          <div class="form-group">
+            <p class="settings-card-note">誰が・いつ・何をキャンセルしたかの記録を、何ヶ月分残すか（-1で無期限）</p>
+            <input type="number" id="ret-cancel-history-retention" min="-1">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">カレンダー変更履歴の保持期間</h3>
+          <div class="form-group">
+            <p class="settings-card-note">Googleカレンダー上での直接編集の記録を、何ヶ月分残すか（-1で無期限）</p>
+            <input type="number" id="ret-calendar-history-retention" min="-1">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">設定変更履歴の保持期間</h3>
+          <div class="form-group">
+            <p class="settings-card-note">管理画面から「誰が・いつ・何を変更したか」の記録を、何ヶ月分残すか（-1で無期限）</p>
+            <input type="number" id="ret-settings-history-retention" min="-1">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-card-title">キャンセル待ちの保持期間</h3>
+          <div class="form-group">
+            <p class="settings-card-note">登録日時から数えて、キャンセル待ちのデータを何ヶ月分残すか（-1で無期限）</p>
+            <input type="number" id="ret-waitlist-retention" min="-1">
+          </div>
+        </div>
+
+        <button type="submit" id="save-retention-btn" class="btn-save-settings">保存する</button>
+      </form>
     </section>
 
     <section id="tab-waitlist" class="tab-page" style="display: none;">
