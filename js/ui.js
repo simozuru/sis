@@ -179,7 +179,7 @@ function applySystemSettings(settings) {
     titleTargets.forEach(el => {
       if (branding.titleFontSize) el.style.fontSize = normalizeFontSizeValue(branding.titleFontSize);
       if (branding.titleColor) el.style.color = branding.titleColor;
-      if (branding.titleFontFamily) el.style.fontFamily = branding.titleFontFamily;
+      if (branding.titleFontFamily) el.style.fontFamily = normalizeFontFamilyValue(branding.titleFontFamily);
     });
   }
   CONFIG.SHOW_STAFF_SELECTOR = settings.showStaffSelector;
@@ -225,6 +225,55 @@ function _buildInfoCardIconContent(item) {
  * （メニュー名・注意文など）は、ここで明示的に再描画する
  */
 /**
+ * 「丸ゴシック」「明朝」のような、実際のフォント名ではない“書体の種類”が入力された場合に、
+ * 実在するフォント名（Googleフォント）に変換するための対応表
+ */
+const JAPANESE_FONT_STYLE_ALIASES = {
+  '丸ゴシック': { googleFont: 'M PLUS Rounded 1c', cssValue: "'M PLUS Rounded 1c', sans-serif" },
+  '丸ゴシック体': { googleFont: 'M PLUS Rounded 1c', cssValue: "'M PLUS Rounded 1c', sans-serif" },
+  'ゴシック': { googleFont: 'Noto Sans JP', cssValue: "'Noto Sans JP', sans-serif" },
+  'ゴシック体': { googleFont: 'Noto Sans JP', cssValue: "'Noto Sans JP', sans-serif" },
+  '明朝': { googleFont: 'Noto Serif JP', cssValue: "'Noto Serif JP', serif" },
+  '明朝体': { googleFont: 'Noto Serif JP', cssValue: "'Noto Serif JP', serif" }
+};
+
+// 同じGoogleフォントを何度も読み込まないよう、読み込み済みのフォント名を記録しておく
+const _loadedGoogleFonts = {};
+
+/**
+ * 管理画面で入力されたフォント名の値を整える
+ * 「丸ゴシック」のような“書体の種類名”が入力された場合は、実在するGoogleフォントに変換し、
+ * そのフォント自体をページに自動で読み込む（どの端末で見ても同じ見た目になるようにするため）
+ * @param {string} value - 入力されたフォント名（例："serif"、"丸ゴシック"、"'Yu Mincho', serif" など）
+ * @returns {string} そのままCSSのfont-familyとして使える値
+ */
+function normalizeFontFamilyValue(value) {
+  if (!value) return value;
+  const trimmed = String(value).trim();
+  const alias = JAPANESE_FONT_STYLE_ALIASES[trimmed];
+
+  if (alias) {
+    _loadGoogleFontIfNeeded(alias.googleFont);
+    return alias.cssValue;
+  }
+  return trimmed;
+}
+
+/**
+ * 内部ヘルパー: 指定したGoogleフォントを、ページにまだ読み込まれていなければ読み込む
+ * @param {string} fontName - Googleフォントの名前（例："M PLUS Rounded 1c"）
+ */
+function _loadGoogleFontIfNeeded(fontName) {
+  if (_loadedGoogleFonts[fontName]) return;
+  _loadedGoogleFonts[fontName] = true;
+
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@400;700&display=swap`;
+  document.head.appendChild(link);
+}
+
+/**
  * 管理画面で入力された文字サイズの値を、CSSとして正しく使える形に整える
  * 「22」のように数字だけが入力された場合、単位（px）が付いておらず無効なCSS値として
  * ブラウザに無視されてしまうため、その場合だけ自動的に「px」を補う
@@ -258,7 +307,7 @@ function renderInfoSection(infoConfig) {
     infoSectionHeading.textContent = heading.text || 'Information';
     if (heading.fontSize) infoSectionHeading.style.fontSize = normalizeFontSizeValue(heading.fontSize);
     if (heading.color) infoSectionHeading.style.color = heading.color;
-    if (heading.fontFamily) infoSectionHeading.style.fontFamily = heading.fontFamily;
+    if (heading.fontFamily) infoSectionHeading.style.fontFamily = normalizeFontFamilyValue(heading.fontFamily);
   }
 
   // カードの生成
@@ -270,7 +319,7 @@ function renderInfoSection(infoConfig) {
     const titleStyle = [
       item.titleFontSize ? `font-size:${escapeHtml(normalizeFontSizeValue(item.titleFontSize))}` : '',
       item.titleColor ? `color:${escapeHtml(item.titleColor)}` : '',
-      item.titleFontFamily ? `font-family:${escapeHtml(item.titleFontFamily)}` : ''
+      item.titleFontFamily ? `font-family:${escapeHtml(normalizeFontFamilyValue(item.titleFontFamily))}` : ''
     ].filter(Boolean).join(';');
 
     const isInternalPage = !!item.page;

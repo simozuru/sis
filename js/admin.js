@@ -1864,7 +1864,8 @@ function renderInfoItemRows(items) {
         </div>
         <div class="form-group font-style-group">
           <label>タイトルのフォント</label>
-          <input type="text" class="info-title-font-family-input" value="${escapeHtmlAdmin(item.titleFontFamily || '')}" placeholder="例：serif、'Yu Mincho', sans-serif など（未入力で標準フォント）">
+          <p class="i18n-panel-note">「丸ゴシック」「明朝」「ゴシック」という言葉で入力すると、それらしいフォントを自動で読み込んで表示します。実在するフォント名を直接指定することもできます。</p>
+          <input type="text" class="info-title-font-family-input" value="${escapeHtmlAdmin(item.titleFontFamily || '')}" placeholder="例：丸ゴシック（未入力で標準フォント）">
         </div>
         <div class="form-group">
           <label>説明文</label>
