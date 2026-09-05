@@ -171,9 +171,16 @@ function applySystemSettings(settings) {
   if (branding && branding.shopName && mainTitle) {
     mainTitle.textContent = branding.shopName;
     if (mainSubtitle) mainSubtitle.style.display = 'none';
-    if (branding.titleFontSize) mainTitle.style.fontSize = branding.titleFontSize;
-    if (branding.titleColor) mainTitle.style.color = branding.titleColor;
-    if (branding.titleFontFamily) mainTitle.style.fontFamily = branding.titleFontFamily;
+  }
+  if (branding && mainTitle) {
+    // 店舗名を入力していない場合（デフォルトの「SIS / Web Reservation」表示のまま）でも、
+    // 中の2行（title-main・title-sub）それぞれに直接スタイルを当てて、文字サイズ等が反映されるようにする
+    const titleTargets = [mainTitle, ...mainTitle.querySelectorAll('.title-main, .title-sub')];
+    titleTargets.forEach(el => {
+      if (branding.titleFontSize) el.style.fontSize = normalizeFontSizeValue(branding.titleFontSize);
+      if (branding.titleColor) el.style.color = branding.titleColor;
+      if (branding.titleFontFamily) el.style.fontFamily = branding.titleFontFamily;
+    });
   }
   CONFIG.SHOW_STAFF_SELECTOR = settings.showStaffSelector;
   CONFIG.WAITLIST_ENABLED = !!settings.waitlistEnabled;
@@ -217,6 +224,19 @@ function _buildInfoCardIconContent(item) {
  * data-i18n属性が付いた要素は自動で切り替わるが、JavaScriptで動的に組み立てている表示
  * （メニュー名・注意文など）は、ここで明示的に再描画する
  */
+/**
+ * 管理画面で入力された文字サイズの値を、CSSとして正しく使える形に整える
+ * 「22」のように数字だけが入力された場合、単位（px）が付いておらず無効なCSS値として
+ * ブラウザに無視されてしまうため、その場合だけ自動的に「px」を補う
+ * @param {string} value - 入力された文字サイズ（例："22px"、"22"、"1.2em"など）
+ * @returns {string} そのまま使える文字サイズの値
+ */
+function normalizeFontSizeValue(value) {
+  if (!value) return value;
+  const trimmed = String(value).trim();
+  return /^\d+(\.\d+)?$/.test(trimmed) ? `${trimmed}px` : trimmed;
+}
+
 function onLanguageChanged() {
   if (typeof renderMenuUI === 'function') renderMenuUI();
   if (typeof renderInfoSection === 'function' && CONFIG.INFO_SECTION) renderInfoSection(CONFIG.INFO_SECTION);
@@ -236,7 +256,7 @@ function renderInfoSection(infoConfig) {
   const heading = infoConfig.heading || {};
   if (infoSectionHeading) {
     infoSectionHeading.textContent = heading.text || 'Information';
-    if (heading.fontSize) infoSectionHeading.style.fontSize = heading.fontSize;
+    if (heading.fontSize) infoSectionHeading.style.fontSize = normalizeFontSizeValue(heading.fontSize);
     if (heading.color) infoSectionHeading.style.color = heading.color;
     if (heading.fontFamily) infoSectionHeading.style.fontFamily = heading.fontFamily;
   }
@@ -248,7 +268,7 @@ function renderInfoSection(infoConfig) {
   items.forEach(item => {
     const iconContent = _buildInfoCardIconContent(item);
     const titleStyle = [
-      item.titleFontSize ? `font-size:${escapeHtml(item.titleFontSize)}` : '',
+      item.titleFontSize ? `font-size:${escapeHtml(normalizeFontSizeValue(item.titleFontSize))}` : '',
       item.titleColor ? `color:${escapeHtml(item.titleColor)}` : '',
       item.titleFontFamily ? `font-family:${escapeHtml(item.titleFontFamily)}` : ''
     ].filter(Boolean).join(';');

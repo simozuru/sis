@@ -1855,7 +1855,7 @@ function renderInfoItemRows(items) {
           <input type="text" class="info-title-input" value="${escapeHtmlAdmin(item.title || '')}" placeholder="例：お店情報">
         </div>
         <div class="form-group font-style-group">
-          <label>タイトルの文字サイズ</label>
+          <label>タイトルの文字サイズ・px単位</label>
           <input type="text" class="info-title-font-size-input" value="${escapeHtmlAdmin(item.titleFontSize || '')}" placeholder="例：16px（未入力で標準サイズ）">
         </div>
         <div class="form-group font-style-group">
