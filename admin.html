@@ -492,11 +492,10 @@
         </div>
 
         <div class="settings-card">
-          <h3 class="settings-card-title">管理者への通知メール宛先</h3>
-          <div class="form-group">
-            <p class="settings-card-note">新規予約などの通知を受け取るメールアドレス</p>
-            <input type="text" id="s2-admin-email" placeholder="例：owner@example.com">
-          </div>
+          <h3 class="settings-card-title">予約通知メール宛先</h3>
+          <p class="settings-card-note">新規予約などの通知を受け取るメールアドレス（複数登録できます。同じ内容が全員に届きます）</p>
+          <div id="admin-email-rows" class="admin-email-rows"></div>
+          <button type="button" id="add-admin-email-row-btn" class="btn-add-row">＋ 宛先を追加</button>
         </div>
 
         <div class="settings-card">
@@ -576,7 +575,7 @@
             <input type="text" id="s3-shop-name-font-size" placeholder="例：22px（未入力で標準サイズ）">
           </div>
           <div class="form-group font-style-group">
-            <label>店舗名の文字色</label>
+            <label>店舗名の文字色・16進数</label>
             <input type="text" id="s3-shop-name-color" placeholder="例：#3d2f24（未入力で標準色）">
           </div>
           <div class="form-group font-style-group">

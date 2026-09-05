@@ -100,7 +100,8 @@ const settings2Error = document.getElementById('settings2-error');
 const settings2SavedMsg = document.getElementById('settings2-saved-msg');
 const settings2Form = document.getElementById('settings2-form');
 const s2ReminderDays = document.getElementById('s2-reminder-days');
-const s2AdminEmail = document.getElementById('s2-admin-email');
+const adminEmailRows = document.getElementById('admin-email-rows');
+const addAdminEmailRowBtn = document.getElementById('add-admin-email-row-btn');
 const s2CalendarSalonName = document.getElementById('s2-calendar-salon-name');
 const s2MailHeader = document.getElementById('s2-mail-header');
 const s2MailFooter = document.getElementById('s2-mail-footer');
@@ -1065,6 +1066,54 @@ function refreshI18nTranslateLinks(panelEl, sourceText) {
   });
 }
 
+/**
+ * 予約通知メール宛先の入力欄を、カンマ区切りの文字列から複数行描画する
+ * @param {string} emailsCsv - カンマ区切りのメールアドレス（例："a@example.com,b@example.com"）
+ */
+function renderAdminEmailRows(emailsCsv) {
+  if (!adminEmailRows) return;
+
+  const emails = String(emailsCsv || '').split(',').map(e => e.trim()).filter(e => e.length > 0);
+  adminEmailRows.innerHTML = '';
+  emails.forEach(email => addAdminEmailRow(email));
+
+  if (emails.length === 0) addAdminEmailRow('');
+}
+
+/**
+ * 予約通知メール宛先の入力欄を1行追加する
+ * @param {string} email
+ */
+function addAdminEmailRow(email = '') {
+  if (!adminEmailRows) return;
+
+  const row = document.createElement('div');
+  row.className = 'admin-email-row';
+  row.innerHTML = `
+    <input type="text" class="admin-email-input" value="${escapeHtmlAdmin(email)}" placeholder="例：owner@example.com">
+    <button type="button" class="btn-remove-row" title="この宛先を削除">×</button>
+  `;
+  row.querySelector('.btn-remove-row').addEventListener('click', () => row.remove());
+  adminEmailRows.appendChild(row);
+}
+
+/**
+ * 入力されている予約通知メール宛先を集めて、カンマ区切りの文字列にする（空欄は除外）
+ * @returns {string}
+ */
+function collectAdminEmails() {
+  const emails = [];
+  document.querySelectorAll('.admin-email-input').forEach(input => {
+    const val = input.value.trim();
+    if (val) emails.push(val);
+  });
+  return emails.join(',');
+}
+
+if (addAdminEmailRowBtn) {
+  addAdminEmailRowBtn.addEventListener('click', () => addAdminEmailRow());
+}
+
 function addMenuRow(name = '', minutes = '', price = '', minutesApprox = false, priceApprox = false, i18n = {}) {
   if (!menuMasterRows) return;
 
@@ -1587,7 +1636,7 @@ async function loadSettings2() {
     if (!result.success) throw new Error(result.message || '設定の取得に失敗しました。');
 
     if (s2ReminderDays) s2ReminderDays.value = result.reminderMailDaysBefore;
-    if (s2AdminEmail) s2AdminEmail.value = result.adminEmail || '';
+    renderAdminEmailRows(result.adminEmail || '');
     if (s2CalendarSalonName) s2CalendarSalonName.value = result.calendarSalonName || '';
 
     if (s2MailHeader) s2MailHeader.value = result.customerMailHeader || '';
@@ -1650,7 +1699,7 @@ if (settings2Form) {
     try {
       const settings = {
         REMINDER_MAIL_DAYS_BEFORE: parseInt(s2ReminderDays.value, 10),
-        ADMIN_EMAIL: s2AdminEmail.value.trim(),
+        ADMIN_EMAIL: collectAdminEmails(),
         CALENDAR_SALON_NAME: s2CalendarSalonName.value.trim(),
         CUSTOMER_MAIL_HEADER: s2MailHeader.value,
         CUSTOMER_MAIL_FOOTER: s2MailFooter.value,

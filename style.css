@@ -126,18 +126,24 @@ flex: 1 1 auto;
 min-width: 0;
 }
 
+.page-header-right-group {
+display: flex;
+flex-direction: column;
+align-items: flex-end;
+
+flex: 0 0 auto;
+
+gap: 4px;
+}
+
 .page-header-right {
 flex: 0 0 auto;
 
 text-align: right;
-
-padding-top: 4px;
 }
 
 .lang-switcher {
 flex: 0 0 auto;
-
-padding-top: 4px;
 }
 
 .lang-switcher select {
@@ -1537,12 +1543,12 @@ flex: 1 1 40%;
 max-width: none;
 }
 
-.page-header-right {
-text-align: left;
+.page-header-right-group {
+align-items: flex-start;
 }
 
-.lang-switcher {
-padding-top: 0;
+.page-header-right {
+text-align: left;
 }
 
 h1 {

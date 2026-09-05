@@ -714,7 +714,8 @@ line-height: 1.6;
 }
 
 .business-hours-row,
-.staff-name-row {
+.staff-name-row,
+.admin-email-row {
 display: flex;
 flex-wrap: wrap;
 align-items: center;
@@ -944,6 +945,22 @@ flex: 0 0 140px;
 }
 
 .staff-name-row .staff-calendar-id-input {
+flex: 1 1 auto;
+
+min-width: 0;
+}
+
+.admin-email-row input {
+padding: 8px 10px;
+
+border: 1px solid var(--border-color);
+
+border-radius: var(--radius-sm);
+
+font-size: 14px;
+}
+
+.admin-email-row .admin-email-input {
 flex: 1 1 auto;
 
 min-width: 0;
