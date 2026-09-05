@@ -571,6 +571,18 @@
             <label for="s3-logo-url">ロゴ画像のURL（未入力表示なし）</label>
             <input type="text" id="s3-logo-url" placeholder="https://example.com/logo.png">
           </div>
+          <div class="form-group font-style-group">
+            <label>店舗名の文字サイズ</label>
+            <input type="text" id="s3-shop-name-font-size" placeholder="例：22px（未入力で標準サイズ）">
+          </div>
+          <div class="form-group font-style-group">
+            <label>店舗名の文字色</label>
+            <input type="text" id="s3-shop-name-color" placeholder="例：#3d2f24（未入力で標準色）">
+          </div>
+          <div class="form-group font-style-group">
+            <label>店舗名のフォント</label>
+            <input type="text" id="s3-shop-name-font-family" placeholder="例：serif、'Yu Mincho', sans-serif など（未入力で標準フォント）">
+          </div>
         </div>
 
         <div class="settings-card">
@@ -609,6 +621,18 @@
           <div class="form-group">
             <label for="s3-info-heading">見出し文言（空欄で「Information」）</label>
             <input type="text" id="s3-info-heading" placeholder="Information">
+          </div>
+          <div class="form-group font-style-group">
+            <label>見出しの文字サイズ</label>
+            <input type="text" id="s3-info-heading-font-size" placeholder="例：20px（未入力で標準サイズ）">
+          </div>
+          <div class="form-group font-style-group">
+            <label>見出しの文字色</label>
+            <input type="text" id="s3-info-heading-color" placeholder="例：#3d2f24（未入力で標準色）">
+          </div>
+          <div class="form-group font-style-group">
+            <label>見出しのフォント</label>
+            <input type="text" id="s3-info-heading-font-family" placeholder="例：serif、'Yu Mincho', sans-serif など（未入力で標準フォント）">
           </div>
 
           <div id="info-item-rows"></div>
@@ -670,40 +694,40 @@
         <div class="settings-card">
           <h3 class="settings-card-title">予約履歴の保持期間</h3>
           <div class="form-group">
-            <p class="settings-card-note">何ヶ月分の予約履歴をデータで残すか（-1で無期限）</p>
-            <input type="number" id="ret-history-retention" min="-1">
+            <p class="settings-card-note">何ヶ月分の予約履歴をデータで残すか（未入力の場合は12ヶ月）</p>
+            <input type="number" id="ret-history-retention" min="1" placeholder="12">
           </div>
         </div>
 
         <div class="settings-card">
           <h3 class="settings-card-title">キャンセル履歴の保持期間</h3>
           <div class="form-group">
-            <p class="settings-card-note">誰が・いつ・何をキャンセルしたかの記録を、何ヶ月分残すか（-1で無期限）</p>
-            <input type="number" id="ret-cancel-history-retention" min="-1">
+            <p class="settings-card-note">誰が・いつ・何をキャンセルしたかの記録を、何ヶ月分残すか（未入力の場合は12ヶ月）</p>
+            <input type="number" id="ret-cancel-history-retention" min="1" placeholder="12">
           </div>
         </div>
 
         <div class="settings-card">
           <h3 class="settings-card-title">キャンセル待ちの保持期間</h3>
           <div class="form-group">
-            <p class="settings-card-note">登録日時から数えて、キャンセル待ちのデータを何ヶ月分残すか（-1で無期限）</p>
-            <input type="number" id="ret-waitlist-retention" min="-1">
+            <p class="settings-card-note">登録日時から数えて、キャンセル待ちのデータを何ヶ月分残すか（未入力の場合は12ヶ月）</p>
+            <input type="number" id="ret-waitlist-retention" min="1" placeholder="12">
           </div>
         </div>
 
         <div class="settings-card">
           <h3 class="settings-card-title">カレンダー変更履歴の保持期間</h3>
           <div class="form-group">
-            <p class="settings-card-note">Googleカレンダー上での直接編集の記録を、何ヶ月分残すか（-1で無期限）</p>
-            <input type="number" id="ret-calendar-history-retention" min="-1">
+            <p class="settings-card-note">Googleカレンダー上での直接編集の記録を、何ヶ月分残すか（未入力の場合は12ヶ月）</p>
+            <input type="number" id="ret-calendar-history-retention" min="1" placeholder="12">
           </div>
         </div>
 
         <div class="settings-card">
           <h3 class="settings-card-title">設定変更履歴の保持期間</h3>
           <div class="form-group">
-            <p class="settings-card-note">管理画面から「誰が・いつ・何を変更したか」の記録を、何ヶ月分残すか（-1で無期限）</p>
-            <input type="number" id="ret-settings-history-retention" min="-1">
+            <p class="settings-card-note">管理画面から「誰が・いつ・何を変更したか」の記録を、何ヶ月分残すか（未入力の場合は12ヶ月）</p>
+            <input type="number" id="ret-settings-history-retention" min="1" placeholder="12">
           </div>
         </div>
 

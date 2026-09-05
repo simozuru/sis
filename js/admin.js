@@ -179,6 +179,9 @@ const settings3Error = document.getElementById('settings3-error');const settings
 const settings3Form = document.getElementById('settings3-form');
 const s3ShopName = document.getElementById('s3-shop-name');
 const s3LogoUrl = document.getElementById('s3-logo-url');
+const s3ShopNameFontSize = document.getElementById('s3-shop-name-font-size');
+const s3ShopNameColor = document.getElementById('s3-shop-name-color');
+const s3ShopNameFontFamily = document.getElementById('s3-shop-name-font-family');
 const s3ContactPhone = document.getElementById('s3-contact-phone');
 const s3ContactHours = document.getElementById('s3-contact-hours');
 const s3ContactClosed = document.getElementById('s3-contact-closed');
@@ -186,6 +189,9 @@ const s3HomeUrl = document.getElementById('s3-home-url');
 const s3HomeLabel = document.getElementById('s3-home-label');
 const s3InfoEnabled = document.getElementById('s3-info-enabled');
 const s3InfoHeading = document.getElementById('s3-info-heading');
+const s3InfoHeadingFontSize = document.getElementById('s3-info-heading-font-size');
+const s3InfoHeadingColor = document.getElementById('s3-info-heading-color');
+const s3InfoHeadingFontFamily = document.getElementById('s3-info-heading-font-family');
 const infoItemRows = document.getElementById('info-item-rows');
 const saveSettings3Btn = document.getElementById('save-settings3-btn');
 
@@ -434,11 +440,11 @@ if (retentionForm) {
 
     try {
       const settings = {
-        HISTORY_RETENTION_MONTHS: parseInt(retHistoryRetention.value, 10),
-        CANCEL_HISTORY_RETENTION_MONTHS: parseInt(retCancelHistoryRetention.value, 10),
-        CALENDAR_HISTORY_RETENTION_MONTHS: parseInt(retCalendarHistoryRetention.value, 10),
-        SETTINGS_HISTORY_RETENTION_MONTHS: parseInt(retSettingsHistoryRetention.value, 10),
-        WAITLIST_RETENTION_MONTHS: parseInt(retWaitlistRetention.value, 10)
+        HISTORY_RETENTION_MONTHS: parseInt(retHistoryRetention.value, 10) || 12,
+        CANCEL_HISTORY_RETENTION_MONTHS: parseInt(retCancelHistoryRetention.value, 10) || 12,
+        CALENDAR_HISTORY_RETENTION_MONTHS: parseInt(retCalendarHistoryRetention.value, 10) || 12,
+        SETTINGS_HISTORY_RETENTION_MONTHS: parseInt(retSettingsHistoryRetention.value, 10) || 12,
+        WAITLIST_RETENTION_MONTHS: parseInt(retWaitlistRetention.value, 10) || 12
       };
 
       const token = sessionStorage.getItem(SESSION_TOKEN_KEY) || '';
@@ -1697,6 +1703,9 @@ async function loadSettings3() {
     // 店名・ロゴ
     const branding = result.headerBranding || {};
     if (s3ShopName) s3ShopName.value = branding.shopName || '';
+    if (s3ShopNameFontSize) s3ShopNameFontSize.value = branding.titleFontSize || '';
+    if (s3ShopNameColor) s3ShopNameColor.value = branding.titleColor || '';
+    if (s3ShopNameFontFamily) s3ShopNameFontFamily.value = branding.titleFontFamily || '';
     if (s3LogoUrl) s3LogoUrl.value = branding.logoUrl || '';
 
     // 連絡先情報
@@ -1713,6 +1722,9 @@ async function loadSettings3() {
     const info = result.infoSection || {};
     if (s3InfoEnabled) s3InfoEnabled.checked = !!info.enabled;
     if (s3InfoHeading) s3InfoHeading.value = (info.heading && info.heading.text) || '';
+    if (s3InfoHeadingFontSize) s3InfoHeadingFontSize.value = (info.heading && info.heading.fontSize) || '';
+    if (s3InfoHeadingColor) s3InfoHeadingColor.value = (info.heading && info.heading.color) || '';
+    if (s3InfoHeadingFontFamily) s3InfoHeadingFontFamily.value = (info.heading && info.heading.fontFamily) || '';
     renderInfoItemRows(info.items || []);
 
     settings3Loaded = true;
@@ -1792,6 +1804,18 @@ function renderInfoItemRows(items) {
         <div class="form-group">
           <label>タイトル</label>
           <input type="text" class="info-title-input" value="${escapeHtmlAdmin(item.title || '')}" placeholder="例：お店情報">
+        </div>
+        <div class="form-group font-style-group">
+          <label>タイトルの文字サイズ</label>
+          <input type="text" class="info-title-font-size-input" value="${escapeHtmlAdmin(item.titleFontSize || '')}" placeholder="例：16px（未入力で標準サイズ）">
+        </div>
+        <div class="form-group font-style-group">
+          <label>タイトルの文字色</label>
+          <input type="text" class="info-title-color-input" value="${escapeHtmlAdmin(item.titleColor || '')}" placeholder="例：#3d2f24（未入力で標準色）">
+        </div>
+        <div class="form-group font-style-group">
+          <label>タイトルのフォント</label>
+          <input type="text" class="info-title-font-family-input" value="${escapeHtmlAdmin(item.titleFontFamily || '')}" placeholder="例：serif、'Yu Mincho', sans-serif など（未入力で標準フォント）">
         </div>
         <div class="form-group">
           <label>説明文</label>
@@ -1877,7 +1901,18 @@ if (settings3Form) {
       // 店名・ロゴ（両方空なら null にして「未設定」に戻す）
       const shopName = s3ShopName.value.trim();
       const logoUrl = s3LogoUrl.value.trim();
-      const headerBranding = (shopName || logoUrl) ? { shopName: shopName || null, logoUrl: logoUrl || null } : null;
+      const shopNameFontSize = s3ShopNameFontSize.value.trim();
+      const shopNameColor = s3ShopNameColor.value.trim();
+      const shopNameFontFamily = s3ShopNameFontFamily.value.trim();
+      const headerBranding = (shopName || logoUrl || shopNameFontSize || shopNameColor || shopNameFontFamily)
+        ? {
+            shopName: shopName || null,
+            logoUrl: logoUrl || null,
+            titleFontSize: shopNameFontSize || null,
+            titleColor: shopNameColor || null,
+            titleFontFamily: shopNameFontFamily || null
+          }
+        : null;
 
       // 連絡先情報
       const phone = s3ContactPhone.value.trim();
@@ -1892,7 +1927,12 @@ if (settings3Form) {
         HOME_PAGE_LABEL: s3HomeLabel.value.trim() || null,
         INFO_SECTION: {
           enabled: !!s3InfoEnabled.checked,
-          heading: { text: s3InfoHeading.value.trim() || null, fontSize: null, color: null, fontFamily: null },
+          heading: {
+            text: s3InfoHeading.value.trim() || null,
+            fontSize: s3InfoHeadingFontSize.value.trim() || null,
+            color: s3InfoHeadingColor.value.trim() || null,
+            fontFamily: s3InfoHeadingFontFamily.value.trim() || null
+          },
           items: collectInfoItems()
         }
       };
@@ -1933,6 +1973,9 @@ function collectInfoItems() {
     if (!title) return; // タイトル未入力の枠は、カードとして保存しない
 
     const description = block.querySelector('.info-desc-input').value.trim();
+    const titleFontSize = block.querySelector('.info-title-font-size-input').value.trim();
+    const titleColor = block.querySelector('.info-title-color-input').value.trim();
+    const titleFontFamily = block.querySelector('.info-title-font-family-input').value.trim();
     const slot = block.getAttribute('data-slot');
     const linkType = getRadioValue(`info-link-type-${slot}`);
     const linkValue = block.querySelector('.info-link-value-input').value.trim();
@@ -1943,7 +1986,7 @@ function collectInfoItems() {
       ? block.querySelector('.info-icon-image-input').value.trim()
       : block.querySelector('.info-icon-select').value;
 
-    const item = { icon: icon, showIcon: showIcon, title: title, description: description };
+    const item = { icon: icon, showIcon: showIcon, title: title, description: description, titleFontSize: titleFontSize || null, titleColor: titleColor || null, titleFontFamily: titleFontFamily || null };
 
     // 翻訳パネルから、入力済みの翻訳を集める（タイトル・説明文どちらか入っていればその言語を保存）
     const panel = document.querySelector(`.info-i18n-panel[data-slot="${slot}"]`);
